@@ -4,8 +4,8 @@ body {
     padding: 0;
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* Aligner en bas de l'écran */
-    height: 100vh;
+    align-items: center; /* Aligner au centre de l'écran */
+    height: 100vh; /* Take full height of the viewport */
     background-color: #f0f0ff;
     overflow: hidden; /* Pour éviter le défilement lors des animations */
 }
@@ -52,11 +52,11 @@ p {
     border-radius: 20px;
     font-size: 14px;
     color: white;
-    transition: background-color 0.3s ease, transform 0.3s ease; /* Transition pour hover/click */
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .btn.yes {
-    flex-grow: 3; /* Le bouton "Oui" occupe 3 parts */
+    flex-grow: 3;
     background-color: #6A5ACD;
     font-size: 16px;
     padding: 15px 30px;
@@ -64,11 +64,11 @@ p {
 
 .btn.yes:hover {
     background-color: #5b49c6;
-    transform: scale(1.05); /* Agrandir légèrement au survol */
+    transform: scale(1.05);
 }
 
 .btn.no {
-    flex-grow: 1; /* Le bouton "Non" occupe 1 part */
+    flex-grow: 1;
     background-color: #b2b2b2;
     font-size: 14px;
     padding: 15px 15px;
@@ -76,15 +76,26 @@ p {
 
 .btn.no:hover {
     background-color: #9a9a9a;
-    transform: scale(1.05); /* Agrandir légèrement au survol */
+    transform: scale(1.05);
 }
 
-/* Animation pour cliquer sur le bouton */
 .btn:active {
-    transform: scale(0.95); /* Réduire légèrement lors du clic */
+    transform: scale(0.95);
 }
 
-/* Classes pour animation lors de la transition de questios */
+.footer {
+    text-align: center;
+    padding: 10px 0;
+    font-size: 12px;
+    color: #666;
+    background-color: #f0f0ff;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 .fade-out {
     transform: translateY(20px);
     opacity: 0;
