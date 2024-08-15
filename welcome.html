@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue sur RdVous</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="phone-frame" id="question-box">
+        <div class="icon">
+            <img src="https://via.placeholder.com/50" alt="Icone question">
+        </div>
+        <h1 id="question-title">Veux-tu prendre RDV ?</h1>
+        <p id="question-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <div class="buttons">
+            <a href="#" class="btn yes" onclick="showNextQuestion()">Oui</a>
+            <a href="index.html" class="btn no">Non</a>
+        </div>
+    </div>
+
+    <script>
+        function showNextQuestion() {
+    // Ajouter la classe fade-out pour animé la disparition
+    const questionBox = document.getElementById('question-box');
+    questionBox.classList.add('fade-out');
+
+    // Attendre que l'animation de disparition soit terminée
+    setTimeout(() => {
+        // Modifier le texte de la question et le titre
+        document.getElementById('question-title').textContent = "Quelle est la prochaine étape ?";
+        document.getElementById('question-text').textContent = "Choisissez parmi les options ci-dessous.";
+
+        // Modifier les boutons
+        const buttonsDiv = document.querySelector('.buttons');
+        buttonsDiv.innerHTML = `
+            <a href="page_finale.html" class="btn yes">Option 1</a>
+            <a href="page_finale.html" class="btn no">Option 2</a>
+        `;
+
+        // Ajouter la classe fade-in pour animer l'apparition
+        questionBox.classList.remove('fade-out');
+        questionBox.classList.add('fade-in');
+    }, 500); // 500ms correspond au temps de l'animation CSS
+} 
+    </script>
+</body>
+</html>
