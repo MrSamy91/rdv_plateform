@@ -1,0 +1,108 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Aligner au centre de l'écran */
+    height: 100vh; /* Take full height of the viewport */
+    background-color: #f0f0ff;
+    overflow: hidden; /* Pour éviter le défilement lors des animations */
+}
+
+.phone-frame {
+    background-color: white;
+    border-radius: 20px 20px 0 0; /* Arrondi seulement en haut */
+    box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    text-align: center;
+    width: 90%;
+    max-width: 500px; /* Largeur maximale de la boîte */
+    margin-bottom: 20px; /* Ajuste cette valeur pour remonter la boîte */
+    transition: transform 0.5s ease, opacity 0.5s ease; /* Transition pour l'animation smooth */
+    opacity: 1;
+}
+
+.icon img {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn {
+    text-decoration: none;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: white;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn.yes {
+    flex-grow: 3;
+    background-color: #6A5ACD;
+    font-size: 18px;
+    padding: 15px 20px;
+}
+
+.btn.yes:hover {
+    background-color: #5b49c6;
+    transform: scale(1.05);
+}
+
+.btn.no {
+    flex-grow: 1;
+    background-color: #b2b2b2;
+    font-size: 14px;
+    padding: 15px 15px;
+    margin-left: 10px;
+}
+
+.btn.no:hover {
+    background-color: #9a9a9a;
+    transform: scale(1.05);
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.footer {
+    text-align: center;
+    padding: 10px 0;
+    font-size: 12px;
+    color: #666;
+    background-color: #f0f0ff;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.fade-out {
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+.fade-in {
+    transform: translateY(-20px);
+    opacity: 1;
+}
