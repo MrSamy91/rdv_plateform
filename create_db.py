@@ -1,6 +1,7 @@
-from app import app, db  # Assure-toi d'importer aussi l'instance de l'application
+from app import app, db  # Import your Flask app and db instance
+from models import User  # Import your User model if needed
 
-# Créer un contexte d'application
+# Create the database tables
 with app.app_context():
-    db.create_all()  # Crée la base de données et les tables
-    print("Base de données initialisée !")
+    db.create_all()  # This will create all tables defined in your models
+    print("Database and tables created successfully.")
