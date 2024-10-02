@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 
@@ -12,8 +13,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'si
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'admin'  # Replace with a strong secret key
 
-
+# Initialize the database and migration modules
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Import routes after initializing the app and db
 from routes import *

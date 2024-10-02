@@ -14,31 +14,27 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        
-        if user and user.check_password(form.password.data):  # Check password
-            login_user(user)
+        if user and user.check_password(form.password.data):
+            # User authentication successful
             flash('Login successful!', 'success')
-            return redirect(url_for('home'))  # Redirect to home page
+            return redirect(url_for('agenda'))
         else:
-            flash('Login failed. Please check your email and password.', 'error')
-    
+            flash('Invalid email or password.', 'danger')
     return render_template('login.html', form=form)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        # Create a new user with a hashed password
         user = User(username=form.username.data, email=form.email.data)
-        user.set_password(form.password.data)  # This hashes the password
+        user.set_password(form.password.data)  # Use set_password to hash the password
         db.session.add(user)
         db.session.commit()
-        
         flash('User created successfully! Redirecting to agenda...', 'success')
-        return redirect(url_for('agenda'))  # Redirect to agenda page
+        return redirect(url_for('agenda'))  # Redirect to your agenda page
     else:
         flash('Registration failed. Please check your inputs.', 'error')
     return render_template('register.html', form=form)
