@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .agenda-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .week-slider {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .week {
+            display: flex;
+            gap: 20px;
+        }
+
+        .day {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            min-width: 200px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .day h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .date {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #888;
+        }
+
+        .time-slots {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .time-slot {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            color: #1565c0;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .time-slot:hover {
+            background-color: #bbdefb;
+        }
+
+        .prev-week,
+        .next-week {
+            background-color: #1565c0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .prev-week:hover,
+        .next-week:hover {
+            background-color: #0d47a1;
+        }
+
+        /* Scrollbar styling for better appearance */
+        .week-slider::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .week-slider::-webkit-scrollbar-thumb {
+            background-color: #1565c0;
+            border-radius: 10px;
+        }
+
+        .week-slider::-webkit-scrollbar-track {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="agenda-header">
+            <h1>Agenda des Rendez-vous</h1>
+        </div>
+        <div class="week-slider">
+            <div class="week">
+                <div class="day">
+                    <h2>Lundi</h2>
+                    <div class="date">02 Oct 2024</div>
+                    <div class="time-slots">
+                        <div class="time-slot">08:00 - 09:00</div>
+                        <div class="time-slot">09:00 - 10:00</div>
+                        <div class="time-slot">10:00 - 11:00</div>
+                        <div class="time-slot">11:00 - 12:00</div>
+                        <div class="time-slot">12:00 - 13:00</div>
+                        <div class="time-slot">13:00 - 14:00</div>
+                        <div class="time-slot">14:00 - 15:00</div>
+                        <div class="time-slot">15:00 - 16:00</div>
+                        <div class="time-slot">16:00 - 17:00</div>
+                        <div class="time-slot">17:00 - 18:00</div>
+                    </div>
+                </div>
+                <div class="day">
+                    <h2>Mardi</h2>
+                    <div class="date">03 Oct 2024</div>
+                    <div class="time-slots">
+                        <div class="time-slot">08:00 - 09:00</div>
+                        <div class="time-slot">09:00 - 10:00</div>
+                        <div class="time-slot">10:00 - 11:00</div>
+                        <div class="time-slot">11:00 - 12:00</div>
+                        <div class="time-slot">12:00 - 13:00</div>
+                        <div class="time-slot">13:00 - 14:00</div>
+                        <div class="time-slot">14:00 - 15:00</div>
+                        <div class="time-slot">15:00 - 16:00</div>
+                        <div class="time-slot">16:00 - 17:00</div>
+                        <div class="time-slot">17:00 - 18:00</div>
+                    </div>
+                </div>
+                <div class="day">
+                    <h2>Mercredi</h2>
+                    <div class="date">04 Oct 2024</div>
+                    <div class="time-slots">
+                        <div class="time-slot">08:00 - 09:00</div>
+                        <div class="time-slot">09:00 - 10:00</div>
+                        <div class="time-slot">10:00 - 11:00</div>
+                        <div class="time-slot">11:00 - 12:00</div>
+                        <div class="time-slot">12:00 - 13:00</div>
+                        <div class="time-slot">13:00 - 14:00</div>
+                        <div class="time-slot">14:00 - 15:00</div>
+                        <div class="time-slot">15:00 - 16:00</div>
+                        <div class="time-slot">16:00 - 17:00</div>
+                        <div class="time-slot">17:00 - 18:00</div>
+                    </div>
+                </div>
+                <div class="day">
+                    <h2>Jeudi</h2>
+                    <div class="date">05 Oct 2024</div>
+                    <div class="time-slots">
+                        <div class="time-slot">08:00 - 09:00</div>
+                        <div class="time-slot">09:00 - 10:00</div>
+                        <div class="time-slot">10:00 - 11:00</div>
+                        <div class="time-slot">11:00 - 12:00</div>
+                        <div class="time-slot">12:00 - 13:00</div>
+                        <div class="time-slot">13:00 - 14:00</div>
+                        <div class="time-slot">14:00 - 15:00</div>
+                        <div class="time-slot">15:00 - 16:00</div>
+                        <div class="time-slot">16:00 - 17:00</div>
+                        <div class="time-slot">17:00 - 18:00</div>
+                    </div>
+                </div>
+                <div class="day">
+                    <h2>Vendredi</h2>
+                    <div class="date">06 Oct 2024</div>
+                    <div class="time-slots">
+                        <div class="time-slot">08:00 - 09:00</div>
+                        <div class="time-slot">09:00 - 10:00</div>
+                        <div class="time-slot">10:00 - 11:00</div>
+                        <div class="time-slot">11:00 - 12:00</div>
+                        <div class="time-slot">12:00 - 13:00</div>
+                        <div class="time-slot">13:00 - 14:00</div>
+                        <div class="time-slot">14:00 - 15:00</div>
+                        <div class="time-slot">15:00 - 16:00</div>
+                        <div class="time-slot">16:00 - 17:00</div>
+                        <div class="time-slot">17:00 - 18:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="prev-week">&lt; Semaine précédente</button>
+        <button class="next-week">Semaine suivante &gt;</button>
+    </div>
+</body>
+
+</html>
