@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page de Connexion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="logo">
+        <a href="/">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+        </a>
+        <a href="/">Nom de l'application</a>
+    </div>
+    <div class="container">
+        <h1>Connectez-vous à votre compte</h1>
+        <div class="social-login">
+            <a href="{{ url_for('login_google') }}">
+                <button class="google">
+                    <i class='bx bxl-google'></i>
+                    Utiliser Google
+                </button>
+            </a>
+            <a href="{{ url_for('login_apple') }}">
+                <button class="apple">
+                    <i class='bx bxl-apple'></i>
+                    Utiliser Apple
+                </button>
+            </a>
+        </div>
+        <div class="divider">
+            <div class="line"></div>
+            <p>Ou</p>
+            <div class="line"></div>
+        </div>
+
+        <!-- Le formulaire -->
+        <form method="POST" action="{{ url_for('login') }}">
+            <!-- Inclusion du token CSRF -->
+            {{ form.hidden_tag() }}
+            
+            <!-- Champs email -->
+            <div class="custome-input">
+                {{ form.email.label }}  <!-- Assure-toi que "email" est un champ dans LoginForm -->
+                {{ form.email(class="form-control", placeholder="Votre Email") }}
+                <i class='bx bx-at'></i>
+                {% if form.email.errors %}
+                    <span class="text-danger">{{ form.email.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Champs mot de passe -->
+            <div class="custome-input">
+                {{ form.password.label }}  <!-- Assure-toi que "password" est un champ dans LoginForm -->
+                {{ form.password(class="form-control", placeholder="Votre Mot de Passe") }}
+                <i class='bx bx-lock-alt'></i>
+                {% if form.password.errors %}
+                    <span class="text-danger">{{ form.password.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Bouton de soumission -->
+            <button class="login" type="submit">Se connecter</button>
+
+            <div class="links">
+                <a href="{{ url_for('reset_password') }}">Réinitialiser le Mot de Passe</a>
+                <a href="{{ url_for('register') }}">Pas de compte ? Inscrivez-vous</a>
+            </div>
+        </form>
+
+        <!-- Affichage des messages flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>

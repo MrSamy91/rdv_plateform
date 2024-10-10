@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         * {
             margin: 0;
@@ -21,24 +22,23 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            text-align: center;
         }
 
         .agenda-header {
-            text-align: center;
             margin-bottom: 20px;
         }
 
         .week-slider {
             display: flex;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
+            overflow: hidden;
+            width: 100%; /* Conteneur de la largeur d'un seul jour */
+            position: relative;
         }
 
         .week {
             display: flex;
-            gap: 20px;
+            transition: transform 0.5s ease-in-out;
         }
 
         .day {
@@ -46,7 +46,7 @@
             border: 1px solid #ddd;
             border-radius: 10px;
             padding: 20px;
-            min-width: 200px;
+            min-width: 100%; /* Afficher un seul jour à la fois */
             text-align: center;
             flex-shrink: 0;
         }
@@ -94,25 +94,22 @@
             cursor: pointer;
             border-radius: 5px;
             font-size: 14px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .prev-week {
+            left: 0;
+        }
+
+        .next-week {
+            right: 0;
         }
 
         .prev-week:hover,
         .next-week:hover {
             background-color: #0d47a1;
-        }
-
-        /* Scrollbar styling for better appearance */
-        .week-slider::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .week-slider::-webkit-scrollbar-thumb {
-            background-color: #1565c0;
-            border-radius: 10px;
-        }
-
-        .week-slider::-webkit-scrollbar-track {
-            background-color: #f9f9f9;
         }
     </style>
 </head>
@@ -123,7 +120,7 @@
             <h1>Agenda des Rendez-vous</h1>
         </div>
         <div class="week-slider">
-            <div class="week">
+            <div class="week" id="week">
                 <div class="day">
                     <h2>Lundi</h2>
                     <div class="date">02 Oct 2024</div>
@@ -172,43 +169,48 @@
                         <div class="time-slot">17:00 - 18:00</div>
                     </div>
                 </div>
-                <div class="day">
-                    <h2>Jeudi</h2>
-                    <div class="date">05 Oct 2024</div>
-                    <div class="time-slots">
-                        <div class="time-slot">08:00 - 09:00</div>
-                        <div class="time-slot">09:00 - 10:00</div>
-                        <div class="time-slot">10:00 - 11:00</div>
-                        <div class="time-slot">11:00 - 12:00</div>
-                        <div class="time-slot">12:00 - 13:00</div>
-                        <div class="time-slot">13:00 - 14:00</div>
-                        <div class="time-slot">14:00 - 15:00</div>
-                        <div class="time-slot">15:00 - 16:00</div>
-                        <div class="time-slot">16:00 - 17:00</div>
-                        <div class="time-slot">17:00 - 18:00</div>
-                    </div>
-                </div>
-                <div class="day">
-                    <h2>Vendredi</h2>
-                    <div class="date">06 Oct 2024</div>
-                    <div class="time-slots">
-                        <div class="time-slot">08:00 - 09:00</div>
-                        <div class="time-slot">09:00 - 10:00</div>
-                        <div class="time-slot">10:00 - 11:00</div>
-                        <div class="time-slot">11:00 - 12:00</div>
-                        <div class="time-slot">12:00 - 13:00</div>
-                        <div class="time-slot">13:00 - 14:00</div>
-                        <div class="time-slot">14:00 - 15:00</div>
-                        <div class="time-slot">15:00 - 16:00</div>
-                        <div class="time-slot">16:00 - 17:00</div>
-                        <div class="time-slot">17:00 - 18:00</div>
-                    </div>
-                </div>
+                <!-- Ajoute les autres jours ici -->
             </div>
         </div>
-        <button class="prev-week">&lt; Semaine précédente</button>
-        <button class="next-week">Semaine suivante &gt;</button>
+        <button class="prev-week" id="prev-week">&lt;</button>
+        <button class="next-week" id="next-week">&gt;</button>
     </div>
+
+    <script>
+        const week = document.getElementById('week');
+        const nextBtn = document.getElementById('next-week');
+        const prevBtn = document.getElementById('prev-week');
+        let dayIndex = 0;
+
+        nextBtn.addEventListener('click', () => {
+            if (dayIndex < week.children.length - 1) {
+                dayIndex++;
+                week.style.transform = `translateX(-${dayIndex * 100}%)`;
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (dayIndex > 0) {
+                dayIndex--;
+                week.style.transform = `translateX(-${dayIndex * 100}%)`;
+            }
+        });
+    </script>
+
+    <nav>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('logout') }}">
+                <button type="button">Se déconnecter</button>
+            </a>
+        {% else %}
+            <a href="{{ url_for('login') }}">
+                <button type="button">Se connecter</button>
+            </a>
+        {% endif %}
+    </nav>
+    <footer class="footer">
+        <p>© 2024 Holberteub Inc. All rights reserved.</p>
+    </footer>
 </body>
 
 </html>
