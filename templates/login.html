@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page de Connexion</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Import Firebase SDKs for app and authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js"></script>
+
+    <!-- Include the custom JavaScript file for authentication logic -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
 </head>
 <body>
+    
     <div class="logo">
         <a href="/">
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
@@ -16,13 +24,13 @@
     <div class="container">
         <h1>Connectez-vous à votre compte</h1>
         <div class="social-login">
-            <a href="{{ url_for('login_google') }}">
-                <button class="google">
-                    <i class='bx bxl-google'></i>
-                    Utiliser Google
-                </button>
-            </a>
+            <!-- Button for Google Sign-In -->
+            <button id="login-google" class="google">
+                <i class='bx bxl-google'></i>
+                Utiliser Google
+            </button>
             <a href="{{ url_for('login_apple') }}">
+                <!-- Button for Apple Sign-In -->
                 <button class="apple">
                     <i class='bx bxl-apple'></i>
                     Utiliser Apple
@@ -35,14 +43,14 @@
             <div class="line"></div>
         </div>
 
-        <!-- Le formulaire -->
+        <!-- The login form -->
         <form method="POST" action="{{ url_for('login') }}">
-            <!-- Inclusion du token CSRF -->
+            <!-- CSRF token for security -->
             {{ form.hidden_tag() }}
             
-            <!-- Champs email -->
+            <!-- Email input field -->
             <div class="custome-input">
-                {{ form.email.label }}  <!-- Assure-toi que "email" est un champ dans LoginForm -->
+                {{ form.email.label }}  <!-- Ensure "email" is a field in LoginForm -->
                 {{ form.email(class="form-control", placeholder="Votre Email") }}
                 <i class='bx bx-at'></i>
                 {% if form.email.errors %}
@@ -50,9 +58,9 @@
                 {% endif %}
             </div>
 
-            <!-- Champs mot de passe -->
+            <!-- Password input field -->
             <div class="custome-input">
-                {{ form.password.label }}  <!-- Assure-toi que "password" est un champ dans LoginForm -->
+                {{ form.password.label }}  <!-- Ensure "password" is a field in LoginForm -->
                 {{ form.password(class="form-control", placeholder="Votre Mot de Passe") }}
                 <i class='bx bx-lock-alt'></i>
                 {% if form.password.errors %}
@@ -60,7 +68,7 @@
                 {% endif %}
             </div>
 
-            <!-- Bouton de soumission -->
+            <!-- Submit button for the login form -->
             <button class="login" type="submit">Se connecter</button>
 
             <div class="links">
@@ -69,7 +77,7 @@
             </div>
         </form>
 
-        <!-- Affichage des messages flash -->
+        <!-- Display flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <ul class="flashes">
