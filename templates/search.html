@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche de Services</title>
+    <style>
+        /* ==============================
+           CONFIGURATION VARIABLES
+           ============================== */
+
+        /* Couleurs */
+        :root {
+            --background-color: #ffffffa0; /* Couleur d'arrière-plan principale */
+            --container-color:  #8495f946; /* Couleur de fond du conteneur */
+            --shadow-color: #000000;
+            --text-color: #1d1d1d; /* Couleur du texte */
+            --primary-color: #6b43ff; /* Couleur principale pour les boutons */
+            --secondary-color: #5222fd; /* Couleur secondaire pour les survols */
+            --footer-bg-color: rgba(241, 241, 241, 0); /* Couleur de fond du footer */
+            --logo-size: 48px; /* Taille du logo */
+        }
+
+        /* ==============================
+           RESET CSS
+           ============================== */
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Mulish', sans-serif; /* Police de caractère par défaut */
+        }
+
+        /* ==============================
+           STYLES DU BODY
+           ============================== */
+        body {
+            height: 100vh; /* Prend toute la hauteur de la fenêtre */
+            display: flex;
+            align-items: center; /* Centre le contenu verticalement */
+            justify-content: center; /* Centre le contenu horizontalement */
+            background-color: var(--background-color); /* Couleur d'arrière-plan */
+            flex-direction: column; /* Arrange le contenu de façon verticale */
+        }
+
+        /* ==============================
+           STYLES DU HEADER
+           ============================== */
+        .header {
+            display: flex;
+            justify-content: space-between; /* Espace entre le titre et le bouton */
+            align-items: center; /* Centre verticalement */
+            width: 100%; /* Prend toute la largeur */
+            position: absolute; /* Positionne le header en haut de la page */
+            top: 0; /* Aligne en haut */
+            padding: 10px 22px; /* Espacement autour */
+        }
+
+        .logout-button {
+            background-color: var(--primary-color); /* Utilise la couleur principale pour le bouton */
+            color: white; /* Couleur du texte */
+            padding: 10px 15px; /* Espacement interne */
+            border: none; /* Pas de bordure */
+            border-radius: 8px; /* Coins arrondis */
+            text-decoration: none; /* Pas de soulignement */
+            cursor: pointer; /* Curseur pointer */
+            transition: background-color 0.3s ease; /* Transition pour le survol */
+        }
+
+        .logout-button:hover {
+            background-color: var(--secondary-color); /* Couleur au survol */
+        }
+
+        /* ==============================
+           STYLES DU LOGO
+           ============================== */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            width: var(--logo-size); /* Utilise la taille configurée */
+        }
+
+        .logo a {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #464646; /* Couleur du texte du logo */
+        }
+
+        /* ==============================
+           STYLES DU CONTENEUR
+           ============================== */
+        .container {
+            width: 440px; /* Largeur fixe du conteneur */
+            padding: 40px 32px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-color) 0px 5px 20px 3px; /* Ombre autour du conteneur */
+            background: var(--container-color); /* Couleur de fond du conteneur */
+            margin-top: 60px; /* Marge en haut pour éviter le header */
+        }
+
+        .container h1 {
+            font-size: 1.6rem;
+            margin-bottom: 20px; /* Marge en bas de l'en-tête */
+        }
+
+        /* ==============================
+           STYLES DU FORMULAIRE
+           ============================== */
+        .container form label {
+            color: var(--text-color); /* Utilise la couleur du texte */
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0.03rem;
+            display: block; /* Affiche les labels en bloc */
+            margin-top: 12px; /* Marge en haut */
+        }
+
+        .container form .custome-input {
+            position: relative; /* Position relative pour l'icône */
+        }
+
+        .container form .custome-input input {
+            color: var(--text-color); /* Couleur du texte des champs */
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%; /* Occupe toute la largeur */
+            height: 46px; /* Hauteur des champs */
+            letter-spacing: 0.03rem;
+            border: 1px solid var(--text-color); /* Bordure des champs */
+            background: transparent; /* Fond transparent */
+            outline: none; /* Pas de contour par défaut */
+            border-radius: 8px; /* Coins arrondis */
+            text-indent: 20px; /* Indentation du texte */
+            margin-top: 6px; /* Marge en haut */
+            transition: all 0.3s ease; /* Transition pour les effets au focus */
+        }
+
+        .container form .custome-input input:focus {
+            border-color: var(--secondary-color); /* Bordure au focus */
+        }
+
+        .container form .login {
+            width: 100%; /* Occupe toute la largeur */
+            margin-top: 30px; /* Marge en haut */
+            background: var(--primary-color); /* Couleur de fond du bouton */
+            color: #fff; /* Couleur du texte */
+            border: none; /* Pas de bordure */
+            line-height: 50px; /* Hauteur de ligne */
+            font-size: 18px;
+            letter-spacing: 0.025em;
+            cursor: pointer; /* Curseur pointer au survol */
+            font-weight: 800; /* Poids de la police */
+            border-radius: 8px; /* Coins arrondis */
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15); /* Ombre autour du bouton */
+            transition: all 0.3s ease; /* Transition pour les effets au survol */
+        }
+
+        .container form .login:hover {
+            background: var(--secondary-color); /* Couleur de fond au survol */
+        }
+
+        /* ==============================
+           STYLES DU FOOTER
+           ============================== */
+        .footer {
+            text-align: center; /* Centre le texte du footer */
+            padding: 20px; /* Espacement autour du texte */
+            background-color: var(--footer-bg-color); /* Couleur de fond du footer */
+            position: absolute; /* Positionne le footer */
+            bottom: 0; /* Aligne en bas */
+            width: 100%; /* Prend toute la largeur */
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <a href="/"><img src="logo.png" alt="Logo"></a> <!-- Remplacez logo.png par le chemin correct -->
+            <span>Mon Application</span>
+        </div>
+        <button class="logout-button">Se déconnecter</button>
+    </header>
+
+    <div class="container">
+        <h1>Rechercher un Service</h1>
+        <form action="/search" method="GET">
+            <label for="service">Service :</label>
+            <div class="custome-input">
+                <input type="text" id="service" name="service" placeholder="Entrez un service" required>
+                <i class="fas fa-search"></i> <!-- Assurez-vous d'inclure Font Awesome si vous utilisez des icônes -->
+            </div>
+
+            <label for="city">Ville :</label>
+            <div class="custome-input">
+                <input type="text" id="city" name="city" placeholder="Entrez une ville" required>
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+
+            <button type="submit" class="login">Rechercher</button>
+        </form>
+    </div>
+
+    <footer class="footer">
+        &copy; 2024 Mon Application. Tous droits réservés.
+    </footer>
+</body>
+</html>

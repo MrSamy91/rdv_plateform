@@ -37,6 +37,32 @@ body {
 }
 
 /* ==============================
+   STYLES DU HEADER
+   ============================== */
+.header {
+    display: flex;
+    justify-content: space-between; /* Espace entre le titre et le bouton */
+    align-items: center; /* Centre verticalement */
+    width: 100%; /* Prend toute la largeur */
+    margin-bottom: 20px; /* Marge en bas */
+}
+
+.logout-button {
+    background-color: var(--primary-color); /* Utilise la couleur principale pour le bouton */
+    color: white; /* Couleur du texte */
+    padding: 10px 15px; /* Espacement interne */
+    border: none; /* Pas de bordure */
+    border-radius: 8px; /* Coins arrondis */
+    text-decoration: none; /* Pas de soulignement */
+    cursor: pointer; /* Curseur pointer */
+    transition: background-color 0.3s ease; /* Transition pour le survol */
+}
+
+.logout-button:hover {
+    background-color: var(--secondary-color); /* Couleur au survol */
+}
+
+/* ==============================
    STYLES DU LOGO
    ============================== */
 .logo {
