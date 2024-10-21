@@ -2,15 +2,15 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
-// Firebase configuration
+// Firebase configuration using environment variables
 const firebaseConfig = {
-    apiKey: "AIzaSyBsuJ1ksDev_VdHW2oRIhDHDHL5QeyK3_0",
-    authDomain: "portfolio-6bc7d.firebaseapp.com",
-    projectId: "portfolio-6bc7d",
-    storageBucket: "portfolio-6bc7d.appspot.com",
-    messagingSenderId: "977727425718",
-    appId: "1:977727425718:web:f87707a0c2bb20c76cea17",
-    measurementId: "G-LHFTHCHT17"
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID,
+    measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
