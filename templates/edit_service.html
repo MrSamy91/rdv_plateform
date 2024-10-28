@@ -1,0 +1,22 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Admin - Edit Service{% endblock %}
+
+{% block content %}
+<h1>Edit Service</h1>
+<form method="POST">
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ service.name }}" required>
+    </div>
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3" required>{{ service.description }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="price">Price</label>
+        <input type="number" step="0.01" class="form-control" id="price" name="price" value="{{ service.price }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Service</button>
+</form>
+{% endblock %}
