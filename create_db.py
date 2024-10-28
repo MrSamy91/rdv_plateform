@@ -1,5 +1,8 @@
-from app import app, db  # Import your Flask app and db instance
+from app import create_app
+from db import db
 from models import User  # Import your User model if needed
+
+app = create_app()
 
 # Create the database tables
 with app.app_context():

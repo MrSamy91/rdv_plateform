@@ -5,16 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page de Connexion</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
-    <!-- Import Firebase SDKs for app and authentication -->
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js"></script>
-
-    <!-- Include the custom JavaScript file for authentication logic -->
-    <script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
 </head>
 <body>
-    
     <div class="logo">
         <a href="/">
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
@@ -23,34 +15,15 @@
     </div>
     <div class="container">
         <h1>Connectez-vous à votre compte</h1>
-        <div class="social-login">
-            <!-- Button for Google Sign-In -->
-            <button id="login-google" class="google">
-                <i class='bx bxl-google'></i>
-                Utiliser Google
-            </button>
-            <a href="{{ url_for('login_apple') }}">
-                <!-- Button for Apple Sign-In -->
-                <button class="apple">
-                    <i class='bx bxl-apple'></i>
-                    Utiliser Apple
-                </button>
-            </a>
-        </div>
-        <div class="divider">
-            <div class="line"></div>
-            <p>Ou</p>
-            <div class="line"></div>
-        </div>
 
-        <!-- The login form -->
-        <form method="POST" action="{{ url_for('login') }}">
-            <!-- CSRF token for security -->
+        <!-- Le formulaire -->
+        <form method="POST" action="{{ url_for('main.login') }}">
+            <!-- Inclusion du token CSRF -->
             {{ form.hidden_tag() }}
             
-            <!-- Email input field -->
+            <!-- Champs email -->
             <div class="custome-input">
-                {{ form.email.label }}  <!-- Ensure "email" is a field in LoginForm -->
+                {{ form.email.label }}
                 {{ form.email(class="form-control", placeholder="Votre Email") }}
                 <i class='bx bx-at'></i>
                 {% if form.email.errors %}
@@ -58,9 +31,9 @@
                 {% endif %}
             </div>
 
-            <!-- Password input field -->
+            <!-- Champs mot de passe -->
             <div class="custome-input">
-                {{ form.password.label }}  <!-- Ensure "password" is a field in LoginForm -->
+                {{ form.password.label }}
                 {{ form.password(class="form-control", placeholder="Votre Mot de Passe") }}
                 <i class='bx bx-lock-alt'></i>
                 {% if form.password.errors %}
@@ -68,16 +41,22 @@
                 {% endif %}
             </div>
 
-            <!-- Submit button for the login form -->
+            <!-- Champ "Remember Me" -->
+            <div class="custome-input">
+                {{ form.remember_me() }}
+                {{ form.remember_me.label }}
+            </div>
+
+            <!-- Bouton de soumission -->
             <button class="login" type="submit">Se connecter</button>
 
             <div class="links">
-                <a href="{{ url_for('reset_password') }}">Réinitialiser le Mot de Passe</a>
-                <a href="{{ url_for('register') }}">Pas de compte ? Inscrivez-vous</a>
+                <a href="{{ url_for('main.reset_password') }}">Forgot Password?</a>
+                <a href="{{ url_for('main.register') }}">Register</a>
             </div>
         </form>
 
-        <!-- Display flash messages -->
+        <!-- Affichage des messages flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <ul class="flashes">

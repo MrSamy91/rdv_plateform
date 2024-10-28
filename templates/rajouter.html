@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter Disponibilité</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Ajouter une Disponibilité</h1>
+        <form method="POST" action="{{ url_for('main.add_availability') }}">
+            <label for="start_time">Début:</label>
+            <input type="datetime-local" id="start_time" name="start_time" required>
+            
+            <label for="end_time">Fin:</label>
+            <input type="datetime-local" id="end_time" name="end_time" required>
+            
+            <select name="coiffeur_id">
+                {% for coiffeur in coiffeurs %}
+                <option value="{{ coiffeur.id }}">{{ coiffeur.name }}</option>
+                {% endfor %}
+            </select>
+            
+            <button type="submit" class="btn">Ajouter</button>
+        </form>
+    </div>
+</body>
+
+</html>

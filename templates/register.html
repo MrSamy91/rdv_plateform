@@ -25,7 +25,7 @@
                 </ul>
             {% endif %}
         {% endwith %}
-        <form method="POST" action="{{ url_for('register') }}">
+        <form method="POST" action="{{ url_for('main.register') }}">
             {{ form.hidden_tag() }}
             <div class="custome-input">
                 <label for="username">{{ form.username.label }}</label>
@@ -73,7 +73,7 @@
             </div>
             <button class="login" type="submit">{{ form.submit.label }}</button>
         </form>
-        <p>Déjà un compte ? <a href="{{ url_for('login') }}">Connectez-vous</a></p>
+        <p>Déjà un compte ? <a href="{{ url_for('main.login') }}">Connectez-vous</a></p>
     </div>
 </body>
 </html>
