@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from functools import wraps
-from models import User, Coiffeur, Service, Rendezvous, Review, Availability
+from models import User, Coiffeur, Service, Booking, Review, TimeSlot
 from forms import LoginForm, RegistrationForm, RendezvousForm, ReviewForm
 from datetime import datetime, timedelta
 from utils import send_email_notification, add_to_google_calendar
@@ -14,9 +14,11 @@ from flask import Blueprint
 
 main = Blueprint('main', __name__)
 
+# Début des pages
+
 @main.route('/')
 def index():
-    return render_template('home.html', title='Accueil')
+    return render_template('public/home.html', title='Accueil')
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
@@ -30,105 +32,26 @@ def register():
         db.session.commit() 
         flash('Félicitations, vous êtes maintenant inscrit!')
         return redirect(url_for('main.login'))
-    return render_template('register.html', title='Inscription', form=form)
-
-@main.route('/coiffeurs')
-def coiffeurs():
-    coiffeurs = Coiffeur.query.all()
-    return render_template('coiffeurs.html', title='Nos Coiffeurs', coiffeurs=coiffeurs)
-
-@main.route('/services')
-def services():
-    services = Service.query.all()
-    return render_template('services.html', title='Nos Services', services=services)
-
-@main.route('/prendre_rendez_vous', methods=['GET', 'POST'])
-@login_required
-def prendre_rendez_vous():
-    form = RendezvousForm()
-    if form.validate_on_submit():
-        rendezvous = Rendezvous(
-            client_id=current_user.id,
-            coiffeur_id=form.coiffeur.data,
-            service_id=form.service.data,
-            date_heure=form.date_heure.data
-        )
-        db.session.add(rendezvous)
-        db.session.commit()
-        
-        send_email_notification(current_user.email, 'Confirmation de rendez-vous', 
-                                f'Votre rendez-vous est confirmé pour le {rendezvous.date_heure}')
-        
-        if current_user.google_token:
-            add_to_google_calendar(rendezvous, current_user.google_token)
-        
-        flash('Votre rendez-vous a été pris avec succès!')
-        return redirect(url_for('main.mes_rendez_vous'))
-    return render_template('prendre_rendez_vous.html', title='Prendre un rendez-vous', form=form)
-
-@main.route('/mes_rendez_vous')
-@login_required
-def mes_rendez_vous():
-    rendez_vous = Rendezvous.query.filter_by(client_id=current_user.id).all()
-    return render_template('mes_rendez_vous.html', title='Mes Rendez-vous', rendez_vous=rendez_vous)
-
-@main.route('/annuler_rendez_vous/<int:id>')
-@login_required
-def annuler_rendez_vous(id):
-    rendez_vous = Rendezvous.query.get_or_404(id)
-    if rendez_vous.client_id != current_user.id:
-        flash('Vous n\'êtes pas autorisé à annuler ce rendez-vous.')
-        return redirect(url_for('main.mes_rendez_vous'))
-    if rendez_vous.can_reschedule():
-        rendez_vous.status = 'annulé'
-        db.session.commit()
-        flash('Votre rendez-vous a été annulé avec succès.')
-    else:
-        flash('Désolé, vous ne pouvez plus annuler ce rendez-vous.')
-    return redirect(url_for('main.mes_rendez_vous'))
-
-@main.route('/laisser_avis/<int:coiffeur_id>', methods=['GET', 'POST'])
-@login_required
-def laisser_avis(coiffeur_id):
-    form = ReviewForm()
-    if form.validate_on_submit():
-        review = Review(
-            client_id=current_user.id,
-            coiffeur_id=coiffeur_id,
-            rating=form.rating.data,
-            comment=form.comment.data
-        )
-        db.session.add(review)
-        db.session.commit()
-        flash('Merci pour votre avis!')
-        return redirect(url_for('main.coiffeurs'))
-    return render_template('laisser_avis.html', title='Laisser un avis', form=form)
-
-@main.route('/agenda')
-@login_required
-def agenda():
-    return render_template('agenda.html', title='Agenda')
-
-@main.route('/dashboard')
-@login_required
-def dashboard():
-    rendez_vous = Rendezvous.query.filter_by(client_id=current_user.id).all()
-    return render_template('dashboard.html', rendez_vous=rendez_vous)
+    return render_template('public/register.html', title='Inscription', form=form)
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        # Correction ici : utilisation du bon nom de route
+        return redirect(url_for('main.client_dashboard'))
+    
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.index'))
+            # Correction ici aussi
+            return redirect(next_page) if next_page else redirect(url_for('main.client_dashboard'))
         else:
             flash('Email ou mot de passe invalide')
-    return render_template('login.html', title='Connexion', form=form)
+    return render_template('public/login.html', title='Connexion', form=form)
+
 
 @main.route('/logout')
 @login_required
@@ -149,11 +72,101 @@ def reset_password():
         else:
             flash('Adresse e-mail non trouvée.', 'error')
         return redirect(url_for('main.login'))
-    return render_template('reset_password.html')
+    return render_template('public/reset_password.html')
 
-@main.route('/search', methods=['GET'])
-def search():
-    return render_template('search.html')
+# Fin des pages
+
+@main.route('/client/dashboard')
+@login_required
+def client_dashboard():
+    # Rendez-vous à venir (après aujourd'hui)
+    upcoming_appointments = Booking.query.filter_by(
+        client_id=current_user.id
+    ).filter(
+        Booking.datetime > datetime.now()
+    ).order_by(Booking.datetime).all()
+
+    # Comptage des rendez-vous par coiffeur
+    hairdresser_counts = {}
+    for apt in upcoming_appointments:
+        # Correction ici : accéder au username via la relation user
+        hairdresser_name = apt.coiffeur.user.username
+        hairdresser_counts[hairdresser_name] = hairdresser_counts.get(hairdresser_name, 0) + 1
+
+    return render_template(
+        'client/dashboard.html',
+        upcoming_appointments=upcoming_appointments,
+        hairdresser_counts=hairdresser_counts
+    )
+
+@main.route('/administration/admin')
+@login_required
+def admin_panel():
+    if not current_user.is_admin:
+        abort(403)  # Forbidden access
+        
+    users = User.query.all()
+    return render_template('administration/admin.html', users=users)
+
+@main.route('/assign_role', methods=['POST'])
+@login_required
+def assign_role():
+    if not current_user.is_admin:
+        abort(403)
+        
+    user_id = request.form.get('user_id')
+    new_role = request.form.get('new_role')
+    
+    user = User.query.get_or_404(user_id)
+    user.role = new_role
+    db.session.commit()
+    
+    flash(f'Role updated for {user.name}')
+    return redirect(url_for('admin_panel'))
+
+@main.route('/public/login', methods=['GET', 'POST'])
+def public_login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+        
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('main.index'))
+        else:
+            flash('Email ou mot de passe invalide')
+            
+    return render_template('public/login.html', form=form)
+
+
+
+
+
+
+
+@main.route('/client/questions')
+@login_required
+def questions():
+    return render_template('client/questions.html', title='Questions')
+
+
+@main.route('/client/search')
+@login_required
+def client_search():
+    # Récupérer tous les coiffeurs
+    coiffeurs = Coiffeur.query.all()
+    # Récupérer tous les services disponibles
+    services = Service.query.all()
+    
+    return render_template('client/prise.html', 
+                         title='Recherche',
+                         coiffeurs=coiffeurs,
+                         services=services)
+
+
 
 @main.route('/admin')
 @login_required
@@ -163,66 +176,105 @@ def admin():
     users = User.query.all()
     return render_template('admin.html', users=users)
 
-@main.route('/add_availability', methods=['GET', 'POST'])
+# Ajout de la route pour prendre rendez-vous
+@main.route('/rendez-vous/nouveau', methods=['GET', 'POST'])
 @login_required
-def add_availability():
-    if request.method == 'POST':
-        start_time_str = request.form['start_time']
-        end_time_str = request.form['end_time']
-        coiffeur_id = request.form.get('coiffeur_id')  # Peut être None si non sélectionné
+def prendre_rendez_vous():
+    return render_template('rendez_vous/nouveau.html')
+
+# Ajout de la route pour le profil
+@main.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html')
+
+@main.route('/api/hairdressers')
+@login_required
+def get_hairdressers():
+    hairdressers = User.query.filter_by(role='coiffeur').all()
+    return jsonify([{
+        'id': h.id,
+        'name': h.username
+    } for h in hairdressers])
+
+@main.route('/api/get_availability')
+def get_availability():
+    coiffeur_id = request.args.get('hairdresser_id')
+    weekday = request.args.get('day')
+    
+    slots = TimeSlot.query.filter_by(
+        coiffeur_id=coiffeur_id,
+        weekday=weekday,
+    ).all()
+    
+    available_slots = []
+    for slot in slots:
+        # Vérifier si le créneau est déjà réservé
+        booking = Booking.query.filter_by(
+            time_slot_id=slot.id,
+            status='confirmed'
+        ).first()
         
-        start_time = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M')
-        end_time = datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M')
+        available_slots.append({
+            'id': slot.id,
+            'time': slot.start_time.strftime('%H:%M'),
+            'is_available': slot.is_available and not booking
+        })
+    
+    return jsonify(available_slots)
+@main.route('/api/book', methods=['POST'])
+@login_required
+def book_appointment():
+    data = request.get_json()
+    
+    try:
+        # Récupérer le créneau
+        slot = TimeSlot.query.get_or_404(data['slot_id'])
         
-        new_availability = Availability(
-            start_time=start_time,
-            end_time=end_time,
-            coiffeur_id=coiffeur_id if coiffeur_id else None
+        if not slot.is_available:
+            return jsonify({'success': False, 'error': 'Ce créneau n\'est plus disponible'})
+        
+        # Créer la réservation
+        booking = Booking(
+            client_id=current_user.id,
+            coiffeur_id=data['hairdresser_id'],
+            time_slot_id=slot.id,
+            datetime=slot.start_time,
+            status="confirmed"
         )
-        db.session.add(new_availability)
+        
+        # Marquer le créneau comme non disponible
+        slot.is_available = False
+        
+        db.session.add(booking)
         db.session.commit()
         
-        flash('Nouvelle disponibilité ajoutée avec succès!', 'success')
-        return redirect(url_for('main.add_availability'))
-    
-    coiffeurs = User.query.filter_by(role='coiffeur').all()  # Assurez-vous d'importer User
-    return render_template('rajouter.html', coiffeurs=coiffeurs)
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
 
-@main.route('/create_admin', methods=['GET', 'POST'])
-def create_admin():
-    if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
+@main.route('/api/cancel_appointment/<int:appointment_id>', methods=['POST'])
+@login_required
+def cancel_appointment(appointment_id):
+    try:
+        booking = Booking.query.get_or_404(appointment_id)
         
-        user = User(username=username, email=email, role='admin')
-        user.set_password(password)
-        db.session.add(user)
+        # Vérifier que c'est bien le rendez-vous du client connecté
+        if booking.client_id != current_user.id:
+            return jsonify({'success': False, 'error': 'Non autorisé'}), 403
+        
+        # Mettre à jour le statut du rendez-vous
+        booking.status = 'cancelled'
+        
+        # Rendre le créneau à nouveau disponible
+        time_slot = TimeSlot.query.get(booking.time_slot_id)
+        if time_slot:
+            time_slot.is_available = True
+        
         db.session.commit()
-        
-        flash('Admin user created successfully!')
-        return redirect(url_for('main.login'))
-    
-    return render_template('create_admin.html')
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
 
-@main.route('/navtest')
-def navtest():
-    return render_template('nav_test.html')
-
-@main.route('/rajouter', methods=['GET', 'POST'])
-def rajouter():
-    if request.method == 'POST':
-        start_time = request.form['start_time']
-        end_time = request.form['end_time']
-        
-        # Créez une nouvelle disponibilité
-        new_availability = Availability(start_time=start_time, end_time=end_time)
-        
-        # Ajoutez-la à la base de données
-        db.session.add(new_availability)
-        db.session.commit()
-        
-        flash('Nouvelle disponibilité ajoutée avec succès!', 'success')
-        return redirect(url_for('rajouter'))
-    
-    return render_template('rajouter.html')
