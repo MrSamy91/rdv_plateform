@@ -36,30 +36,32 @@ class Service(db.Model):
     duration = db.Column(db.Integer, nullable=False)  # durée en minutes
     price = db.Column(db.Float, nullable=False)
 
-class Availability(db.Model):
+class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    coiffeur_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    coiffeur_id = db.Column(db.Integer, db.ForeignKey('coiffeur.id'), nullable=False)
+    weekday = db.Column(db.String(10))
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
-    is_booked = db.Column(db.Boolean, default=False)
+    is_available = db.Column(db.Boolean, default=True)
+    
+    # Relations
+    coiffeur = db.relationship('Coiffeur', backref='time_slots')
 
-    def __repr__(self):
-        return f'<Availability {self.id}: {self.start_time} - {self.end_time}>'
-
-class Rendezvous(db.Model):
+class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     coiffeur_id = db.Column(db.Integer, db.ForeignKey('coiffeur.id'), nullable=False)
-    service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
-    date_heure = db.Column(db.DateTime, nullable=False)
-    status = db.Column(db.String(20), default='confirmé')  # 'confirmé', 'annulé', 'reporté'
-    payment_status = db.Column(db.String(20), default='en attente')  # 'en attente', 'payé', 'payé en espèces'
-    client = db.relationship('User', foreign_keys=[client_id])
-    coiffeur = db.relationship('Coiffeur', foreign_keys=[coiffeur_id])
-    service = db.relationship('Service')
+    time_slot_id = db.Column(db.Integer, db.ForeignKey('time_slot.id'), nullable=False)
+    status = db.Column(db.String(20), default='confirmed')  # confirmed, cancelled, completed
+    datetime = db.Column(db.DateTime, nullable=False)  # Le vrai nom de votre colonne
+    
+    # Relations
+    client = db.relationship('User', foreign_keys=[client_id], backref='bookings')
+    coiffeur = db.relationship('Coiffeur', foreign_keys=[coiffeur_id], backref='bookings')
+    time_slot = db.relationship('TimeSlot', backref='bookings')
 
-    def can_reschedule(self):
-        return datetime.utcnow() + timedelta(hours=24) < self.date_heure
+    def __repr__(self):
+        return f'<Booking {self.id}: {self.client.username} with {self.coiffeur.user.username}>'
 
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
