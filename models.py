@@ -10,6 +10,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role = db.Column(db.String(20), nullable=False, default='client')
     phone_number = db.Column(db.String(20))
+    loyalty_points = db.Column(db.Integer, default=0)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -49,15 +50,17 @@ class TimeSlot(db.Model):
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    coiffeur_id = db.Column(db.Integer, db.ForeignKey('coiffeur.id'), nullable=False)
-    time_slot_id = db.Column(db.Integer, db.ForeignKey('time_slot.id'), nullable=False)
-    status = db.Column(db.String(20), default='confirmed')  # confirmed, cancelled, completed
-    datetime = db.Column(db.DateTime, nullable=False)  # Le vrai nom de votre colonne
+    client_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_booking_client'), nullable=False)
+    coiffeur_id = db.Column(db.Integer, db.ForeignKey('coiffeur.id', name='fk_booking_coiffeur'), nullable=False)
+    service_id = db.Column(db.Integer, db.ForeignKey('service.id', name='fk_booking_service'), nullable=True)  # Temporairement nullable
+    time_slot_id = db.Column(db.Integer, db.ForeignKey('time_slot.id', name='fk_booking_timeslot'), nullable=False)
+    status = db.Column(db.String(20), default='confirmed')
+    datetime = db.Column(db.DateTime, nullable=False)
     
     # Relations
     client = db.relationship('User', foreign_keys=[client_id], backref='bookings')
     coiffeur = db.relationship('Coiffeur', foreign_keys=[coiffeur_id], backref='bookings')
+    service = db.relationship('Service', backref='bookings')
     time_slot = db.relationship('TimeSlot', backref='bookings')
 
     def __repr__(self):

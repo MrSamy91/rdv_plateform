@@ -141,6 +141,13 @@
             color: #333;
         }
 
+        .stat-card small {
+            display: block;
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
         .section-title {
             font-size: 1.5rem;
             color: #333;
@@ -415,7 +422,13 @@
             <div class="stat-card">
                 <i class="fas fa-cut"></i>
                 <h3>Coiffeur favori</h3>
-                <p>{{ favorite_hairdresser if favorite_hairdresser else "Aucun" }}</p>
+                {% if favorite_hairdresser %}
+                    <p>{{ favorite_hairdresser }}</p>
+                    <small>({{ "%.0f"|format((hairdresser_counts[favorite_hairdresser] / total_appointments) * 100) }}% de vos rendez-vous)</small>
+                {% else %}
+                    <p>Aucun favori</p>
+                    <small>(minimum 70% des rendez-vous requis)</small>
+                {% endif %}
             </div>
             <div class="stat-card">
                 <i class="fas fa-star"></i>
@@ -431,7 +444,7 @@
         
         <div class="appointments-list">
             {% for appointment in upcoming_appointments %}
-            <div class="appointment-card">
+            <div class="appointment-card" data-appointment-id="{{ appointment.id }}">
                 <div class="appointment-info">
                     <div>
                         <i class="fas fa-user-circle"></i>
@@ -454,7 +467,7 @@
                 </div>
                 {% if appointment.status != 'cancelled' %}
                 <div class="action-buttons">
-                    <button onclick="cancelAppointment({{ appointment.id }})" class="action-btn">
+                    <button onclick="cancelAppointment('{{ appointment.id }}')" class="action-btn">
                         <i class="fas fa-times"></i> Annuler
                     </button>
                 </div>
@@ -472,19 +485,14 @@
         </div>
 
         <div class="navigation-grid">
-            <a href="{{ url_for('main.client_dashboard') }}" class="nav-box">
-                <div class="nav-content">
-                    <i class="fas fa-home"></i>
-                    <p>Accueil</p>
-                </div>
-            </a>
             <a href="{{ url_for('main.questions') }}" class="nav-box">
                 <div class="nav-content">
                     <i class="fas fa-calendar-plus"></i>
                     <p>Réserver</p>
                 </div>
             </a>
-            <a href="#" class="nav-box">
+            </a>
+            <a href="{{ url_for('main.client_history') }}" class="nav-box">
                 <div class="nav-content">
                     <i class="fas fa-history"></i>
                     <p>Historique</p>
@@ -541,6 +549,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // Cacher immédiatement le rendez-vous annulé
+                        const appointmentCard = document.querySelector(`[data-appointment-id="${appointmentId}"]`);
+                        if (appointmentCard) {
+                            appointmentCard.remove();
+                        }
+                        // Mettre à jour le compteur de rendez-vous
+                        updateAppointmentCount();
+                        // Optionnel : recharger la page pour tout rafraîchir
                         window.location.reload();
                     } else {
                         alert('Erreur lors de l\'annulation : ' + (data.error || 'Erreur inconnue'));
@@ -549,6 +565,14 @@
                 .catch(error => {
                     alert('Erreur lors de l\'annulation : ' + error);
                 });
+            }
+        }
+
+        function updateAppointmentCount() {
+            const upcomingAppointmentsCount = document.querySelectorAll('.appointment-card').length;
+            const statsCounter = document.querySelector('.stat-card p');
+            if (statsCounter) {
+                statsCounter.textContent = upcomingAppointmentsCount;
             }
         }
     </script>
