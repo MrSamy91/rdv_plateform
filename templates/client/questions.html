@@ -13,7 +13,9 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
         }
 
         .container {
@@ -25,11 +27,28 @@
         .phone-frame {
             background: white;
             border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #007bff, #00ff88);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .phone-frame:hover::before {
             opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
         .phone-frame.fade-out {
@@ -37,25 +56,24 @@
             transform: translateY(-20px);
         }
 
-        #question-title {
+        #question-title, #initial-question-title, #service-question-title, #hairdresser-question-title {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
         }
 
         #question-text {
             text-align: center;
             margin-bottom: 20px;
             font-size: 18px;
+            color: #666;
         }
 
         .buttons {
             display: grid;
             gap: 15px;
             margin-top: 20px;
-        }
-
-        .button-box {
-            text-align: center;
         }
 
         .btn {
@@ -68,69 +86,131 @@
             font-size: 16px;
             cursor: pointer;
             border: none;
+            background: white;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
 
         .yes {
-            background-color: #28a745;
+            background: #28a745;
             color: white;
         }
 
         .no {
-            background-color: #dc3545;
+            background: #dc3545;
             color: white;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        .service-btn, .slot-btn {
+            background: #007bff;
+            color: white;
         }
 
         .back-btn {
             display: inline-block;
             padding: 10px 20px;
-            background: #f8f9fa;
-            color: #333;
+            background: white;
+            border-radius: 8px;
             text-decoration: none;
-            border-radius: 5px;
+            color: #333;
             margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn.disabled {
+            background: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .success-message {
+            text-align: center;
+            color: #28a745;
+            padding: 20px;
+        }
+
+        .success-message h3 {
+            margin-bottom: 10px;
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                color: #fff;
+            }
+
+            .phone-frame {
+                background: #282c34;
+                color: #fff;
+            }
+
+            #question-title, #initial-question-title, 
+            #service-question-title, #hairdresser-question-title {
+                color: #fff;
+            }
+
+            #question-text {
+                color: #adb5bd;
+            }
+
+            .btn:not(.yes):not(.no):not(.service-btn):not(.slot-btn) {
+                background: #343a40;
+                color: #fff;
+            }
+
+            .back-btn {
+                background: #343a40;
+                color: #fff;
+            }
+        }
+
+        /* Responsive design */
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
             }
 
-            .phone-frame {
-                padding: 15px;
-            }
-
             .btn {
-                padding: 12px 24px;
-                font-size: 14px;
+                padding: 12px 20px;
             }
         }
 
-        .day-btn.selected {
-            background-color: #007bff;
+        /* Style pour les boutons de jour sélectionnés */
+        .btn.day-btn.selected {
+            background: #007bff;
+            color: white;
+            transform: scale(0.98);
         }
 
         .search-btn {
-            background-color: #17a2b8;
+            background: #28a745;
+            color: white;
             margin-top: 20px;
         }
 
         .day-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
+            margin-bottom: 30px;
         }
 
         .day-section h3 {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: #333;
         }
 
+        /* Styles pour le modal */
         .modal {
             display: none;
             position: fixed;
@@ -140,71 +220,45 @@
             height: 100%;
             background-color: rgba(0,0,0,0.5);
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
         .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
             max-width: 500px;
+            margin: 20% auto;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
         }
 
         .modal-buttons {
-            display: flex;
-            justify-content: space-around;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
             margin-top: 20px;
         }
 
-        .success-message {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            text-align: center;
-        }
+        /* Dark mode pour le modal */
+        @media (prefers-color-scheme: dark) {
+            .modal-content {
+                background: #282c34;
+                color: #fff;
+            }
 
-        .btn.disabled {
-            background-color: #e9ecef;
-            color: #6c757d;
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
+            .modal-content h2 {
+                color: #fff;
+            }
 
-        .btn.disabled:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        .booked-label {
-            font-size: 0.8em;
-            display: block;
-            margin-top: 4px;
-            color: #dc3545;
-        }
-
-        .button-box {
-            position: relative;
-        }
-
-        .button-box .btn.disabled::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(
-                45deg,
-                rgba(0,0,0,0.05),
-                rgba(0,0,0,0.05) 10px,
-                rgba(0,0,0,0.1) 10px,
-                rgba(0,0,0,0.1) 20px
-            );
-            pointer-events: none;
-            border-radius: 8px;
+            .day-section h3 {
+                color: #fff;
+            }
         }
     </style>
 </head>
@@ -215,7 +269,7 @@
         </a>
         
         <div class="phone-frame" id="question-box">
-            <h1 id="question-title">Prise de rendez-vous</h1>
+            <h1 id="initial-question-title">Prise de rendez-vous</h1>
             <p id="question-text">Souhaitez-vous prendre un rendez-vous ?</p>
             <div class="buttons">
                 <div class="button-box">
@@ -227,8 +281,21 @@
             </div>
         </div>
 
+        <div id="service-box" class="phone-frame" style="display: none;">
+            <h2 id="service-question-title">Choisissez votre prestation</h2>
+            <div class="buttons" id="services-container">
+                {% for service in services %}
+                <button class="btn service-btn" 
+                        onclick="handleServiceChoice('{{ service.id }}', '{{ service.duration }}')"
+                        data-duration="{{ service.duration }}">
+                    {{ service.name }} ({{ service.duration }} min)
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
         <div class="phone-frame" id="hairdresser-box" style="display: none;">
-            <h1 id="question-title">Choix du coiffeur</h1>
+            <h1 id="hairdresser-question-title">Choix du coiffeur</h1>
             <p id="question-text">Avec quel coiffeur souhaitez-vous prendre rendez-vous ?</p>
             <div class="buttons" id="hairdresser-buttons">
                 <!-- Les boutons seront ajoutés dynamiquement -->
@@ -236,26 +303,26 @@
         </div>
 
         <div class="phone-frame" id="day-box" style="display: none;">
-            <h1 id="question-title">Choix des jours</h1>
+            <h1 id="day-question-title">Choix des jours</h1>
             <p id="question-text">Sélectionnez les jours qui vous conviennent :</p>
             <div class="buttons">
                 <div class="button-box">
-                    <button onclick="toggleDaySelection('lundi')" class="btn day-btn" data-day="lundi">Lundi</button>
+                    <button onclick="toggleDay(this, 'lundi')" class="btn day-btn" data-day="lundi">Lundi</button>
                 </div>
                 <div class="button-box">
-                    <button onclick="toggleDaySelection('mardi')" class="btn day-btn" data-day="mardi">Mardi</button>
+                    <button onclick="toggleDay(this, 'mardi')" class="btn day-btn" data-day="mardi">Mardi</button>
                 </div>
                 <div class="button-box">
-                    <button onclick="toggleDaySelection('mercredi')" class="btn day-btn" data-day="mercredi">Mercredi</button>
+                    <button onclick="toggleDay(this, 'mercredi')" class="btn day-btn" data-day="mercredi">Mercredi</button>
                 </div>
                 <div class="button-box">
-                    <button onclick="toggleDaySelection('jeudi')" class="btn day-btn" data-day="jeudi">Jeudi</button>
+                    <button onclick="toggleDay(this, 'jeudi')" class="btn day-btn" data-day="jeudi">Jeudi</button>
                 </div>
                 <div class="button-box">
-                    <button onclick="toggleDaySelection('vendredi')" class="btn day-btn" data-day="vendredi">Vendredi</button>
+                    <button onclick="toggleDay(this, 'vendredi')" class="btn day-btn" data-day="vendredi">Vendredi</button>
                 </div>
                 <div class="button-box">
-                    <button onclick="toggleDaySelection('samedi')" class="btn day-btn" data-day="samedi">Samedi</button>
+                    <button onclick="toggleDay(this, 'samedi')" class="btn day-btn" data-day="samedi">Samedi</button>
                 </div>
                 <div class="button-box">
                     <button onclick="searchAvailabilities()" class="btn search-btn">Rechercher les disponibilités</button>
@@ -264,7 +331,7 @@
         </div>
 
         <div class="phone-frame" id="slots-box" style="display: none;">
-            <h1 id="question-title">Créneaux disponibles</h1>
+            <h1 id="slots-question-title">Créneaux disponibles</h1>
             <div id="slots-container">
                 <!-- Les créneaux seront ajoutés ici, groupés par jour -->
             </div>
@@ -287,6 +354,8 @@
         let selectedHairdresser = null;
         let selectedDays = new Set();
         let selectedSlotId = null;
+        let selectedService = null;
+        let serviceDuration = null;
 
         function handleChoice(choice) {
             const questionBox = document.getElementById('question-box');
@@ -295,8 +364,7 @@
             if (choice === 'yes') {
                 setTimeout(() => {
                     questionBox.style.display = 'none';
-                    // Charger les coiffeurs depuis l'API
-                    fetchHairdressers();
+                    document.getElementById('service-box').style.display = 'block';
                 }, 300);
             } else {
                 setTimeout(() => {
@@ -342,8 +410,7 @@
             }, 300);
         }
 
-        function toggleDaySelection(day) {
-            const btn = document.querySelector(`[data-day="${day}"]`);
+        function toggleDay(btn, day) {
             if (selectedDays.has(day)) {
                 selectedDays.delete(day);
                 btn.classList.remove('selected');
@@ -461,6 +528,28 @@
             if (event.target === modal) {
                 closeModal();
             }
+        }
+
+        function handleServiceChoice(serviceId, duration) {
+            selectedService = serviceId;
+            serviceDuration = duration;
+            document.getElementById('service-box').style.display = 'none';
+            fetchHairdressers();
+        }
+
+        function fetchAvailableSlots(day) {
+            fetch(`/api/get_availability?hairdresser_id=${selectedHairdresser}&service_id=${selectedService}&day=${day}`)
+            .then(response => response.json())
+            .then(slots => {
+                const slotsContainer = document.getElementById('slots-container');
+                slotsContainer.innerHTML = slots.map(slot => `
+                    <button class="btn slot-btn" 
+                            onclick="handleSlotChoice(${slot.id}, '${day}', '${slot.time}')"
+                            ${!slot.is_available ? 'disabled' : ''}>
+                        ${slot.time} (${serviceDuration} min)
+                    </button>
+                `).join('');
+            });
         }
     </script>
 </body>

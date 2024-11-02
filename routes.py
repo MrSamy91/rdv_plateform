@@ -11,6 +11,8 @@ from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 from db import db  # Import db directly from db.py
 from flask import Blueprint
+from collections import Counter
+from sqlalchemy import func
 
 main = Blueprint('main', __name__)
 
@@ -37,7 +39,8 @@ def register():
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        # Correction ici : utilisation du bon nom de route
+        if current_user.role == 'coiffeur':
+            return redirect(url_for('main.coiffeur_dashboard'))
         return redirect(url_for('main.client_dashboard'))
     
     form = LoginForm()
@@ -45,9 +48,10 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            next_page = request.args.get('next')
-            # Correction ici aussi
-            return redirect(next_page) if next_page else redirect(url_for('main.client_dashboard'))
+            # Redirection selon le rôle
+            if user.role == 'coiffeur':
+                return redirect(url_for('main.coiffeur_dashboard'))
+            return redirect(url_for('main.client_dashboard'))
         else:
             flash('Email ou mot de passe invalide')
     return render_template('public/login.html', title='Connexion', form=form)
@@ -79,24 +83,43 @@ def reset_password():
 @main.route('/client/dashboard')
 @login_required
 def client_dashboard():
-    # Rendez-vous à venir (après aujourd'hui)
-    upcoming_appointments = Booking.query.filter_by(
-        client_id=current_user.id
-    ).filter(
-        Booking.datetime > datetime.now()
+    # Récupérer tous les rendez-vous
+    all_appointments = Booking.query.filter_by(client_id=current_user.id).all()
+    upcoming_appointments = Booking.query.filter(
+        Booking.client_id == current_user.id,
+        Booking.datetime > datetime.now(),
+        Booking.status != 'cancelled'
     ).order_by(Booking.datetime).all()
+    
+    past_appointments = Booking.query.filter(
+        Booking.client_id == current_user.id,
+        Booking.datetime <= datetime.now()
+    ).order_by(Booking.datetime.desc()).all()
 
-    # Comptage des rendez-vous par coiffeur
+    # Calculer le coiffeur favori
+    favorite_hairdresser = None
     hairdresser_counts = {}
-    for apt in upcoming_appointments:
-        # Correction ici : accéder au username via la relation user
-        hairdresser_name = apt.coiffeur.user.username
-        hairdresser_counts[hairdresser_name] = hairdresser_counts.get(hairdresser_name, 0) + 1
+    total_appointments = len(all_appointments)
+
+    if all_appointments:
+        # Compter le nombre de rendez-vous par coiffeur
+        hairdresser_counts = Counter(appointment.coiffeur.user.username for appointment in all_appointments)
+        
+        # Trouver le coiffeur avec le plus de rendez-vous
+        most_common_hairdresser, count = hairdresser_counts.most_common(1)[0]
+        
+        # Vérifier si le coiffeur représente 70% ou plus des rendez-vous
+        if (count / total_appointments) >= 0.7:  # 70% ou plus
+            favorite_hairdresser = most_common_hairdresser
 
     return render_template(
         'client/dashboard.html',
         upcoming_appointments=upcoming_appointments,
-        hairdresser_counts=hairdresser_counts
+        past_appointments=past_appointments,
+        favorite_hairdresser=favorite_hairdresser,
+        hairdresser_counts=hairdresser_counts,
+        total_appointments=total_appointments,
+        loyalty_points=current_user.loyalty_points
     )
 
 @main.route('/administration/admin')
@@ -150,7 +173,8 @@ def public_login():
 @main.route('/client/questions')
 @login_required
 def questions():
-    return render_template('client/questions.html', title='Questions')
+    services = Service.query.all()
+    return render_template('client/questions.html', services=services)
 
 
 @main.route('/client/search')
@@ -200,28 +224,50 @@ def get_hairdressers():
 @main.route('/api/get_availability')
 def get_availability():
     coiffeur_id = request.args.get('hairdresser_id')
+    service_id = request.args.get('service_id')
     weekday = request.args.get('day')
+    
+    # Si service_id n'est pas fourni, utiliser une durée par défaut
+    if service_id:
+        service = Service.query.get_or_404(service_id)
+        service_duration = service.duration
+    else:
+        service_duration = 30  # durée par défaut en minutes
     
     slots = TimeSlot.query.filter_by(
         coiffeur_id=coiffeur_id,
         weekday=weekday,
-    ).all()
+    ).order_by(TimeSlot.start_time).all()
     
     available_slots = []
-    for slot in slots:
-        # Vérifier si le créneau est déjà réservé
-        booking = Booking.query.filter_by(
-            time_slot_id=slot.id,
-            status='confirmed'
-        ).first()
+    for i, slot in enumerate(slots):
+        needed_slots = service_duration // 30
         
-        available_slots.append({
-            'id': slot.id,
-            'time': slot.start_time.strftime('%H:%M'),
-            'is_available': slot.is_available and not booking
-        })
+        consecutive_slots_available = True
+        for j in range(needed_slots):
+            if i + j >= len(slots):
+                consecutive_slots_available = False
+                break
+                
+            booking = Booking.query.filter_by(
+                time_slot_id=slots[i + j].id,
+                status='confirmed'
+            ).first()
+            
+            if booking or not slots[i + j].is_available:
+                consecutive_slots_available = False
+                break
+        
+        if consecutive_slots_available:
+            available_slots.append({
+                'id': slot.id,
+                'time': slot.start_time.strftime('%H:%M'),
+                'is_available': True,
+                'duration': service_duration
+            })
     
     return jsonify(available_slots)
+
 @main.route('/api/book', methods=['POST'])
 @login_required
 def book_appointment():
@@ -257,24 +303,73 @@ def book_appointment():
 @main.route('/api/cancel_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
 def cancel_appointment(appointment_id):
-    try:
-        booking = Booking.query.get_or_404(appointment_id)
+    appointment = Booking.query.get_or_404(appointment_id)
+    if appointment.client_id != current_user.id:
+        return jsonify({'success': False, 'error': 'Non autorisé'}), 403
+    
+    appointment.status = 'cancelled'  # Assurez-vous que ce statut est bien mis à jour
+    db.session.commit()
+    
+    return jsonify({'success': True})
+
+@main.route('/client/history')
+@login_required
+def client_history():
+    # Remplacer Appointment par Booking
+    past_appointments = Booking.query.filter(
+        Booking.client_id == current_user.id,
+        Booking.datetime <= datetime.now()
+    ).order_by(Booking.datetime.desc()).all()
+    
+    return render_template('client/history.html', past_appointments=past_appointments)
+
+@main.route('/coiffeur/dashboard')
+@login_required
+def coiffeur_dashboard():
+    if current_user.role != 'coiffeur':
+        abort(403)
         
-        # Vérifier que c'est bien le rendez-vous du client connecté
-        if booking.client_id != current_user.id:
-            return jsonify({'success': False, 'error': 'Non autorisé'}), 403
+    # Récupérer les rendez-vous du jour avec les relations
+    today = datetime.now().date()
+    today_appointments = Booking.query.filter(
+        Booking.coiffeur_id == current_user.id,
+        func.date(Booking.datetime) == today
+    ).join(User, Booking.client_id == User.id)\
+     .join(Service, Booking.service_id == Service.id)\
+     .all()
+    
+    # Récupérer les rendez-vous de la semaine
+    week_start = today - timedelta(days=today.weekday())
+    week_end = week_start + timedelta(days=6)
+    weekly_appointments = Booking.query.filter(
+        Booking.coiffeur_id == current_user.id,
+        func.date(Booking.datetime).between(week_start, week_end)
+    ).join(User, Booking.client_id == User.id)\
+     .join(Service, Booking.service_id == Service.id)\
+     .all()
+    
+    # Calculer le taux d'occupation
+    total_slots = TimeSlot.query.filter_by(coiffeur_id=current_user.id).count()
+    booked_slots = Booking.query.filter_by(coiffeur_id=current_user.id).count()
+    occupation_rate = round((booked_slots / total_slots * 100) if total_slots > 0 else 0, 1)
+    
+    return render_template('coiffeur/dashboard.html',
+                         today_appointments=today_appointments,
+                         weekly_appointments=weekly_appointments,
+                         occupation_rate=occupation_rate)
+
+@main.route('/api/appointments/<int:appointment_id>/complete', methods=['POST'])
+@login_required
+def complete_appointment(appointment_id):
+    if current_user.role != 'coiffeur':
+        abort(403)
         
-        # Mettre à jour le statut du rendez-vous
-        booking.status = 'cancelled'
+    appointment = Booking.query.get_or_404(appointment_id)
+    if appointment.coiffeur_id != current_user.coiffeur.id:
+        abort(403)
         
-        # Rendre le créneau à nouveau disponible
-        time_slot = TimeSlot.query.get(booking.time_slot_id)
-        if time_slot:
-            time_slot.is_available = True
-        
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)})
+    appointment.status = 'completed'
+    db.session.commit()
+    
+    return jsonify({'success': True})
 
