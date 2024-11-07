@@ -7,12 +7,13 @@ from models import User, Coiffeur, Service, Booking, Review, TimeSlot
 from forms import LoginForm, RegistrationForm, RendezvousForm, ReviewForm
 from datetime import datetime, timedelta
 from utils import send_email_notification, add_to_google_calendar
-from flask_mail import Message
+from flask_mail import Message, Mail
 from itsdangerous import URLSafeTimedSerializer
 from db import db  # Import db directly from db.py
 from flask import Blueprint
 from collections import Counter
 from sqlalchemy import func
+from app import mail  # Assurez-vous que cela correspond à l'endroit où vous avez initialisé mail
 
 main = Blueprint('main', __name__)
 
@@ -26,34 +27,52 @@ def index():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+    
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data, role='client')
+        # Créer l'utilisateur
+        user = User(username=form.username.data, 
+                   email=form.email.data, 
+                   role='client')  # Le rôle est maintenant 'client'
         user.set_password(form.password.data)
         db.session.add(user)
-        db.session.commit() 
+        db.session.flush()  # Pour obtenir l'ID de l'utilisateur
+        
+        db.session.commit()
         flash('Félicitations, vous êtes maintenant inscrit!')
         return redirect(url_for('main.login'))
+        
     return render_template('public/register.html', title='Inscription', form=form)
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
+    print("Tentative de connexion")  # Debug log
     if current_user.is_authenticated:
+        print(f"Utilisateur déjà connecté: {current_user.username} ({current_user.role})")  # Debug log
         if current_user.role == 'coiffeur':
             return redirect(url_for('main.coiffeur_dashboard'))
-        return redirect(url_for('main.client_dashboard'))
-    
+        else:
+            return redirect(url_for('main.client_dashboard'))
+
     form = LoginForm()
     if form.validate_on_submit():
+        print(f"Tentative de connexion avec email: {form.email.data}")  # Debug log
         user = User.query.filter_by(email=form.email.data).first()
-        if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
-            # Redirection selon le rôle
-            if user.role == 'coiffeur':
-                return redirect(url_for('main.coiffeur_dashboard'))
-            return redirect(url_for('main.client_dashboard'))
-        else:
+        if user:
+            print(f"Utilisateur trouvé: {user.username} ({user.role})")  # Debug log
+        if user is None or not user.check_password(form.password.data):
             flash('Email ou mot de passe invalide')
+            return redirect(url_for('main.login'))
+        
+        login_user(user)
+        flash(f'Bienvenue {user.username}!')
+        
+        # Redirection basée sur le rôle
+        if user.role == 'coiffeur':
+            return redirect(url_for('main.coiffeur_dashboard'))
+        else:
+            return redirect(url_for('main.client_dashboard'))
+
     return render_template('public/login.html', title='Connexion', form=form)
 
 
@@ -221,84 +240,94 @@ def get_hairdressers():
         'name': h.username
     } for h in hairdressers])
 
-@main.route('/api/get_availability')
+@main.route('/get_availability')
+@login_required
 def get_availability():
-    coiffeur_id = request.args.get('hairdresser_id')
-    service_id = request.args.get('service_id')
-    weekday = request.args.get('day')
-    
-    # Si service_id n'est pas fourni, utiliser une durée par défaut
-    if service_id:
-        service = Service.query.get_or_404(service_id)
-        service_duration = service.duration
-    else:
-        service_duration = 30  # durée par défaut en minutes
-    
-    slots = TimeSlot.query.filter_by(
-        coiffeur_id=coiffeur_id,
-        weekday=weekday,
-    ).order_by(TimeSlot.start_time).all()
-    
-    available_slots = []
-    for i, slot in enumerate(slots):
-        needed_slots = service_duration // 30
+    try:
+        coiffeur_id = request.args.get('hairdresser_id')
+        day = request.args.get('day')
         
-        consecutive_slots_available = True
-        for j in range(needed_slots):
-            if i + j >= len(slots):
-                consecutive_slots_available = False
-                break
-                
-            booking = Booking.query.filter_by(
-                time_slot_id=slots[i + j].id,
-                status='confirmed'
-            ).first()
-            
-            if booking or not slots[i + j].is_available:
-                consecutive_slots_available = False
-                break
+        print(f"Recherche des créneaux pour coiffeur_id={coiffeur_id}, day={day}")
         
-        if consecutive_slots_available:
-            available_slots.append({
-                'id': slot.id,
-                'time': slot.start_time.strftime('%H:%M'),
-                'is_available': True,
-                'duration': service_duration
-            })
-    
-    return jsonify(available_slots)
+        # Utiliser func.lower() pour une comparaison insensible à la casse
+        slots = TimeSlot.query.filter(
+            TimeSlot.coiffeur_id == coiffeur_id,
+            func.lower(TimeSlot.weekday) == func.lower(day),
+            TimeSlot.is_available == True
+        ).all()
+        
+        print(f"Créneaux trouvés pour {day}: {len(slots)}")
+        
+        slots_data = [{
+            'id': slot.id,
+            'time': slot.start_time,
+            'is_available': slot.is_available
+        } for slot in slots]
+        
+        print(f"Données renvoyées pour {day}: {slots_data}")
+        
+        return jsonify(slots_data)
+        
+    except Exception as e:
+        print(f"Erreur dans get_availability: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
-@main.route('/api/book', methods=['POST'])
+@main.route('/book_appointment', methods=['POST'])
 @login_required
 def book_appointment():
-    data = request.get_json()
-    
     try:
+        print("=== Début de la réservation ===")
+        data = request.get_json()
+        print("Données JSON parsées:", data)
+        
+        slot_id = data.get('slot_id')
+        hairdresser_id = data.get('hairdresser_id')
+        
+        print(f"slot_id: {slot_id} (type: {type(slot_id)})")
+        print(f"hairdresser_id: {hairdresser_id} (type: {type(hairdresser_id)})")
+
         # Récupérer le créneau
-        slot = TimeSlot.query.get_or_404(data['slot_id'])
-        
-        if not slot.is_available:
-            return jsonify({'success': False, 'error': 'Ce créneau n\'est plus disponible'})
-        
-        # Créer la réservation
+        time_slot = TimeSlot.query.get(slot_id)
+        if not time_slot:
+            return jsonify({
+                'success': False, 
+                'error': f'Créneau {slot_id} non trouvé'
+            }), 404
+
+        # Vérifier si le créneau est toujours disponible
+        if not time_slot.is_available:
+            return jsonify({
+                'success': False, 
+                'error': 'Ce créneau n\'est plus disponible'
+            }), 400
+
+        # Créer la réservation en utilisant l'ID du créneau directement
         booking = Booking(
             client_id=current_user.id,
-            coiffeur_id=data['hairdresser_id'],
-            time_slot_id=slot.id,
-            datetime=slot.start_time,
-            status="confirmed"
+            coiffeur_id=time_slot.coiffeur_id,  # Utiliser l'ID du coiffeur du créneau
+            time_slot_id=slot_id,
+            datetime=datetime.now(),
+            status='confirmed'
         )
-        
+
         # Marquer le créneau comme non disponible
-        slot.is_available = False
-        
+        time_slot.is_available = False
+
         db.session.add(booking)
         db.session.commit()
-        
+
+        print("Réservation créée avec succès")
         return jsonify({'success': True})
+
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)})
+        print(f"Exception complète:", str(e))
+        import traceback
+        print("Traceback:", traceback.format_exc())
+        return jsonify({
+            'success': False, 
+            'error': f"Erreur lors de la réservation: {str(e)}"
+        }), 500
 
 @main.route('/api/cancel_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
@@ -326,37 +355,39 @@ def client_history():
 @main.route('/coiffeur/dashboard')
 @login_required
 def coiffeur_dashboard():
+    print(f"User role: {current_user.role}")  # Debug log
+    
     if current_user.role != 'coiffeur':
-        abort(403)
-        
-    # Récupérer les rendez-vous du jour avec les relations
+        flash("Accès non autorisé. Cette page est réservée aux coiffeurs.")
+        return redirect(url_for('main.index'))
+
+    # Récupérer le coiffeur associé à l'utilisateur
+    coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
+    if not coiffeur:
+        # Au lieu de rediriger, créer le profil manquant
+        coiffeur = Coiffeur(
+            user_id=current_user.id,
+            specialties='À définir',
+            years_of_experience=0
+        )
+        db.session.add(coiffeur)
+        db.session.commit()
+
+    # Calculer les dates pour chaque jour
     today = datetime.now().date()
-    today_appointments = Booking.query.filter(
-        Booking.coiffeur_id == current_user.id,
-        func.date(Booking.datetime) == today
-    ).join(User, Booking.client_id == User.id)\
-     .join(Service, Booking.service_id == Service.id)\
-     .all()
-    
-    # Récupérer les rendez-vous de la semaine
-    week_start = today - timedelta(days=today.weekday())
-    week_end = week_start + timedelta(days=6)
-    weekly_appointments = Booking.query.filter(
-        Booking.coiffeur_id == current_user.id,
-        func.date(Booking.datetime).between(week_start, week_end)
-    ).join(User, Booking.client_id == User.id)\
-     .join(Service, Booking.service_id == Service.id)\
-     .all()
-    
-    # Calculer le taux d'occupation
-    total_slots = TimeSlot.query.filter_by(coiffeur_id=current_user.id).count()
-    booked_slots = Booking.query.filter_by(coiffeur_id=current_user.id).count()
-    occupation_rate = round((booked_slots / total_slots * 100) if total_slots > 0 else 0, 1)
-    
+    monday = today - timedelta(days=today.weekday())
+    days_with_dates = [
+        ('Lundi', monday),
+        ('Mardi', monday + timedelta(days=1)),
+        ('Mercredi', monday + timedelta(days=2)),
+        ('Jeudi', monday + timedelta(days=3)),
+        ('Vendredi', monday + timedelta(days=4)),
+        ('Samedi', monday + timedelta(days=5))
+    ]
+
     return render_template('coiffeur/dashboard.html',
-                         today_appointments=today_appointments,
-                         weekly_appointments=weekly_appointments,
-                         occupation_rate=occupation_rate)
+                         days_with_dates=days_with_dates,
+                         week_start_date=monday)
 
 @main.route('/api/appointments/<int:appointment_id>/complete', methods=['POST'])
 @login_required
@@ -373,3 +404,54 @@ def complete_appointment(appointment_id):
     
     return jsonify({'success': True})
 
+@main.route('/send-test-email')
+def send_test_email():
+       from flask_mail import Message
+       msg = Message('Test Email',
+                     recipients=['shadowytcontactpro@gmail.com'])  # Remplacez par l'adresse email du destinataire
+       msg.body = 'Ceci est un email de test.'
+       mail.send(msg)
+       return 'Email de test envoyé !'
+
+@main.route('/save_availability', methods=['POST'])
+@login_required
+def save_availability():
+    try:
+        data = request.get_json()
+        slots = data.get('slots', [])
+        hairdresser_id = data.get('hairdresser_id')
+
+        if not slots or not hairdresser_id:
+            return jsonify({'success': False, 'error': 'Données manquantes'}), 400
+
+        for slot in slots:
+            day = slot.get('day', '').lower()  # Forcer en minuscules
+            start_time = slot.get('start_time')
+            end_time = slot.get('end_time')
+            
+            if not all([day, start_time, end_time]):
+                continue
+                
+            existing_slot = TimeSlot.query.filter(
+                TimeSlot.coiffeur_id == hairdresser_id,
+                func.lower(TimeSlot.weekday) == day,
+                TimeSlot.start_time == start_time,
+                TimeSlot.end_time == end_time
+            ).first()
+
+            if not existing_slot:
+                time_slot = TimeSlot(
+                    coiffeur_id=hairdresser_id,
+                    weekday=day,
+                    start_time=start_time,
+                    end_time=end_time,
+                    is_available=True
+                )
+                db.session.add(time_slot)
+
+        db.session.commit()
+        return jsonify({'success': True})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
