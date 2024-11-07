@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 
 class User(UserMixin, db.Model):
+    __tablename__ = 'user'
+    
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -38,30 +40,39 @@ class Service(db.Model):
     price = db.Column(db.Float, nullable=False)
 
 class TimeSlot(db.Model):
+    __tablename__ = 'time_slot'
+    
     id = db.Column(db.Integer, primary_key=True)
     coiffeur_id = db.Column(db.Integer, db.ForeignKey('coiffeur.id'), nullable=False)
-    weekday = db.Column(db.String(10))
-    start_time = db.Column(db.DateTime, nullable=False)
-    end_time = db.Column(db.DateTime, nullable=False)
+    weekday = db.Column(db.String(20), nullable=False)
+    start_time = db.Column(db.String(5), nullable=False)  # Format HH:MM
+    end_time = db.Column(db.String(5), nullable=False)    # Format HH:MM
     is_available = db.Column(db.Boolean, default=True)
     
-    # Relations
-    coiffeur = db.relationship('Coiffeur', backref='time_slots')
+    # Relation avec Coiffeur
+    coiffeur = db.relationship('Coiffeur', backref='time_slots', lazy=True)
+    
+    # Ne définissez pas la relation bookings ici
+    
+    def __repr__(self):
+        return f'<TimeSlot {self.weekday} {self.start_time}-{self.end_time}>'
 
 class Booking(db.Model):
+    __tablename__ = 'booking'
+    
     id = db.Column(db.Integer, primary_key=True)
     client_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_booking_client'), nullable=False)
     coiffeur_id = db.Column(db.Integer, db.ForeignKey('coiffeur.id', name='fk_booking_coiffeur'), nullable=False)
-    service_id = db.Column(db.Integer, db.ForeignKey('service.id', name='fk_booking_service'), nullable=True)  # Temporairement nullable
     time_slot_id = db.Column(db.Integer, db.ForeignKey('time_slot.id', name='fk_booking_timeslot'), nullable=False)
+    service_id = db.Column(db.Integer, db.ForeignKey('service.id', name='fk_booking_service'), nullable=True)
     status = db.Column(db.String(20), default='confirmed')
     datetime = db.Column(db.DateTime, nullable=False)
     
     # Relations
-    client = db.relationship('User', foreign_keys=[client_id], backref='bookings')
-    coiffeur = db.relationship('Coiffeur', foreign_keys=[coiffeur_id], backref='bookings')
-    service = db.relationship('Service', backref='bookings')
+    client = db.relationship('User', foreign_keys=[client_id], backref='client_bookings')
+    coiffeur = db.relationship('Coiffeur', foreign_keys=[coiffeur_id], backref='coiffeur_bookings')
     time_slot = db.relationship('TimeSlot', backref='bookings')
+    service = db.relationship('Service', backref='bookings')
 
     def __repr__(self):
         return f'<Booking {self.id}: {self.client.username} with {self.coiffeur.user.username}>'

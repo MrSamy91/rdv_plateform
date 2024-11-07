@@ -1,8 +1,8 @@
-"""Add service_id to Booking model
+"""add_service_id_to_booking
 
-Revision ID: 44809537d38c
-Revises: 54c185d1b339
-Create Date: 2024-11-01 16:17:36.237341
+Revision ID: 2c36333ff91b
+Revises: 4dfc1b688311
+Create Date: 2024-11-06 23:55:08.711617
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '44809537d38c'
-down_revision = '54c185d1b339'
+revision = '2c36333ff91b'
+down_revision = '4dfc1b688311'
 branch_labels = None
 depends_on = None
 

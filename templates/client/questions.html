@@ -56,7 +56,7 @@
             transform: translateY(-20px);
         }
 
-        #question-title, #initial-question-title, #service-question-title, #hairdresser-question-title {
+        #question-title, #initial-question-title, #hairdresser-question-title {
             text-align: center;
             margin-bottom: 20px;
             color: #333;
@@ -106,11 +106,6 @@
             color: white;
         }
 
-        .service-btn, .slot-btn {
-            background: #007bff;
-            color: white;
-        }
-
         .back-btn {
             display: inline-block;
             padding: 10px 20px;
@@ -157,8 +152,7 @@
                 color: #fff;
             }
 
-            #question-title, #initial-question-title, 
-            #service-question-title, #hairdresser-question-title {
+            #question-title, #initial-question-title, #hairdresser-question-title {
                 color: #fff;
             }
 
@@ -166,7 +160,7 @@
                 color: #adb5bd;
             }
 
-            .btn:not(.yes):not(.no):not(.service-btn):not(.slot-btn) {
+            .btn:not(.yes):not(.no) {
                 background: #343a40;
                 color: #fff;
             }
@@ -260,9 +254,25 @@
                 color: #fff;
             }
         }
+
+        #slots-box {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .day-section {
+            margin-bottom: 20px;
+        }
+
+        .day-section h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
     </style>
 </head>
 <body>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <div class="container">
         <a href="{{ url_for('main.client_dashboard') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i> Retour
@@ -278,19 +288,6 @@
                 <div class="button-box">
                     <button onclick="handleChoice('no')" class="btn no">Non, retour au dashboard</button>
                 </div>
-            </div>
-        </div>
-
-        <div id="service-box" class="phone-frame" style="display: none;">
-            <h2 id="service-question-title">Choisissez votre prestation</h2>
-            <div class="buttons" id="services-container">
-                {% for service in services %}
-                <button class="btn service-btn" 
-                        onclick="handleServiceChoice('{{ service.id }}', '{{ service.duration }}')"
-                        data-duration="{{ service.duration }}">
-                    {{ service.name }} ({{ service.duration }} min)
-                </button>
-                {% endfor %}
             </div>
         </div>
 
@@ -354,8 +351,6 @@
         let selectedHairdresser = null;
         let selectedDays = new Set();
         let selectedSlotId = null;
-        let selectedService = null;
-        let serviceDuration = null;
 
         function handleChoice(choice) {
             const questionBox = document.getElementById('question-box');
@@ -364,7 +359,7 @@
             if (choice === 'yes') {
                 setTimeout(() => {
                     questionBox.style.display = 'none';
-                    document.getElementById('service-box').style.display = 'block';
+                    fetchHairdressers();
                 }, 300);
             } else {
                 setTimeout(() => {
@@ -411,6 +406,7 @@
         }
 
         function toggleDay(btn, day) {
+            console.log(`Toggle day: ${day}`);
             if (selectedDays.has(day)) {
                 selectedDays.delete(day);
                 btn.classList.remove('selected');
@@ -418,6 +414,7 @@
                 selectedDays.add(day);
                 btn.classList.add('selected');
             }
+            console.log(`Selected days: ${Array.from(selectedDays)}`);
         }
 
         function searchAvailabilities() {
@@ -426,36 +423,57 @@
                 return;
             }
 
+            const dayBox = document.getElementById('day-box');
+            const slotsBox = document.getElementById('slots-box');
             const slotsContainer = document.getElementById('slots-container');
+            
             slotsContainer.innerHTML = '<p>Recherche des créneaux disponibles...</p>';
+            
+            dayBox.style.display = 'none';
+            slotsBox.style.display = 'block';
 
-            const promises = Array.from(selectedDays).map(day =>
-                fetch(`{{ url_for('main.get_availability') }}?hairdresser_id=${selectedHairdresser}&day=${day}`)
-                    .then(response => response.json())
-                    .then(slots => ({ day, slots }))
-            );
+            console.log('Selected days:', Array.from(selectedDays));
+            console.log('Selected hairdresser:', selectedHairdresser);
+
+            const promises = Array.from(selectedDays).map(day => {
+                const url = `/get_availability?hairdresser_id=${selectedHairdresser}&day=${day}`;
+                console.log('Fetching URL:', url);
+                
+                return fetch(url)
+                    .then(response => {
+                        console.log(`Response status for ${day}:`, response.status);
+                        return response.json();
+                    })
+                    .then(slots => {
+                        console.log(`Slots received for ${day}:`, slots);
+                        return { day, slots };
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching slots for ${day}:`, error);
+                        return { day, slots: [] };
+                    });
+            });
 
             Promise.all(promises)
                 .then(results => {
                     slotsContainer.innerHTML = '';
+                    let hasSlots = false;
+
                     results.forEach(({ day, slots }) => {
-                        if (slots.length > 0) {
+                        if (slots && slots.length > 0) {
+                            hasSlots = true;
                             const daySection = document.createElement('div');
                             daySection.className = 'day-section';
                             daySection.innerHTML = `
-                                <h3>${day.charAt(0).toUpperCase() + day.slice(1)}</h3>
+                                <h3>${day}</h3>
                                 <div class="buttons">
                                     ${slots.map(slot => `
-                                        <div class="button-box">
-                                            <button 
-                                                onclick="${slot.is_available ? `handleSlotChoice(${slot.id}, '${day}', '${slot.time}')` : 'void(0)'}" 
-                                                class="btn ${slot.is_available ? 'yes' : 'disabled'}"
-                                                ${!slot.is_available ? 'disabled' : ''}
-                                            >
-                                                ${slot.time}
-                                                ${!slot.is_available ? '<span class="booked-label">Réservé</span>' : ''}
-                                            </button>
-                                        </div>
+                                        <button 
+                                            onclick="handleSlotChoice(${slot.id}, '${day}', '${slot.time}')" 
+                                            class="btn ${slot.is_available ? 'yes' : 'disabled'}"
+                                        >
+                                            ${slot.time}
+                                        </button>
                                     `).join('')}
                                 </div>
                             `;
@@ -463,16 +481,13 @@
                         }
                     });
 
-                    if (slotsContainer.innerHTML === '') {
+                    if (!hasSlots) {
                         slotsContainer.innerHTML = '<p>Aucun créneau disponible pour les jours sélectionnés.</p>';
                     }
-
-                    document.getElementById('day-box').style.display = 'none';
-                    document.getElementById('slots-box').style.display = 'block';
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    slotsContainer.innerHTML = '<p>Erreur lors de la recherche des créneaux. Veuillez réessayer.</p>';
+                    slotsContainer.innerHTML = `<p>Erreur lors de la recherche des créneaux : ${error.message}</p>`;
                 });
         }
 
@@ -487,18 +502,36 @@
         }
 
         function confirmBooking() {
+            const bookingData = {
+                slot_id: selectedSlotId,
+                hairdresser_id: selectedHairdresser
+            };
+            
+            console.log('Données envoyées:', bookingData);
+
             fetch("{{ url_for('main.book_appointment') }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
                 },
-                body: JSON.stringify({
-                    slot_id: selectedSlotId,
-                    hairdresser_id: selectedHairdresser
-                })
+                body: JSON.stringify(bookingData)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Status:', response.status);
+                return response.text().then(text => {
+                    console.log('Réponse brute:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Erreur parsing JSON:', e);
+                        throw new Error('Réponse invalide du serveur');
+                    }
+                });
+            })
             .then(data => {
+                console.log('Données reçues:', data);
                 if (data.success) {
                     const slotsContainer = document.getElementById('slots-container');
                     slotsContainer.innerHTML = `
@@ -507,7 +540,6 @@
                             <p>Votre rendez-vous a été enregistré avec succès.</p>
                         </div>
                     `;
-                    // Redirection après un court délai pour permettre à l'utilisateur de voir le message
                     setTimeout(() => {
                         window.location.href = "{{ url_for('main.client_dashboard') }}";
                     }, 1500);
@@ -517,6 +549,7 @@
                 closeModal();
             })
             .catch(error => {
+                console.error('Erreur détaillée:', error);
                 alert('Erreur lors de la réservation : ' + error.message);
                 closeModal();
             });
@@ -528,28 +561,6 @@
             if (event.target === modal) {
                 closeModal();
             }
-        }
-
-        function handleServiceChoice(serviceId, duration) {
-            selectedService = serviceId;
-            serviceDuration = duration;
-            document.getElementById('service-box').style.display = 'none';
-            fetchHairdressers();
-        }
-
-        function fetchAvailableSlots(day) {
-            fetch(`/api/get_availability?hairdresser_id=${selectedHairdresser}&service_id=${selectedService}&day=${day}`)
-            .then(response => response.json())
-            .then(slots => {
-                const slotsContainer = document.getElementById('slots-container');
-                slotsContainer.innerHTML = slots.map(slot => `
-                    <button class="btn slot-btn" 
-                            onclick="handleSlotChoice(${slot.id}, '${day}', '${slot.time}')"
-                            ${!slot.is_available ? 'disabled' : ''}>
-                        ${slot.time} (${serviceDuration} min)
-                    </button>
-                `).join('');
-            });
         }
     </script>
 </body>

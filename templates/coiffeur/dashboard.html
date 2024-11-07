@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <button class="logout-btn" onclick="location.href='{{ url_for('main.logout') }}'">
+        <i class="fas fa-sign-out-alt"></i>
+        Déconnexion
+    </button>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Espace Coiffeur - Agendaide</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
+        /* Styles globaux */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -22,33 +26,18 @@
         }
 
         .dashboard-header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(10px);
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            border-radius: 12px;
         }
 
         .dashboard-header h1 {
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-size: 1.5rem;
-        }
-
-        .dashboard-header img {
-            height: 40px;
-            width: auto;
-            transition: transform 0.3s ease;
-        }
-
-        .dashboard-header img:hover {
-            transform: scale(1.1);
+            gap: 1px; /* Réduit l'espace entre le logo et le titre */
+            font-size: 1.2rem; /* Réduit la taille de la police */
         }
 
         .user-menu {
@@ -78,53 +67,11 @@
 
         .container {
             flex: 1;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 20px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 30px;
-        }
-
-        .sidebar {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            height: fit-content;
-            position: sticky;
-            top: 100px;
-        }
-
-        .sidebar h2 {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 1.3rem;
-        }
-
-        .sidebar nav ul {
-            list-style: none;
-        }
-
-        .sidebar nav ul li {
-            margin-bottom: 15px;
-        }
-
-        .sidebar nav ul li a {
-            color: #666;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            padding: 20px;
             display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .sidebar nav ul li a:hover {
-            background: rgba(0,123,255,0.1);
-            color: #007bff;
-            transform: translateX(5px);
+            flex-direction: column;
         }
 
         .main-content {
@@ -134,183 +81,12 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #007bff, #00ff88);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .stat-card:hover::before {
-            opacity: 1;
-        }
-
-        .stat-card h3 {
-            color: #666;
-            font-size: 1rem;
-            margin-bottom: 10px;
-        }
-
-        .stat-card p {
-            color: #333;
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .appointments-list {
-            display: grid;
-            gap: 20px;
-        }
-
-        .appointment-card {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .appointment-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .appointment-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+        .section-title {
             margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: #333;
         }
 
-        .btn-complete {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            background-color: #28a745;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-        }
-
-        .btn-complete:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40,167,69,0.2);
-        }
-
-        .status-completed {
-            color: #28a745;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-        }
-
-        .no-appointments {
-            text-align: center;
-            color: #666;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            font-style: italic;
-        }
-
-        /* Media Queries */
-        @media (max-width: 1024px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                position: static;
-                margin-bottom: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-header h1 {
-                font-size: 1.2rem;
-            }
-
-            .dashboard-header img {
-                height: 30px;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .appointment-info {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
-            .main-content {
-                padding: 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .user-menu span {
-                display: none;
-            }
-
-            .dashboard-header h1 span {
-                display: none;
-            }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-                color: #fff;
-            }
-
-            .dashboard-header, .stat-card, .appointment-card {
-                background: #282c34;
-                color: #fff;
-            }
-        }
-
-        /* Styles pour la section disponibilités */
         .availability-container {
             background: white;
             padding: 20px;
@@ -327,129 +103,206 @@
 
         .availability-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
         .day-column {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .day-column:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .day-header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .day-name {
+            font-weight: 600;
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .day-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
         }
 
         .time-slot {
             padding: 10px;
-            margin: 5px 0;
-            background: white;
+            border: 1px solid #e0e0e0;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            text-align: center;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
+        }
+
+        .time-slot:hover {
+            background-color: #f8f9fa;
+            border-color: #007bff;
         }
 
         .time-slot.selected {
-            background: #007bff;
+            background-color: #007bff;
             color: white;
-        }
-
-        /* Styles pour la section services */
-        .services-container {
-            padding: 20px;
-        }
-
-        .service-card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .service-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .edit-btn {
-            background: #ffc107;
-        }
-
-        .delete-btn {
-            background: #dc3545;
-        }
-
-        /* Responsive design pour les nouvelles sections */
-        @media (max-width: 768px) {
-            .availability-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .availability-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            border-color: #0056b3;
         }
 
         .availability-actions {
             display: flex;
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .add-slot-btn, .save-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
 
         .add-slot-btn {
             background: #28a745;
+        }
+
+        .save-btn {
+            background: #007bff;
+        }
+
+        .add-slot-btn:hover, .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            margin: 100px auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .availability-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .day-column {
+                margin-bottom: 15px;
+            }
+
+            .mobile-nav {
+                display: flex;
+                justify-content: space-between;
+                padding: 0 10px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-nav {
+                display: none; /* Cacher la navigation mobile en mode bureau */
+            }
+        }
+
+        .btn {
+            background-color: #007bff;
             color: white;
+            padding: 10px 15px;
             border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Sélecteur de semaine amélioré */
+        .week-selector {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .week-selector h3 {
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+
+        .btn {
             padding: 10px 20px;
             border-radius: 8px;
-            cursor: pointer;
+            font-weight: 500;
             transition: all 0.3s ease;
         }
 
-        .add-slot-btn:hover {
-            background: #218838;
+        .btn:hover {
             transform: translateY(-2px);
-        }
-
-        .action-btn.success-special {
-            background: #ffd700;
-            color: #000;
-        }
-
-        .action-btn.success-special:hover {
-            background: #ffc107;
-        }
-
-        .status-badge {
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-badge.completed {
-            background: #28a745;
-            color: white;
-        }
-
-        .status-badge.success {
-            background: #ffd700;
-            color: #000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
     </style>
 </head>
 <body>
     <header class="dashboard-header">
-        <h1>
-            <img src="{{ url_for('static', filename='img/52904.png') }}" alt="Logo">
-            Espace Coiffeur
-        </h1>
+
         <div class="user-menu">
             <button onclick="openProfileModal()" class="profile-btn">
                 <i class="fas fa-user"></i>
@@ -461,378 +314,287 @@
         </div>
     </header>
 
-    <div class="dashboard-container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <i class="fas fa-calendar-check"></i>
-                <h3>Rendez-vous aujourd'hui</h3>
-                <p>{{ today_appointments|length }}</p>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-clock"></i>
-                <h3>Heures travaillées</h3>
-                <p>{{ worked_hours }}</p>
-                <small>cette semaine</small>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-percentage"></i>
-                <h3>Taux d'occupation</h3>
-                <p>{{ occupation_rate }}%</p>
-                <small>cette semaine</small>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-users"></i>
-                <h3>Clients fidèles</h3>
-                <p>{{ loyal_clients }}</p>
-            </div>
-        </div>
-
-        <div class="navigation-grid">
-            <a href="#planning" class="nav-box">
-                <div class="nav-content">
-                    <i class="fas fa-calendar-alt"></i>
-                    <p>Planning du jour</p>
-                </div>
-            </a>
-            <a href="#disponibilites" class="nav-box">
-                <div class="nav-content">
+    <div class="container">
+        <div class="main-content">
+            <section id="disponibilites">
+                <h2 class="section-title">
                     <i class="fas fa-clock"></i>
-                    <p>Gérer disponibilités</p>
-                </div>
-            </a>
-            <a href="#services" class="nav-box">
-                <div class="nav-content">
-                    <i class="fas fa-cut"></i>
-                    <p>Mes services</p>
-                </div>
-            </a>
-            <a href="#statistiques" class="nav-box">
-                <div class="nav-content">
-                    <i class="fas fa-chart-line"></i>
-                    <p>Statistiques</p>
-                </div>
-            </a>
-        </div>
-
-        <section id="planning">
-            <h2 class="section-title">
-                <i class="fas fa-calendar-day"></i>
-                Planning du jour
-            </h2>
-            
-            <div class="appointments-list">
-                {% for appointment in today_appointments %}
-                <div class="appointment-card">
-                    <div class="appointment-info">
-                        <div>
-                            <i class="fas fa-user"></i>
-                            <p>{{ appointment.client.username }}</p>
-                        </div>
-                        <div>
-                            <i class="fas fa-clock"></i>
-                            <p>{{ appointment.datetime.strftime('%H:%M') }}</p>
-                        </div>
-                        <div>
-                            <i class="fas fa-cut"></i>
-                            <p>{{ appointment.service.name }}</p>
-                        </div>
-                        <div>
-                            <i class="fas fa-hourglass-half"></i>
-                            <p>{{ appointment.service.duration }} min</p>
-                        </div>
+                    Gérer mes disponibilités
+                </h2>
+                <div class="availability-container">
+                    <div class="week-selector">
+                        <button class="btn" onclick="previousWeek()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 id="week-display">Semaine du {{ week_start_date.strftime('%d/%m/%Y') }}</h3>
+                        <button class="btn" onclick="nextWeek()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
-                    <div class="action-buttons">
-                        {% if appointment.status == 'pending' %}
-                            <button onclick="markAsCompleted({{ appointment.id }})" class="action-btn success">
-                                <i class="fas fa-check"></i> Terminer
-                            </button>
-                            <button onclick="markAsSuccess({{ appointment.id }})" class="action-btn success-special">
-                                <i class="fas fa-star"></i> Terminer avec succès
-                            </button>
-                        {% elif appointment.status == 'completed' %}
-                            <span class="status-badge completed">
-                                <i class="fas fa-check-circle"></i> Terminé
-                            </span>
-                        {% elif appointment.status == 'success' %}
-                            <span class="status-badge success">
-                                <i class="fas fa-star"></i> Terminé avec succès
-                            </span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-calendar-times"></i>
-                    <p>Aucun rendez-vous aujourd'hui</p>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
 
-        <!-- Section Disponibilités -->
-        <section id="disponibilites">
-            <h2 class="section-title">
-                <i class="fas fa-clock"></i>
-                Gérer mes disponibilités
-            </h2>
-            <div class="availability-container">
-                <div class="week-selector">
-                    <button class="btn" onclick="previousWeek()">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <h3 id="week-display">Semaine du {{ week_start }}</h3>
-                    <button class="btn" onclick="nextWeek()">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-                
-                <div class="availability-grid">
-                    {% for day in ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'] %}
-                    <div class="day-column">
-                        <h4>{{ day }}</h4>
-                        <div class="time-slots">
-                            {% for hour in range(9, 19) %}
-                            <div class="time-slot" 
-                                 data-day="{{ day }}" 
-                                 data-time="{{ '%02d:00'|format(hour) }}"
-                                 onclick="toggleTimeSlot(this)">
-                                {{ '%02d:00'|format(hour) }}
+                    <!-- Navigation mobile -->
+                    <div class="mobile-nav">
+                        <button onclick="previousDay()">
+                            <i class="fas fa-chevron-left"></i> Jour précédent
+                        </button>
+                        <button onclick="nextDay()">
+                            Jour suivant <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="availability-grid">
+                        {% for day, date in days_with_dates %}
+                        <div class="day-column" data-day-index="{{ loop.index0 }}">
+                            <div class="day-header">
+                                <div class="day-name">{{ day }}</div>
+                                <div class="day-date">{{ date.strftime('%d/%m/%Y') }}</div>
                             </div>
-                            {% endfor %}
+                            <div class="time-slots">
+                                {% for hour in range(9, 19) %}
+                                    {% for minute in [0, 30] %}
+                                    <div class="time-slot" 
+                                         data-day="{{ day }}" 
+                                         data-date="{{ date.strftime('%Y-%m-%d') }}"
+                                         data-time="{{ '%02d:%02d'|format(hour, minute) }}"
+                                         onclick="toggleTimeSlot(this)">
+                                        {{ '%02d:%02d'|format(hour, minute) }}
+                                    </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
+                    
+                    <div class="availability-actions">
+                        <button class="add-slot-btn" onclick="addCustomSlot()">
+                            <i class="fas fa-plus"></i> Ajouter un créneau personnalisé
+                        </button>
+                        <button class="save-btn" onclick="saveAvailability()">
+                            <i class="fas fa-save"></i> Enregistrer les disponibilités
+                        </button>
+                    </div>
                 </div>
-                
-                <div class="availability-actions">
-                    <button class="btn add-slot-btn" onclick="addCustomSlot()">
-                        <i class="fas fa-plus"></i> Ajouter un créneau personnalisé
-                    </button>
-                    <button class="btn save-btn" onclick="saveAvailability()">
-                        <i class="fas fa-save"></i> Enregistrer les disponibilités
-                    </button>
-                </div>
-            </div>
-        </section>
+            </section>
+        </div>
+    </div>
 
-        <!-- Section Services -->
-        <section id="services">
-            <h2 class="section-title">
-                <i class="fas fa-cut"></i>
-                Mes services
-            </h2>
-            <div class="services-container">
-                <button class="btn add-service-btn" onclick="openAddServiceModal()">
-                    <i class="fas fa-plus"></i> Ajouter un service
-                </button>
-                
-                <div class="services-grid">
-                    {% for service in services %}
-                    <div class="service-card">
-                        <div class="service-info">
-                            <h3>{{ service.name }}</h3>
-                            <p class="duration"><i class="fas fa-clock"></i> {{ service.duration }} min</p>
-                            <p class="price"><i class="fas fa-euro-sign"></i> {{ service.price }}</p>
-                        </div>
-                        <div class="service-actions">
-                            <button class="btn edit-btn" onclick="editService({{ service.id }})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn delete-btn" onclick="deleteService({{ service.id }})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    {% endfor %}
+    <!-- Modal Ajout de créneau personnalisé -->
+    <div id="customSlotModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCustomSlotModal()">&times;</span>
+            <h2>Ajouter un créneau personnalisé</h2>
+            <form id="custom-slot-form">
+                <div class="form-group">
+                    <label for="slot-day">Jour</label>
+                    <select id="slot-day" required>
+                        <option value="lundi">Lundi</option>
+                        <option value="mardi">Mardi</option>
+                        <option value="mercredi">Mercredi</option>
+                        <option value="jeudi">Jeudi</option>
+                        <option value="vendredi">Vendredi</option>
+                        <option value="samedi">Samedi</option>
+                    </select>
                 </div>
-            </div>
-        </section>
-
-        <!-- Modal Ajout/Édition Service -->
-        <div id="serviceModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeServiceModal()">&times;</span>
-                <h2 id="service-modal-title">Ajouter un service</h2>
-                <form id="service-form">
-                    <div class="form-group">
-                        <label for="service-name">Nom du service</label>
-                        <input type="text" id="service-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="service-duration">Durée (minutes)</label>
-                        <input type="number" id="service-duration" min="15" step="15" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="service-price">Prix (€)</label>
-                        <input type="number" id="service-price" min="0" step="0.5" required>
-                    </div>
-                    <button type="submit" class="btn">Enregistrer</button>
-                </form>
-            </div>
+                <div class="form-group">
+                    <label for="slot-time">Heure</label>
+                    <input type="time" id="slot-time" required min="09:00" max="19:00">
+                </div>
+                <button type="submit" class="btn">Ajouter</button>
+            </form>
         </div>
     </div>
 
     <!-- Modal Profil -->
     <div id="profileModal" class="modal">
-        <!-- Contenu similaire au modal existant -->
+        <div class="modal-content">
+            <span class="close" onclick="closeProfileModal()">&times;</span>
+            <h2>Profil de {{ current_user.username }}</h2>
+            <p>Email : {{ current_user.email }}</p>
+            <p>Autres informations : ...</p>
+            <!-- Ajoutez d'autres informations de profil si nécessaire -->
+        </div>
+    </div>
+
+    <div class="phone-frame" id="slots-box" style="display: none;">
+        <h1 id="slots-question-title">Créneaux disponibles</h1>
+        <button onclick="backToDays()" class="back-btn">Retour aux jours</button>
+        <div id="slots-container">
+            <!-- Les créneaux seront ajoutés ici, groupés par jour -->
+        </div>
     </div>
 
     <script>
-        // Scripts existants à conserver
-        // Ajouter les nouvelles fonctions nécessaires
+        let selectedAvailabilitySlots = new Set();
 
-        // Fonctions pour la gestion des disponibilités
         function toggleTimeSlot(element) {
+            const day = element.dataset.day;
+            const time = element.dataset.time;
+            const slotKey = `${day}-${time}`;
+            
             element.classList.toggle('selected');
+            
+            if (selectedAvailabilitySlots.has(slotKey)) {
+                selectedAvailabilitySlots.delete(slotKey);
+            } else {
+                selectedAvailabilitySlots.add(slotKey);
+            }
         }
 
         function saveAvailability() {
-            const selectedSlots = document.querySelectorAll('.time-slot.selected');
-            const availability = Array.from(selectedSlots).map(slot => ({
-                day: slot.dataset.day,
-                time: slot.dataset.time
-            }));
+            if (selectedAvailabilitySlots.size === 0) {
+                alert('Veuillez sélectionner au moins un créneau');
+                return;
+            }
 
-            fetch('/api/save_availability', {
+            const slots = Array.from(selectedAvailabilitySlots).map(slot => {
+                const [day, time] = slot.split('-');
+                // Calculer l'heure de fin (30 minutes après)
+                const [hours, minutes] = time.split(':').map(Number);
+                let endHours = hours;
+                let endMinutes = minutes + 30;
+                
+                if (endMinutes >= 60) {
+                    endHours += 1;
+                    endMinutes -= 60;
+                }
+
+                const endTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+
+                return {
+                    day: day,
+                    start_time: time,
+                    end_time: endTime
+                };
+            });
+
+            fetch('/save_availability', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'  // Ajout du token CSRF
                 },
-                body: JSON.stringify({ availability })
+                body: JSON.stringify({
+                    slots: slots,
+                    hairdresser_id: {{ current_user.id }}
+                })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     alert('Disponibilités enregistrées avec succès !');
+                    selectedAvailabilitySlots.clear();
+                    document.querySelectorAll('.time-slot.selected').forEach(slot => {
+                        slot.classList.remove('selected');
+                    });
                 } else {
-                    alert('Erreur lors de l\'enregistrement');
+                    throw new Error(data.error || 'Erreur lors de l\'enregistrement');
                 }
-            });
-        }
-
-        // Fonctions pour la gestion des services
-        function openAddServiceModal() {
-            document.getElementById('serviceModal').style.display = 'block';
-        }
-
-        function closeServiceModal() {
-            document.getElementById('serviceModal').style.display = 'none';
-        }
-
-        function editService(serviceId) {
-            // Récupérer les informations du service et pré-remplir le modal
-            fetch(`/api/service/${serviceId}`)
-                .then(response => response.json())
-                .then(service => {
-                    document.getElementById('service-name').value = service.name;
-                    document.getElementById('service-duration').value = service.duration;
-                    document.getElementById('service-price').value = service.price;
-                    openAddServiceModal();
-                });
-        }
-
-        function deleteService(serviceId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) {
-                fetch(`/api/service/${serviceId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.reload();
-                    }
-                });
-            }
-        }
-
-        // Gestionnaire de formulaire pour les services
-        document.getElementById('service-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = {
-                name: document.getElementById('service-name').value,
-                duration: document.getElementById('service-duration').value,
-                price: document.getElementById('service-price').value
-            };
-
-            fetch('/api/service', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    closeServiceModal();
-                    window.location.reload();
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de l\'enregistrement : ' + error.message);
+            });
+        }
+
+        // Fonction pour mettre à jour l'affichage des créneaux
+        function updateAvailabilityDisplay() {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                const slotId = `${slot.dataset.day}-${slot.dataset.time}`;
+                if (selectedAvailabilitySlots.has(slotId)) {
+                    slot.classList.add('selected');
+                } else {
+                    slot.classList.remove('selected');
                 }
             });
-        });
+        }
 
         function addCustomSlot() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3>Ajouter un créneau personnalisé</h3>
-                    <form id="custom-slot-form">
-                        <div class="form-group">
-                            <label for="slot-day">Jour</label>
-                            <select id="slot-day" required>
-                                <option value="lundi">Lundi</option>
-                                <option value="mardi">Mardi</option>
-                                <option value="mercredi">Mercredi</option>
-                                <option value="jeudi">Jeudi</option>
-                                <option value="vendredi">Vendredi</option>
-                                <option value="samedi">Samedi</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="slot-time">Heure</label>
-                            <input type="time" id="slot-time" required min="09:00" max="19:00">
-                        </div>
-                        <button type="submit" class="btn">Ajouter</button>
-                    </form>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            document.getElementById('custom-slot-form').onsubmit = function(e) {
-                e.preventDefault();
-                const day = document.getElementById('slot-day').value;
-                const time = document.getElementById('slot-time').value;
-                
-                // Ajouter le créneau à la grille
-                const slots = document.querySelectorAll('.time-slot');
-                slots.forEach(slot => {
-                    if (slot.dataset.day.toLowerCase() === day && slot.dataset.time === time) {
-                        slot.classList.add('selected');
-                    }
-                });
-                
-                document.body.removeChild(modal);
-            };
+            document.getElementById('customSlotModal').style.display = 'block';
         }
 
-        function markAsSuccess(appointmentId) {
-            if (confirm('Marquer ce rendez-vous comme terminé avec succès ?')) {
-                fetch(`/api/appointment/${appointmentId}/success`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        alert('Erreur lors de la mise à jour du statut');
-                    }
-                });
+        function closeCustomSlotModal() {
+            document.getElementById('customSlotModal').style.display = 'none';
+        }
+
+        function openProfileModal() {
+            document.getElementById('profileModal').style.display = 'block';
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+
+        document.getElementById('custom-slot-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const day = document.getElementById('slot-day').value;
+            const time = document.getElementById('slot-time').value;
+
+            // Ajouter le créneau à la grille
+            const slots = document.querySelectorAll('.time-slot');
+            slots.forEach(slot => {
+                if (slot.dataset.day.toLowerCase() === day && slot.dataset.time === time) {
+                    slot.classList.add('selected');
+                    selectedAvailabilitySlots.add(day + '-' + time); // Ajoutez le créneau à la sélection
+                }
+            });
+
+            closeCustomSlotModal();
+        });
+
+        function backToDays() {
+            const dayBox = document.getElementById('day-box');
+            const slotsBox = document.getElementById('slots-box');
+            
+            slotsBox.style.display = 'none';
+            dayBox.style.display = 'block';
+        }
+
+        let currentDayIndex = 0;
+        const totalDays = 6; // Nombre total de jours
+
+        function showDay(index) {
+            const columns = document.querySelectorAll('.day-column');
+            columns.forEach((column, i) => {
+                if (i === index) {
+                    column.style.display = 'block';
+                } else {
+                    column.style.display = 'none';
+                }
+            });
+        }
+
+        function nextDay() {
+            currentDayIndex = (currentDayIndex + 1) % totalDays;
+            showDay(currentDayIndex);
+        }
+
+        function previousDay() {
+            currentDayIndex = (currentDayIndex - 1 + totalDays) % totalDays;
+            showDay(currentDayIndex);
+        }
+
+        // Initialisation pour mobile
+        function initMobileView() {
+            if (window.innerWidth <= 768) {
+                showDay(currentDayIndex);
             }
         }
+
+        // Écouteur pour le redimensionnement de la fenêtre
+        window.addEventListener('resize', function() {
+            const columns = document.querySelectorAll('.day-column');
+            if (window.innerWidth > 768) {
+                columns.forEach(column => column.style.display = 'block');
+            } else {
+                showDay(currentDayIndex);
+            }
+        });
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', initMobileView);
     </script>
 </body>
-</html> 
+</html>
+
+
