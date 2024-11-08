@@ -508,11 +508,19 @@
             <div class="profile-info">
                 <p>
                     <i class="fas fa-user"></i>
-                    <strong>Nom d'utilisateur:</strong> {{ current_user.username }}
+                    <strong>Nom d'utilisateur :</strong> {{ current_user.username }}
                 </p>
                 <p>
                     <i class="fas fa-envelope"></i>
-                    <strong>Email:</strong> {{ current_user.email }}
+                    <strong>Email :</strong> {{ current_user.email }}
+                </p>
+                <p>
+                    <i class="fas fa-phone"></i>
+                    <strong>Téléphone :</strong> {{ current_user.phone_number or 'Non renseigné' }}
+                </p>
+                <p>
+                    <i class="fas fa-star"></i>
+                    <strong>Points fidélité :</strong> {{ current_user.loyalty_points }}
                 </p>
             </div>
         </div>
@@ -538,32 +546,40 @@
             }
         }
 
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
         function cancelAppointment(appointmentId) {
             if (confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?')) {
                 fetch(`/api/cancel_appointment/${appointmentId}`, {
                     method: 'POST',
                     headers: {
+                        'Accept': 'application/json',
                         'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Erreur serveur');
+                        });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
-                        // Cacher immédiatement le rendez-vous annulé
-                        const appointmentCard = document.querySelector(`[data-appointment-id="${appointmentId}"]`);
-                        if (appointmentCard) {
-                            appointmentCard.remove();
-                        }
-                        // Mettre à jour le compteur de rendez-vous
-                        updateAppointmentCount();
-                        // Optionnel : recharger la page pour tout rafraîchir
+                        alert('Rendez-vous annulé avec succès');
                         window.location.reload();
                     } else {
-                        alert('Erreur lors de l\'annulation : ' + (data.error || 'Erreur inconnue'));
+                        alert(data.error || 'Une erreur est survenue lors de l\'annulation');
                     }
                 })
                 .catch(error => {
-                    alert('Erreur lors de l\'annulation : ' + error);
+                    console.error('Erreur détaillée:', error);
+                    alert('Une erreur est survenue lors de l\'annulation. Veuillez réessayer.');
                 });
             }
         }

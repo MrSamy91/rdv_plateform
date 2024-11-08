@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, jsonify, render_template
 from flask_migrate import Migrate
 from authlib.integrations.flask_client import OAuth
 from flask_login import LoginManager
@@ -7,6 +7,7 @@ from db import db  # Import db from db.py
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect  # Ajoutez cet import
 from models import User, TimeSlot, Booking  # Assurez-vous d'importer tous les modèles
+import logging
 
 # Initialize extensions without app
 migrate = Migrate()
@@ -38,6 +39,21 @@ def create_app():
     login_manager.init_app(app)
     mail.init_app(app)
     csrf.init_app(app)  # Ajoutez cette ligne
+
+    # Configuration
+    app.config['DEBUG'] = True
+    app.config['JSON_AS_ASCII'] = False
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+    
+    # Gestionnaire d'erreur personnalisé pour les erreurs 500
+    @app.errorhandler(500)
+    def handle_500_error(e):
+        if request.is_json:
+            return jsonify({
+                'success': False,
+                'error': 'Erreur serveur interne'
+            }), 500
+        return render_template('errors/500.html'), 500
 
     @login_manager.user_loader
     def load_user(user_id):

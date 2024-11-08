@@ -410,9 +410,20 @@
         <div class="modal-content">
             <span class="close" onclick="closeProfileModal()">&times;</span>
             <h2>Profil de {{ current_user.username }}</h2>
-            <p>Email : {{ current_user.email }}</p>
-            <p>Autres informations : ...</p>
-            <!-- Ajoutez d'autres informations de profil si nécessaire -->
+            <div class="profile-info">
+                <p>
+                    <i class="fas fa-user"></i>
+                    <strong>Nom d'utilisateur :</strong> {{ current_user.username }}
+                </p>
+                <p>
+                    <i class="fas fa-envelope"></i>
+                    <strong>Email :</strong> {{ current_user.email }}
+                </p>
+                <p>
+                    <i class="fas fa-phone"></i>
+                    <strong>Téléphone :</strong> {{ current_user.phone_number or 'Non renseigné' }}
+                </p>
+            </div>
         </div>
     </div>
 

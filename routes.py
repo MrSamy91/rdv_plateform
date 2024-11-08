@@ -6,7 +6,7 @@ from functools import wraps
 from models import User, Coiffeur, Service, Booking, Review, TimeSlot
 from forms import LoginForm, RegistrationForm, RendezvousForm, ReviewForm
 from datetime import datetime, timedelta
-from utils import send_email_notification, add_to_google_calendar
+from utils import send_email_notification, add_to_google_calendar, generate_verification_token, send_verification_email
 from flask_mail import Message, Mail
 from itsdangerous import URLSafeTimedSerializer
 from db import db  # Import db directly from db.py
@@ -14,6 +14,8 @@ from flask import Blueprint
 from collections import Counter
 from sqlalchemy import func
 from app import mail  # Assurez-vous que cela correspond à l'endroit où vous avez initialisé mail
+from flask_wtf.csrf import validate_csrf
+from wtforms.validators import ValidationError
 
 main = Blueprint('main', __name__)
 
@@ -30,50 +32,83 @@ def register():
     
     form = RegistrationForm()
     if form.validate_on_submit():
-        # Créer l'utilisateur
-        user = User(username=form.username.data, 
-                   email=form.email.data, 
-                   role='client')  # Le rôle est maintenant 'client'
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.flush()  # Pour obtenir l'ID de l'utilisateur
-        
-        db.session.commit()
-        flash('Félicitations, vous êtes maintenant inscrit!')
-        return redirect(url_for('main.login'))
-        
-    return render_template('public/register.html', title='Inscription', form=form)
+        try:
+            # Vérifier si l'utilisateur existe déjà
+            if User.query.filter_by(username=form.username.data).first():
+                flash('Ce nom d\'utilisateur est déjà pris.', 'danger')
+                return render_template('public/register.html', form=form)
+            
+            if User.query.filter_by(email=form.email.data).first():
+                flash('Cette adresse email est déjà utilisée.', 'danger')
+                return render_template('public/register.html', form=form)
+            
+            # Générer le token
+            verification_token = generate_verification_token()
+            
+            # Créer l'utilisateur
+            user = User(
+                username=form.username.data,
+                email=form.email.data,
+                phone_number=form.phone_number.data,
+                role='client',
+                is_verified=False,
+                verification_token=verification_token,
+                token_expiration=datetime.now() + timedelta(hours=24)
+            )
+            user.set_password(form.password.data)
+            
+            # Sauvegarder l'utilisateur
+            db.session.add(user)
+            db.session.commit()
+            
+            # Envoyer l'email de vérification
+            if send_verification_email(user, verification_token):
+                flash('Un email de vérification a été envoyé à votre adresse email.', 'success')
+            else:
+                flash('Erreur lors de l\'envoi de l\'email de vérification.', 'danger')
+            
+            # Connecter l'utilisateur
+            login_user(user)
+            
+            # Rediriger vers la page de vérification
+            return redirect(url_for('main.verify_account'))
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Erreur d'inscription: {str(e)}")
+            flash('Une erreur est survenue lors de l\'inscription.', 'danger')
+            
+    return render_template('public/register.html', form=form)
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
-    print("Tentative de connexion")  # Debug log
+    # Si l'utilisateur est déjà connecté et vérifié
     if current_user.is_authenticated:
-        print(f"Utilisateur déjà connecté: {current_user.username} ({current_user.role})")  # Debug log
-        if current_user.role == 'coiffeur':
-            return redirect(url_for('main.coiffeur_dashboard'))
+        if current_user.is_verified:
+            if current_user.role == 'coiffeur':
+                return redirect(url_for('main.coiffeur_dashboard'))
+            else:
+                return redirect(url_for('main.client_dashboard'))
         else:
-            return redirect(url_for('main.client_dashboard'))
-
+            return redirect(url_for('main.verify_account'))
+        
     form = LoginForm()
     if form.validate_on_submit():
-        print(f"Tentative de connexion avec email: {form.email.data}")  # Debug log
         user = User.query.filter_by(email=form.email.data).first()
-        if user:
-            print(f"Utilisateur trouvé: {user.username} ({user.role})")  # Debug log
-        if user is None or not user.check_password(form.password.data):
-            flash('Email ou mot de passe invalide')
-            return redirect(url_for('main.login'))
-        
-        login_user(user)
-        flash(f'Bienvenue {user.username}!')
-        
-        # Redirection basée sur le rôle
-        if user.role == 'coiffeur':
-            return redirect(url_for('main.coiffeur_dashboard'))
-        else:
-            return redirect(url_for('main.client_dashboard'))
-
-    return render_template('public/login.html', title='Connexion', form=form)
+        if user and user.check_password(form.password.data):
+            login_user(user)
+            
+            if not user.is_verified:
+                flash('Veuillez vérifier votre compte avant de continuer.', 'warning')
+                return redirect(url_for('main.verify_account'))
+                
+            if user.role == 'coiffeur':
+                return redirect(url_for('main.coiffeur_dashboard'))
+            else:
+                return redirect(url_for('main.client_dashboard'))
+            
+        flash('Email ou mot de passe invalide', 'danger')
+    return render_template('public/login.html', form=form)
 
 
 @main.route('/logout')
@@ -249,22 +284,18 @@ def get_availability():
         
         print(f"Recherche des créneaux pour coiffeur_id={coiffeur_id}, day={day}")
         
-        # Utiliser func.lower() pour une comparaison insensible à la casse
+        # Récupérer tous les créneaux pour ce jour, qu'ils soient disponibles ou non
         slots = TimeSlot.query.filter(
             TimeSlot.coiffeur_id == coiffeur_id,
-            func.lower(TimeSlot.weekday) == func.lower(day),
-            TimeSlot.is_available == True
+            func.lower(TimeSlot.weekday) == func.lower(day)
         ).all()
-        
-        print(f"Créneaux trouvés pour {day}: {len(slots)}")
         
         slots_data = [{
             'id': slot.id,
             'time': slot.start_time,
-            'is_available': slot.is_available
+            'is_available': slot.is_available,
+            'booking_info': get_booking_info(slot) if not slot.is_available else None
         } for slot in slots]
-        
-        print(f"Données renvoyées pour {day}: {slots_data}")
         
         return jsonify(slots_data)
         
@@ -272,41 +303,67 @@ def get_availability():
         print(f"Erreur dans get_availability: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+def get_booking_info(slot):
+    booking = Booking.query.filter_by(time_slot_id=slot.id).first()
+    if booking:
+        return {
+            'client_name': booking.client.username,
+            'status': booking.status
+        }
+    return None
+
 @main.route('/book_appointment', methods=['POST'])
 @login_required
 def book_appointment():
     try:
         print("=== Début de la réservation ===")
         data = request.get_json()
-        print("Données JSON parsées:", data)
         
         slot_id = data.get('slot_id')
         hairdresser_id = data.get('hairdresser_id')
         
-        print(f"slot_id: {slot_id} (type: {type(slot_id)})")
-        print(f"hairdresser_id: {hairdresser_id} (type: {type(hairdresser_id)})")
-
         # Récupérer le créneau
         time_slot = TimeSlot.query.get(slot_id)
         if not time_slot:
-            return jsonify({
-                'success': False, 
-                'error': f'Créneau {slot_id} non trouvé'
-            }), 404
+            return jsonify({'success': False, 'error': f'Créneau {slot_id} non trouvé'}), 404
 
-        # Vérifier si le créneau est toujours disponible
         if not time_slot.is_available:
-            return jsonify({
-                'success': False, 
-                'error': 'Ce créneau n\'est plus disponible'
-            }), 400
+            return jsonify({'success': False, 'error': 'Ce créneau n\'est plus disponible'}), 400
 
-        # Créer la réservation en utilisant l'ID du créneau directement
+        # Créer la date complète du rendez-vous en combinant le jour et l'heure
+        weekday_map = {
+            'lundi': 0, 'mardi': 1, 'mercredi': 2, 
+            'jeudi': 3, 'vendredi': 4, 'samedi': 5
+        }
+        
+        today = datetime.now()
+        current_weekday = today.weekday()
+        target_weekday = weekday_map[time_slot.weekday.lower()]
+        
+        # Calculer le nombre de jours jusqu'au prochain jour cible
+        days_ahead = target_weekday - current_weekday
+        if days_ahead <= 0:  # Si le jour est déjà passé cette semaine, aller à la semaine suivante
+            days_ahead += 7
+            
+        target_date = today + timedelta(days=days_ahead)
+        
+        # Convertir l'heure du créneau (format string) en heures et minutes
+        hour, minute = map(int, time_slot.start_time.split(':'))
+        
+        # Créer le datetime final pour le rendez-vous
+        appointment_datetime = target_date.replace(
+            hour=hour, 
+            minute=minute, 
+            second=0, 
+            microsecond=0
+        )
+        
+        # Créer la réservation avec la bonne date
         booking = Booking(
             client_id=current_user.id,
-            coiffeur_id=time_slot.coiffeur_id,  # Utiliser l'ID du coiffeur du créneau
+            coiffeur_id=time_slot.coiffeur_id,
             time_slot_id=slot_id,
-            datetime=datetime.now(),
+            datetime=appointment_datetime,
             status='confirmed'
         )
 
@@ -316,7 +373,43 @@ def book_appointment():
         db.session.add(booking)
         db.session.commit()
 
-        print("Réservation créée avec succès")
+        # Envoyer l'email de confirmation au client
+        coiffeur = User.query.get(time_slot.coiffeur_id)
+        
+        # Email au client
+        client_msg = Message(
+            'Confirmation de votre rendez-vous - Agendaide',
+            recipients=[current_user.email]
+        )
+        
+        client_msg.html = render_template(
+            'emails/booking_confirmation.html',
+            username=current_user.username,
+            date=time_slot.weekday.capitalize(),
+            time=time_slot.start_time,
+            coiffeur_name=coiffeur.username,
+            is_client=True
+        )
+        
+        # Email au coiffeur
+        coiffeur_msg = Message(
+            'Nouveau rendez-vous - Agendaide',
+            recipients=[coiffeur.email]
+        )
+        
+        coiffeur_msg.html = render_template(
+            'emails/booking_confirmation.html',
+            username=coiffeur.username,
+            date=time_slot.weekday.capitalize(),
+            time=time_slot.start_time,
+            client_name=current_user.username,
+            is_client=False
+        )
+        
+        # Envoi des deux emails
+        mail.send(client_msg)
+        mail.send(coiffeur_msg)
+
         return jsonify({'success': True})
 
     except Exception as e:
@@ -324,22 +417,96 @@ def book_appointment():
         print(f"Exception complète:", str(e))
         import traceback
         print("Traceback:", traceback.format_exc())
-        return jsonify({
-            'success': False, 
-            'error': f"Erreur lors de la réservation: {str(e)}"
-        }), 500
+        return jsonify({'success': False, 'error': f"Erreur lors de la réservation: {str(e)}"}), 500
 
 @main.route('/api/cancel_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
 def cancel_appointment(appointment_id):
-    appointment = Booking.query.get_or_404(appointment_id)
-    if appointment.client_id != current_user.id:
-        return jsonify({'success': False, 'error': 'Non autorisé'}), 403
-    
-    appointment.status = 'cancelled'  # Assurez-vous que ce statut est bien mis à jour
-    db.session.commit()
-    
-    return jsonify({'success': True})
+    try:
+        # Vérification du token CSRF
+        try:
+            validate_csrf(request.headers.get('X-CSRFToken'))
+        except ValidationError:
+            return jsonify({'success': False, 'error': 'Invalid CSRF token'}), 400
+
+        print(f"Début de l'annulation pour le rendez-vous {appointment_id}")
+        
+        # Récupérer le rendez-vous
+        appointment = Booking.query.get(appointment_id)
+        if not appointment:
+            print(f"Rendez-vous {appointment_id} non trouvé")
+            return jsonify({'success': False, 'error': 'Rendez-vous non trouvé'}), 404
+        
+        # Vérifier l'autorisation
+        if appointment.client_id != current_user.id:
+            print("Non autorisé - IDs ne correspondent pas")
+            return jsonify({'success': False, 'error': 'Non autorisé'}), 403
+        
+        # Récupérer le créneau horaire et le coiffeur
+        time_slot = TimeSlot.query.get(appointment.time_slot_id)
+        coiffeur = User.query.get(appointment.coiffeur_id)
+        
+        if not time_slot or not coiffeur:
+            return jsonify({'success': False, 'error': 'Données invalides'}), 400
+        
+        # Mettre à jour le statut
+        appointment.status = 'cancelled'
+        if time_slot:
+            time_slot.is_available = True
+
+        try:
+            # Email au client
+            client_msg = Message(
+                'Confirmation d\'annulation - Agendaide',
+                recipients=[current_user.email]
+            )
+            client_msg.html = render_template(
+                'emails/cancellation_client.html',
+                username=current_user.username,
+                date=time_slot.weekday.capitalize(),
+                time=time_slot.start_time,
+                coiffeur_name=coiffeur.username
+            )
+
+            # Email au coiffeur
+            coiffeur_msg = Message(
+                'Annulation d\'un rendez-vous - Agendaide',
+                recipients=[coiffeur.email]
+            )
+            coiffeur_msg.html = render_template(
+                'emails/cancellation_coiffeur.html',
+                client_name=current_user.username,
+                date=time_slot.weekday.capitalize(),
+                time=time_slot.start_time
+            )
+
+            # Envoi des emails
+            mail.send(client_msg)
+            mail.send(coiffeur_msg)
+            print("Emails d'annulation envoyés avec succès")
+
+        except Exception as email_error:
+            print(f"Erreur lors de l'envoi des emails: {str(email_error)}")
+            # On continue même si les emails échouent
+        
+        # Sauvegarder les changements
+        db.session.commit()
+        print("Changements commités avec succès")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Rendez-vous annulé avec succès'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"ERREUR lors de l'annulation: {str(e)}")
+        import traceback
+        print(f"Traceback complet: {traceback.format_exc()}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @main.route('/client/history')
 @login_required
@@ -455,3 +622,65 @@ def save_availability():
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@main.route('/verify-account', methods=['GET', 'POST'])
+def verify_account():
+    if request.method == 'POST':
+        token = request.form.get('token')
+        user = User.query.filter_by(verification_token=token).first()
+        
+        if user and user.token_expiration > datetime.now():
+            user.is_verified = True
+            user.verification_token = None
+            user.token_expiration = None
+            db.session.commit()
+            
+            # Connecter l'utilisateur
+            login_user(user)
+            
+            flash('Votre compte a été vérifié avec succès!', 'success')
+            # Rediriger vers le dashboard approprié selon le rôle
+            if user.role == 'coiffeur':
+                return redirect(url_for('main.coiffeur_dashboard'))
+            else:
+                return redirect(url_for('main.client_dashboard'))
+        else:
+            flash('Code de vérification invalide ou expiré.', 'danger')
+            
+    return render_template('public/verify_account.html')
+
+@main.route('/resend-verification')
+def resend_verification():
+    if not current_user.is_authenticated:
+        flash('Veuillez vous connecter d\'abord.', 'warning')
+        return redirect(url_for('main.login'))
+        
+    if current_user.is_verified:
+        flash('Votre compte est déjà vérifié.', 'info')
+        return redirect(url_for('main.index'))
+        
+    # Générer un nouveau token
+    verification_token = generate_verification_token()
+    current_user.verification_token = verification_token
+    current_user.token_expiration = datetime.now() + timedelta(hours=24)
+    
+    try:
+        db.session.commit()
+        # Envoyer l'email
+        msg = Message(
+            'Nouveau code de vérification - Agendaide',
+            recipients=[current_user.email]
+        )
+        msg.html = render_template(
+            'emails/verify_account.html',
+            username=current_user.username,
+            token=verification_token
+        )
+        mail.send(msg)
+        
+        flash('Un nouveau code de vérification vous a été envoyé par email.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Une erreur est survenue lors de l\'envoi du code.', 'danger')
+        
+    return redirect(url_for('main.verify_account'))
