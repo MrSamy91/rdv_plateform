@@ -13,6 +13,15 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), nullable=False, default='client')
     phone_number = db.Column(db.String(20))
     loyalty_points = db.Column(db.Integer, default=0)
+    is_verified = db.Column(db.Boolean, nullable=True, default=False)
+    verification_token = db.Column(db.String(100), nullable=True)
+    token_expiration = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_bookings = db.Column(db.Integer, default=0)
+
+    __table_args__ = (
+        db.UniqueConstraint('verification_token', name='uq_user_verification_token'),
+    )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -23,6 +32,13 @@ class User(UserMixin, db.Model):
     @property
     def is_admin(self):
         return self.role == 'admin'
+
+    @property
+    def past_bookings_count(self):
+        return Booking.query.filter_by(
+            client_id=self.id,
+            status='completed'
+        ).count()
 
 class Coiffeur(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -1,0 +1,32 @@
+<!-- Template pour le client -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { color: #333; }
+        .content { line-height: 1.6; }
+        .footer { margin-top: 30px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="header">Confirmation d'annulation</h2>
+        <div class="content">
+            <p>Bonjour {{ username }},</p>
+            <p>Nous confirmons l'annulation de votre rendez-vous :</p>
+            <ul>
+                <li>Date : {{ date }}</li>
+                <li>Heure : {{ time }}</li>
+                <li>Coiffeur : {{ coiffeur_name }}</li>
+            </ul>
+            <p>Vous pouvez reprendre un nouveau rendez-vous à tout moment sur notre plateforme.</p>
+        </div>
+        <div class="footer">
+            <p>Cordialement,<br>L'équipe Agendaide</p>
+        </div>
+    </div>
+</body>
+</html> 

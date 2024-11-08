@@ -16,4 +16,4 @@ app = create_app()
 # Push the application context
 with app.app_context():
     # Call the function with the username 'admin'
-    make_admin(username='reda')
+    make_admin(username='samy')

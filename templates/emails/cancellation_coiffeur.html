@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { color: #333; }
+        .content { line-height: 1.6; }
+        .footer { margin-top: 30px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="header">Annulation d'un rendez-vous</h2>
+        <div class="content">
+            <p>Un rendez-vous a été annulé :</p>
+            <ul>
+                <li>Client : {{ client_name }}</li>
+                <li>Date : {{ date }}</li>
+                <li>Heure : {{ time }}</li>
+            </ul>
+            <p>Le créneau est maintenant disponible pour d'autres réservations.</p>
+        </div>
+        <div class="footer">
+            <p>Cordialement,<br>L'équipe Agendaide</p>
+        </div>
+    </div>
+</body>
+</html>

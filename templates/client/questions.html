@@ -268,6 +268,62 @@
             margin-bottom: 10px;
             color: #333;
         }
+
+        .time-slot {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .time-slot.available {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .time-slot.reserved {
+            background-color: #dc3545;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .time-slot.reserved:hover .booking-info {
+            display: block;
+        }
+
+        .booking-info {
+            display: none;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-top: 5px;
+            z-index: 1000;
+        }
+
+        .legend {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .legend-item {
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        .legend-color {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -330,7 +386,7 @@
         <div class="phone-frame" id="slots-box" style="display: none;">
             <h1 id="slots-question-title">Créneaux disponibles</h1>
             <div id="slots-container">
-                <!-- Les créneaux seront ajoutés ici, groupés par jour -->
+                <!-- Les créneaux seront ajoutés ici -->
             </div>
         </div>
 
@@ -467,22 +523,46 @@
                             daySection.innerHTML = `
                                 <h3>${day}</h3>
                                 <div class="buttons">
-                                    ${slots.map(slot => `
-                                        <button 
-                                            onclick="handleSlotChoice(${slot.id}, '${day}', '${slot.time}')" 
-                                            class="btn ${slot.is_available ? 'yes' : 'disabled'}"
-                                        >
-                                            ${slot.time}
-                                        </button>
-                                    `).join('')}
+                                    ${slots.map(slot => {
+                                        const isAvailable = slot.is_available;
+                                        const bookingInfo = slot.booking_info;
+                                        return `
+                                            <div class="time-slot ${isAvailable ? 'available' : 'reserved'}"
+                                                 ${isAvailable ? `onclick="handleSlotChoice(${slot.id}, '${day}', '${slot.time}')"` : ''}>
+                                                ${slot.time}
+                                                ${!isAvailable && bookingInfo ? `
+                                                    <div class="booking-info">
+                                                        Réservé par: ${bookingInfo.client_name}
+                                                        <br>
+                                                        Status: ${bookingInfo.status}
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        `;
+                                    }).join('')}
                                 </div>
                             `;
                             slotsContainer.appendChild(daySection);
                         }
                     });
 
+                    // Ajouter la légende
+                    const legend = document.createElement('div');
+                    legend.className = 'legend';
+                    legend.innerHTML = `
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #28a745;"></span>
+                            Disponible
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #dc3545;"></span>
+                            Réservé
+                        </div>
+                    `;
+                    slotsContainer.appendChild(legend);
+
                     if (!hasSlots) {
-                        slotsContainer.innerHTML = '<p>Aucun créneau disponible pour les jours sélectionnés.</p>';
+                        slotsContainer.innerHTML = '<p>Aucun créneau pour les jours sélectionnés.</p>';
                     }
                 })
                 .catch(error => {
