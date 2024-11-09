@@ -4,9 +4,9 @@ from models import User
 def make_admin(username):
     user = User.query.filter_by(username=username).first()
     if user:
-        user.role = 'coiffeur'
+        user.role = 'admin'
         db.session.commit()
-        print(f"User {user.username} is now an coiffeur.")
+        print(f"User {user.username} is now an admin.")
     else:
         print("User not found.")
 
@@ -16,4 +16,4 @@ app = create_app()
 # Push the application context
 with app.app_context():
     # Call the function with the username 'admin'
-    make_admin(username='samy')
+    make_admin(username='insérer_le_nom')

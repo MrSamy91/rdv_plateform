@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Récompenses - Agendaide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .rewards-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .points-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .points-info {
+            font-size: 2em;
+            margin: 10px 0;
+        }
+        .progress-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: #4CAF50;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .reward-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .reward-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .reward-icon {
+            font-size: 2em;
+            color: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="rewards-container">
+        <div class="points-card">
+            <h2>Mes Points Fidélité</h2>
+            <div class="points-info">
+                {{ points }} points
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: {{ (points % 100) }}%"></div>
+            </div>
+            <p>Plus que {{ 100 - (points % 100) }} points pour votre prochaine coupe gratuite!</p>
+        </div>
+
+        <h2>Mes Récompenses Disponibles</h2>
+        {% if rewards %}
+            {% for reward in rewards %}
+                <div class="reward-card">
+                    <div class="reward-info">
+                        <i class="fas fa-cut reward-icon"></i>
+                        <div>
+                            <h3>Coupe Gratuite</h3>
+                            <p>Valable jusqu'au {{ reward.expiration_date.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                    </div>
+                    <form action="{{ url_for('main.use_reward', reward_id=reward.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary">Utiliser</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Vous n'avez pas encore de récompenses disponibles.</p>
+        {% endif %}
+    </div>
+</body>
+</html> 

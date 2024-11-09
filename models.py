@@ -93,6 +93,32 @@ class Booking(db.Model):
     def __repr__(self):
         return f'<Booking {self.id}: {self.client.username} with {self.coiffeur.user.username}>'
 
+    def complete_booking(self):
+        """Marque le RDV comme terminé et attribue les points"""
+        if self.status != 'completed':
+            self.status = 'completed'
+            # Attribuer 10 points par RDV
+            self.client.loyalty_points += 10
+            db.session.commit()
+            
+            # Vérifier si le client peut avoir une récompense
+            self.check_rewards()
+    
+    def check_rewards(self):
+        """Vérifie si le client peut avoir une récompense"""
+        if self.client.loyalty_points >= 100:
+            # Créer une nouvelle récompense
+            reward = Reward(
+                client_id=self.client_id,
+                type='free_haircut',
+                status='available',
+                expiration_date=datetime.now() + timedelta(days=90)  # Valable 3 mois
+            )
+            # Déduire les points
+            self.client.loyalty_points -= 100
+            db.session.add(reward)
+            db.session.commit()
+
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -102,3 +128,15 @@ class Review(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
     client = db.relationship('User', foreign_keys=[client_id])
     coiffeur = db.relationship('Coiffeur', foreign_keys=[coiffeur_id])
+
+class Reward(db.Model):
+    """Modèle pour gérer les récompenses"""
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    type = db.Column(db.String(50), nullable=False)  # ex: 'free_haircut'
+    status = db.Column(db.String(20), default='available')  # available, used, expired
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expiration_date = db.Column(db.DateTime, nullable=False)
+    used_at = db.Column(db.DateTime)
+    
+    client = db.relationship('User', backref='rewards')
