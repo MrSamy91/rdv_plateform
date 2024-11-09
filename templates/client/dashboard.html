@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Agendaide</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         * {
             box-sizing: border-box;
@@ -491,11 +492,16 @@
                     <p>Réserver</p>
                 </div>
             </a>
-            </a>
             <a href="{{ url_for('main.client_history') }}" class="nav-box">
                 <div class="nav-content">
                     <i class="fas fa-history"></i>
                     <p>Historique</p>
+                </div>
+            </a>
+            <a href="{{ url_for('main.rewards') }}" class="nav-box">
+                <div class="nav-content">
+                    <i class="fas fa-gift"></i>
+                    <p>Mes Récompenses</p>
                 </div>
             </a>
         </div>
@@ -546,40 +552,34 @@
             }
         }
 
-        function getCsrfToken() {
-            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        }
-
         function cancelAppointment(appointmentId) {
             if (confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?')) {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
                 fetch(`/api/cancel_appointment/${appointmentId}`, {
                     method: 'POST',
                     headers: {
-                        'Accept': 'application/json',
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCsrfToken(),
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-CSRFToken': csrfToken
                     }
                 })
                 .then(response => {
                     if (!response.ok) {
-                        return response.json().then(data => {
-                            throw new Error(data.error || 'Erreur serveur');
-                        });
+                        throw new Error('Erreur réseau');
                     }
                     return response.json();
                 })
                 .then(data => {
                     if (data.success) {
                         alert('Rendez-vous annulé avec succès');
-                        window.location.reload();
+                        location.reload();
                     } else {
                         alert(data.error || 'Une erreur est survenue lors de l\'annulation');
                     }
                 })
                 .catch(error => {
-                    console.error('Erreur détaillée:', error);
-                    alert('Une erreur est survenue lors de l\'annulation. Veuillez réessayer.');
+                    console.error('Erreur:', error);
+                    alert('Une erreur est survenue lors de l\'annulation');
                 });
             }
         }

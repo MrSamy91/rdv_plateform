@@ -6,7 +6,7 @@ def make_admin(username):
     if user:
         user.role = 'coiffeur'
         db.session.commit()
-        print(f"User {user.username} is now an admin.")
+        print(f"User {user.username} is now an coiffeur.")
     else:
         print("User not found.")
 
@@ -16,4 +16,4 @@ app = create_app()
 # Push the application context
 with app.app_context():
     # Call the function with the username 'admin'
-    make_admin(username='admin')
+    make_admin(username='inséerer_le_nom')

@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from functools import wraps
-from models import User, Coiffeur, Service, Booking, Review, TimeSlot
+from models import User, Coiffeur, Service, Booking, Review, TimeSlot, Reward
 from forms import LoginForm, RegistrationForm, RendezvousForm, ReviewForm
 from datetime import datetime, timedelta
 from utils import send_email_notification, add_to_google_calendar, generate_verification_token, send_verification_email
@@ -423,37 +423,25 @@ def book_appointment():
 @login_required
 def cancel_appointment(appointment_id):
     try:
-        # Vérification du token CSRF
-        try:
-            validate_csrf(request.headers.get('X-CSRFToken'))
-        except ValidationError:
-            return jsonify({'success': False, 'error': 'Invalid CSRF token'}), 400
-
-        print(f"Début de l'annulation pour le rendez-vous {appointment_id}")
+        appointment = Booking.query.get_or_404(appointment_id)
         
-        # Récupérer le rendez-vous
-        appointment = Booking.query.get(appointment_id)
-        if not appointment:
-            print(f"Rendez-vous {appointment_id} non trouvé")
-            return jsonify({'success': False, 'error': 'Rendez-vous non trouvé'}), 404
-        
-        # Vérifier l'autorisation
+        # Vérifier que le rendez-vous appartient bien au client connecté
         if appointment.client_id != current_user.id:
-            print("Non autorisé - IDs ne correspondent pas")
             return jsonify({'success': False, 'error': 'Non autorisé'}), 403
+            
+        # Vérifier que le rendez-vous n'est pas déjà annulé
+        if appointment.status == 'cancelled':
+            return jsonify({'success': False, 'error': 'Ce rendez-vous est déjà annulé'}), 400
+            
+        # Récupérer les informations nécessaires avant l'annulation
+        time_slot = appointment.time_slot
+        coiffeur = appointment.coiffeur.user
         
-        # Récupérer le créneau horaire et le coiffeur
-        time_slot = TimeSlot.query.get(appointment.time_slot_id)
-        coiffeur = User.query.get(appointment.coiffeur_id)
-        
-        if not time_slot or not coiffeur:
-            return jsonify({'success': False, 'error': 'Données invalides'}), 400
-        
-        # Mettre à jour le statut
+        # Annuler le rendez-vous
         appointment.status = 'cancelled'
         if time_slot:
             time_slot.is_available = True
-
+            
         try:
             # Email au client
             client_msg = Message(
@@ -463,8 +451,8 @@ def cancel_appointment(appointment_id):
             client_msg.html = render_template(
                 'emails/cancellation_client.html',
                 username=current_user.username,
-                date=time_slot.weekday.capitalize(),
-                time=time_slot.start_time,
+                date=appointment.datetime.strftime('%d/%m/%Y'),
+                time=appointment.datetime.strftime('%H:%M'),
                 coiffeur_name=coiffeur.username
             )
 
@@ -476,22 +464,20 @@ def cancel_appointment(appointment_id):
             coiffeur_msg.html = render_template(
                 'emails/cancellation_coiffeur.html',
                 client_name=current_user.username,
-                date=time_slot.weekday.capitalize(),
-                time=time_slot.start_time
+                date=appointment.datetime.strftime('%d/%m/%Y'),
+                time=appointment.datetime.strftime('%H:%M')
             )
 
             # Envoi des emails
             mail.send(client_msg)
             mail.send(coiffeur_msg)
-            print("Emails d'annulation envoyés avec succès")
-
+            
         except Exception as email_error:
             print(f"Erreur lors de l'envoi des emails: {str(email_error)}")
             # On continue même si les emails échouent
-        
+            
         # Sauvegarder les changements
         db.session.commit()
-        print("Changements commités avec succès")
         
         return jsonify({
             'success': True,
@@ -500,9 +486,7 @@ def cancel_appointment(appointment_id):
         
     except Exception as e:
         db.session.rollback()
-        print(f"ERREUR lors de l'annulation: {str(e)}")
-        import traceback
-        print(f"Traceback complet: {traceback.format_exc()}")
+        print(f"Erreur lors de l'annulation: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -522,39 +506,43 @@ def client_history():
 @main.route('/coiffeur/dashboard')
 @login_required
 def coiffeur_dashboard():
-    print(f"User role: {current_user.role}")  # Debug log
-    
     if current_user.role != 'coiffeur':
-        flash("Accès non autorisé. Cette page est réservée aux coiffeurs.")
-        return redirect(url_for('main.index'))
-
+        abort(403)
+        
     # Récupérer le coiffeur associé à l'utilisateur
     coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
-    if not coiffeur:
-        # Au lieu de rediriger, créer le profil manquant
-        coiffeur = Coiffeur(
-            user_id=current_user.id,
-            specialties='À définir',
-            years_of_experience=0
-        )
-        db.session.add(coiffeur)
-        db.session.commit()
-
-    # Calculer les dates pour chaque jour
+    
+    # Calculer la date de début de semaine (lundi)
+    today = datetime.now()
+    week_start_date = today - timedelta(days=today.weekday())
+    
+    # Générer les dates de la semaine
+    days_with_dates = []
+    french_days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+    for i in range(7):
+        current_date = week_start_date + timedelta(days=i)
+        days_with_dates.append((french_days[i], current_date))
+    
+    # Récupérer les rendez-vous du jour
     today = datetime.now().date()
-    monday = today - timedelta(days=today.weekday())
-    days_with_dates = [
-        ('Lundi', monday),
-        ('Mardi', monday + timedelta(days=1)),
-        ('Mercredi', monday + timedelta(days=2)),
-        ('Jeudi', monday + timedelta(days=3)),
-        ('Vendredi', monday + timedelta(days=4)),
-        ('Samedi', monday + timedelta(days=5))
-    ]
-
+    today_appointments = Booking.query.filter(
+        Booking.coiffeur_id == coiffeur.id,
+        func.date(Booking.datetime) == today,
+        Booking.status != 'cancelled'
+    ).order_by(Booking.datetime).all()
+    
+    # Récupérer les prochains rendez-vous (après aujourd'hui)
+    upcoming_appointments = Booking.query.filter(
+        Booking.coiffeur_id == coiffeur.id,
+        func.date(Booking.datetime) > today,
+        Booking.status != 'cancelled'
+    ).order_by(Booking.datetime).all()
+    
     return render_template('coiffeur/dashboard.html',
+                         week_start_date=week_start_date,
                          days_with_dates=days_with_dates,
-                         week_start_date=monday)
+                         today_appointments=today_appointments,
+                         upcoming_appointments=upcoming_appointments)
 
 @main.route('/api/appointments/<int:appointment_id>/complete', methods=['POST'])
 @login_required
@@ -684,3 +672,36 @@ def resend_verification():
         flash('Une erreur est survenue lors de l\'envoi du code.', 'danger')
         
     return redirect(url_for('main.verify_account'))
+
+@main.route('/rewards')
+@login_required
+def rewards():
+    available_rewards = Reward.query.filter_by(
+        client_id=current_user.id,
+        status='available'
+    ).all()
+    
+    return render_template(
+        'client/rewards.html',
+        rewards=available_rewards,
+        points=current_user.loyalty_points
+    )
+
+@main.route('/use-reward/<int:reward_id>', methods=['POST'])
+@login_required
+def use_reward(reward_id):
+    reward = Reward.query.get_or_404(reward_id)
+    
+    if reward.client_id != current_user.id:
+        abort(403)
+    
+    if reward.status != 'available':
+        flash('Cette récompense n\'est plus disponible.', 'error')
+        return redirect(url_for('main.rewards'))
+    
+    reward.status = 'used'
+    reward.used_at = datetime.now()
+    db.session.commit()
+    
+    flash('Votre récompense a été marquée comme utilisée.', 'success')
+    return redirect(url_for('main.rewards'))
