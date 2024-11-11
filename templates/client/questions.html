@@ -585,9 +585,10 @@
         }
 
         .day-item {
-            background: #f8f9fa;
-            border-radius: 12px;
-            overflow: hidden;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
 
@@ -597,9 +598,7 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            background: #fff;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
+            border-radius: 8px;
             transition: all 0.3s ease;
         }
 
@@ -630,24 +629,19 @@
         .slots-panel {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            background: #fff;
+            transition: max-height 0.5s ease-in-out;
         }
 
         .slots-content {
-            padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
+            padding: 0 20px;
         }
 
         .slot-item {
-            padding: 10px;
+            padding: 12px 15px;
             text-align: center;
-            border-radius: 8px;
-            font-size: 0.9em;
-            cursor: pointer;
+            border-radius: 6px;
             transition: all 0.2s ease;
+            font-size: 1em;
         }
 
         .slot-item.available {
@@ -669,12 +663,14 @@
         }
 
         .day-item.expanded {
+            margin: 20px 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .day-item.expanded .day-info {
             background: #e3f2fd;
-            border-color: #2196f3;
+            border-bottom: 1px solid #bbdefb;
+            border-radius: 8px 8px 0 0;
         }
 
         .loading {
@@ -682,6 +678,53 @@
             color: #666;
             padding: 10px;
             grid-column: 1 / -1;
+        }
+
+        .slots-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .day-item.expanded .slots-content {
+            animation: expandSlots 0.3s ease-out forwards;
+        }
+
+        .slots-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        }
+
+        .days-list {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        @keyframes expandSlots {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .slots-content {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .days-list {
+                padding: 10px;
+            }
+        }
+
+        .slots-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+
+        .day-item.expanded .slots-panel {
+            max-height: 1000px; /* Même valeur que dans le JavaScript */
         }
     </style>
 </head>
@@ -1021,8 +1064,14 @@
                     if (!wasExpanded) {
                         day.classList.add('expanded');
                         const panel = day.querySelector('.slots-panel');
-                        panel.style.maxHeight = panel.scrollHeight + "px";
-                        fetchAvailability(selectedHairdresser, dayName);
+                        // Charger d'abord les créneaux
+                        fetchAvailability(selectedHairdresser, dayName)
+                            .then(() => {
+                                // Attendre un court instant pour que le contenu soit chargé
+                                setTimeout(() => {
+                                    panel.style.maxHeight = '1000px'; // Valeur fixe suffisamment grande
+                                }, 50);
+                            });
                     }
                 });
             });
