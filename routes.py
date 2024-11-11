@@ -411,13 +411,23 @@ def cancel_appointment(appointment_id):
 @main.route('/client/history')
 @login_required
 def client_history():
-    # Remplacer Appointment par Booking
+    now = datetime.now()
     past_appointments = Booking.query.filter(
         Booking.client_id == current_user.id,
-        Booking.datetime <= datetime.now()
+        db.or_(
+            # Soit le rendez-vous est passé
+            Booking.datetime <= datetime.now(),
+            # Soit le rendez-vous est confirmé (même futur)
+            Booking.status == 'confirmed'
+        ),
+        # Exclure les rendez-vous annulés et en attente
+        Booking.status != 'cancelled',
+        Booking.status != 'pending'
     ).order_by(Booking.datetime.desc()).all()
     
-    return render_template('client/history.html', past_appointments=past_appointments)
+    return render_template('client/history.html', 
+                         past_appointments=past_appointments,
+                         now=now)
 
 @main.route('/coiffeur/dashboard')
 @login_required
@@ -670,30 +680,34 @@ def add_availability():
         coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
         print(f"Coiffeur trouvé: ID={coiffeur.id}")
 
-        # Supprimer les anciens créneaux
-        deleted = TimeSlot.query.filter_by(
+        # Récupérer les créneaux existants
+        existing_slots = TimeSlot.query.filter_by(
             coiffeur_id=coiffeur.id,
-            weekday=weekday  # Stockons le jour comme un nombre
-        ).delete()
-        print(f"Créneaux supprimés: {deleted}")
+            weekday=str(weekday)
+        ).all()
+
+        # Ne supprimer que les créneaux non réservés
+        for slot in existing_slots:
+            # Vérifier si le créneau a des réservations
+            has_booking = Booking.query.filter_by(
+                time_slot_id=slot.id
+            ).first() is not None
+
+            if not has_booking:
+                db.session.delete(slot)
 
         # Ajouter les nouveaux créneaux
         for slot_time in selected_slots:
-            try:
-                time_slot = TimeSlot(
-                    coiffeur_id=coiffeur.id,
-                    weekday=weekday,  # Stockons le jour comme un nombre
-                    start_time=slot_time,
-                    end_time=f"{(int(slot_time.split(':')[0]) + 1):02d}:{slot_time.split(':')[1]}",
-                    is_available=True
-                )
-                db.session.add(time_slot)
-                print(f"Créneau ajouté: {time_slot}")
-                
-            except ValueError as e:
-                print(f"Erreur lors de l'ajout du créneau {slot_time}: {str(e)}")
-                continue
-        
+            time_slot = TimeSlot(
+                coiffeur_id=coiffeur.id,
+                weekday=str(weekday),
+                start_time=slot_time,
+                end_time=f"{(int(slot_time.split(':')[0]) + 1):02d}:{slot_time.split(':')[1]}",
+                is_available=True
+            )
+            db.session.add(time_slot)
+            print(f"Créneau ajouté: {time_slot}")
+
         db.session.commit()
         print("Commit réussi")
         return jsonify({'success': True})

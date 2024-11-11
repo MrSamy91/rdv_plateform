@@ -56,16 +56,16 @@
 
         .appointment-card {
             background: white;
+            border-radius: 10px;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
         }
 
         .appointment-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .appointment-info {
@@ -168,6 +168,37 @@
                 padding: 0 15px;
             }
         }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-confirmed {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .review-btn {
+            background-color: #ffd700;
+            color: #856404;
+        }
+
+        .review-btn:hover {
+            background-color: #ffed4a;
+        }
+
+        .status-upcoming {
+            background-color: #cce5ff;
+            color: #004085;
+        }
     </style>
 </head>
 <body>
@@ -184,35 +215,54 @@
             Historique des rendez-vous
         </h1>
 
-        {% if past_appointments %}
-            {% for appointment in past_appointments %}
+        <div class="appointments-history">
+            {% if past_appointments %}
+                {% for appointment in past_appointments %}
                 <div class="appointment-card">
                     <div class="appointment-info">
-                        <div class="info-item">
+                        <div>
                             <i class="fas fa-user-circle"></i>
-                            <span>Coiffeur: {{ appointment.coiffeur.user.username }}</span>
+                            <p>{{ appointment.coiffeur.user.username }}</p>
                         </div>
-                        <div class="info-item">
+                        <div>
                             <i class="fas fa-calendar"></i>
-                            <span>Date: {{ appointment.datetime.strftime('%d/%m/%Y') }}</span>
+                            <p>{{ appointment.datetime.strftime('%d/%m/%Y') }}</p>
                         </div>
-                        <div class="info-item">
+                        <div>
                             <i class="fas fa-clock"></i>
-                            <span>Heure: {{ appointment.datetime.strftime('%H:%M') }}</span>
+                            <p>{{ appointment.datetime.strftime('%H:%M') }}</p>
                         </div>
-                        <div class="info-item">
+                        <div>
                             <i class="fas fa-info-circle"></i>
-                            <span>Statut: {{ appointment.status }}</span>
+                            <span class="status-badge {% if appointment.datetime > now %}status-upcoming{% else %}status-completed{% endif %}">
+                                {% if appointment.datetime > now %}
+                                    Confirmé (à venir)
+                                {% else %}
+                                    Terminé
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
+                    {% if not appointment.review %}
+                        <div class="action-buttons">
+                            <button onclick="openReviewModal('{{ appointment.id }}')" class="action-btn review-btn">
+                                <i class="fas fa-star"></i> Laisser un avis
+                            </button>
+                        </div>
+                    {% endif %}
                 </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-history">
-                <i class="fas fa-calendar-times"></i>
-                <p>Aucun rendez-vous passé</p>
-            </div>
-        {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <p>Aucun rendez-vous terminé</p>
+                    <a href="{{ url_for('main.questions') }}" class="btn">
+                        <i class="fas fa-plus"></i> Prendre rendez-vous
+                    </a>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </body>
+</html> 
 </html> 

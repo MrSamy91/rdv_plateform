@@ -453,6 +453,29 @@
             background: #28a745;
             color: white;
         }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #ffeeba;
+            color: #856404;
+        }
+
+        /* Mettre à jour le titre de la section */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #856404;
+        }
     </style>
 </head>
 <body></body>
@@ -476,8 +499,8 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <i class="fas fa-calendar-check"></i>
-                <h3>Rendez-vous à venir</h3>
-                <p>{{ upcoming_appointments|length }}</p>
+                <h3>Rendez-vous en attente</h3>
+                <p>{{ upcoming_appointments|selectattr('status', 'equalto', 'pending')|list|length }}</p>
             </div>
             <div class="stat-card">
                 <i class="fas fa-history"></i>
@@ -503,49 +526,49 @@
         </div>
 
         <h2 class="section-title">
-            <i class="fas fa-calendar-alt"></i>
-            Prochains rendez-vous
+            <i class="fas fa-clock"></i>
+            Rendez-vous en attente
         </h2>
         
         <div class="appointments-list">
             {% for appointment in upcoming_appointments %}
-            <div class="appointment-card" data-appointment-id="{{ appointment.id }}">
-                <div class="appointment-info">
-                    <div>
-                        <i class="fas fa-user-circle"></i>
-                        <p>{{ appointment.coiffeur.user.username }}</p>
+                {% if appointment.status == 'pending' %}
+                <div class="appointment-card" data-appointment-id="{{ appointment.id }}">
+                    <div class="appointment-info">
+                        <div>
+                            <i class="fas fa-user-circle"></i>
+                            <p>{{ appointment.coiffeur.user.username }}</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-calendar"></i>
+                            <p>{{ appointment.datetime.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-clock"></i>
+                            <p>{{ appointment.datetime.strftime('%H:%M') }}</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-info-circle"></i>
+                            <span class="status-badge status-pending">
+                                En attente
+                            </span>
+                        </div>
                     </div>
-                    <div>
-                        <i class="fas fa-calendar"></i>
-                        <p>{{ appointment.datetime.strftime('%d/%m/%Y') }}</p>
+                    <div class="action-buttons">
+                        <button onclick="cancelAppointment('{{ appointment.id }}')" class="action-btn">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
                     </div>
-                    <div>
-                        <i class="fas fa-clock"></i>
-                        <p>{{ appointment.datetime.strftime('%H:%M') }}</p>
-                    </div>
-                    <div>
-                        <i class="fas fa-info-circle"></i>
-                        <span class="status-badge status-{{ appointment.status }}">
-                            {{ appointment.status }}
-                        </span>
-                    </div>
-                </div>
-                {% if appointment.status != 'cancelled' %}
-                <div class="action-buttons">
-                    <button onclick="cancelAppointment('{{ appointment.id }}')" class="action-btn">
-                        <i class="fas fa-times"></i> Annuler
-                    </button>
                 </div>
                 {% endif %}
-            </div>
             {% else %}
-            <div class="empty-state">
-                <i class="fas fa-calendar-times"></i>
-                <p>Aucun rendez-vous à venir</p>
-                <a href="{{ url_for('main.questions') }}" class="btn">
-                    <i class="fas fa-plus"></i> Prendre rendez-vous
-                </a>
-            </div>
+                <div class="empty-state">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>Aucun rendez-vous en attente</p>
+                    <a href="{{ url_for('main.questions') }}" class="btn">
+                        <i class="fas fa-plus"></i> Prendre rendez-vous
+                    </a>
+                </div>
             {% endfor %}
         </div>
 
