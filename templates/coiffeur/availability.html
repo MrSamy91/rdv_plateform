@@ -1,0 +1,68 @@
+<div class="availability-grid">
+    {% for day in ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'] %}
+    <div class="day-column">
+        <h3>{{ day|capitalize }}</h3>
+        <div class="time-slots">
+            {% for hour in range(9, 19) %}
+                {% set time = '%02d:00'|format(hour) %}
+                <div class="time-slot-wrapper">
+                    <div class="time-slot {% if time in available_slots[day] %}available{% endif %} {% if time in booked_slots[day] %}booked{% endif %}"
+                         data-time="{{ time }}" 
+                         data-day="{{ day }}">
+                        {{ time }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .availability-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .day-column {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .time-slots {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .time-slot {
+        padding: 10px;
+        border-radius: 4px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .time-slot.available {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .time-slot.booked {
+        background-color: #dc3545;
+        color: white;
+        cursor: not-allowed;
+    }
+
+    .time-slot:not(.available):not(.booked) {
+        background-color: #f8f9fa;
+        border: 1px dashed #ccc;
+    }
+
+    .time-slot:hover:not(.booked) {
+        transform: scale(1.05);
+    }
+</style> 

@@ -389,6 +389,70 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        .booking-calendar {
+            margin-top: 20px;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .day-column {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .day-header {
+            text-align: center;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .day-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .day-date {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .slots-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .time-slot:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        .past-day {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .selected-slot {
+            background: #28a745;
+            color: white;
+        }
     </style>
 </head>
 <body></body>
@@ -532,6 +596,34 @@
         </div>
     </div>
 
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBookingModal()">&times;</span>
+            <h2>Prendre rendez-vous</h2>
+            
+            <div class="booking-calendar">
+                <div class="calendar-header">
+                    <button class="nav-btn" onclick="previousWeek()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h3 id="weekDisplay"></h3>
+                    <button class="nav-btn" onclick="nextWeek()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="days-grid">
+                    {% for i in range(6) %}
+                        <div class="day-column" id="day_{{ i }}">
+                            <div class="day-header"></div>
+                            <div class="slots-container"></div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         function openProfileModal() {
             const modal = document.getElementById('profileModal');
@@ -591,6 +683,155 @@
                 statsCounter.textContent = upcomingAppointmentsCount;
             }
         }
+
+        function openBookingModal() {
+            const modal = document.getElementById('bookingModal');
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.classList.add('show');
+                initializeCalendar();
+            }, 10);
+        }
+
+        function closeBookingModal() {
+            const modal = document.getElementById('bookingModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        let currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
+        function initializeCalendar() {
+            updateCalendar();
+        }
+
+        function updateCalendar() {
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1);
+            
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 5);
+            
+            document.getElementById('weekDisplay').textContent = 
+                `${startOfWeek.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} - ${endOfWeek.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}`;
+
+            updateDayColumns(startOfWeek);
+        }
+
+        function updateDayColumns(startOfWeek) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < 6; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                
+                const dayColumn = document.getElementById(`day_${i}`);
+                const dayHeader = dayColumn.querySelector('.day-header');
+                const slotsContainer = dayColumn.querySelector('.slots-container');
+                
+                dayHeader.innerHTML = `
+                    <div class="day-name">${date.toLocaleDateString('fr-FR', { weekday: 'long' })}</div>
+                    <div class="day-date">${date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</div>
+                `;
+
+                if (date < today) {
+                    dayColumn.classList.add('past-day');
+                    slotsContainer.innerHTML = '<p class="no-slots">Jour passé</p>';
+                    continue;
+                }
+
+                // Charger les créneaux disponibles
+                loadAvailableSlots(date, slotsContainer);
+            }
+        }
+
+        function loadAvailableSlots(date, container) {
+            const dateStr = date.toISOString().split('T')[0];
+            const coiffeurId = {{ selected_coiffeur_id }};  // Cette variable doit être passée depuis le backend
+            const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' });
+            
+            console.log(`Chargement des créneaux pour le coiffeur ${coiffeurId} le ${dayName}`);
+            
+            fetch(`/get_availability?hairdresser_id=${coiffeurId}&day=${dayName}`)
+                .then(response => response.json())
+                .then(slots => {
+                    console.log('Créneaux reçus:', slots);
+                    if (slots.length === 0) {
+                        container.innerHTML = '<p class="no-slots">Aucun créneau disponible</p>';
+                        return;
+                    }
+                    
+                    let html = '<div class="slots-list">';
+                    slots.forEach(slot => {
+                        if (slot.is_available) {
+                            html += `
+                                <div class="time-slot" onclick="selectSlot(this, ${slot.id})">
+                                    ${slot.time}
+                                </div>
+                            `;
+                        }
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    container.innerHTML = '<p class="error">Erreur de chargement des créneaux</p>';
+                });
+        }
+
+        function selectSlot(element, slotId) {
+            // Désélectionner tous les autres créneaux
+            document.querySelectorAll('.time-slot.selected').forEach(slot => {
+                if (slot !== element) slot.classList.remove('selected');
+            });
+            
+            element.classList.toggle('selected');
+            
+            // Afficher/masquer le bouton de confirmation
+            const selectedSlot = document.querySelector('.time-slot.selected');
+            const confirmButton = document.getElementById('confirmBooking');
+            if (confirmButton) {
+                confirmButton.style.display = selectedSlot ? 'block' : 'none';
+            } else if (selectedSlot) {
+                // Créer le bouton s'il n'existe pas
+                const btn = document.createElement('button');
+                btn.id = 'confirmBooking';
+                btn.className = 'btn confirm-btn';
+                btn.innerHTML = 'Confirmer le rendez-vous';
+                btn.onclick = () => bookAppointment(slotId);
+                element.parentElement.appendChild(btn);
+            }
+        }
+
+        function bookAppointment(slotId) {
+            if (confirm('Voulez-vous confirmer ce rendez-vous ?')) {
+                fetch('/book_appointment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ slot_id: slotId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Rendez-vous confirmé avec succès !');
+                        location.reload();
+                    } else {
+                        alert(data.error || 'Erreur lors de la réservation');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Une erreur est survenue');
+                });
+            }
+        }
     </script>
 </body>
 </html>
+
