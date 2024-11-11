@@ -71,7 +71,7 @@ class TimeSlot(db.Model):
     # Ne définissez pas la relation bookings ici
     
     def __repr__(self):
-        return f'<TimeSlot {self.weekday} {self.start_time}-{self.end_time}>'
+        return f'<TimeSlot id={self.id} coiffeur_id={self.coiffeur_id} {self.weekday} {self.start_time}-{self.end_time}>'
 
 class Booking(db.Model):
     __tablename__ = 'booking'
@@ -81,8 +81,9 @@ class Booking(db.Model):
     coiffeur_id = db.Column(db.Integer, db.ForeignKey('coiffeur.id', name='fk_booking_coiffeur'), nullable=False)
     time_slot_id = db.Column(db.Integer, db.ForeignKey('time_slot.id', name='fk_booking_timeslot'), nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id', name='fk_booking_service'), nullable=True)
-    status = db.Column(db.String(20), default='confirmed')
+    status = db.Column(db.String(20), default='pending')  # pending, confirmed, completed, cancelled
     datetime = db.Column(db.DateTime, nullable=False)
+    completed_at = db.Column(db.DateTime, nullable=True)
     
     # Relations
     client = db.relationship('User', foreign_keys=[client_id], backref='client_bookings')

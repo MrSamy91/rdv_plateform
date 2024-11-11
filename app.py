@@ -19,6 +19,16 @@ csrf = CSRFProtect()  # Ajoutez cette ligne
 def create_app():
     app = Flask(__name__)
 
+    # Configuration du logger
+    if app.debug:
+        logging.basicConfig(level=logging.DEBUG)
+        app.logger.setLevel(logging.DEBUG)
+        
+    # Ajouter un handler pour les logs
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    app.logger.addHandler(handler)
+
     # Configure the app
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -62,6 +72,15 @@ def create_app():
 
     from routes import main as main_blueprint
     app.register_blueprint(main_blueprint)
+
+    @app.template_filter('datetime_format')
+    def datetime_format(value, format='%Y-%m-%d'):
+        return value.strftime(format)
+
+    # Configuration de Flask-Login
+    login_manager.login_view = 'main.login'
+    login_manager.login_message = 'Veuillez vous connecter pour accéder à cette page.'
+    login_manager.login_message_category = 'info'
 
     return app
 

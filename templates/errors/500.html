@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erreur 500 - Erreur Serveur</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: #f5f5f5;
+        }
+        .error-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #d32f2f;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #2196f3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-link:hover {
+            background: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>Erreur 500</h1>
+        <p>Une erreur inattendue s'est produite sur le serveur.</p>
+        <p>Nous nous excusons pour la gêne occasionnée.</p>
+        <a href="{{ url_for('main.index') }}" class="back-link">Retour à l'accueil</a>
+    </div>
+</body>
+</html> 

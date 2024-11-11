@@ -270,9 +270,9 @@
         }
 
         .time-slot {
-            padding: 10px;
-            margin: 5px;
-            border-radius: 8px;
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -281,6 +281,18 @@
         .time-slot.available {
             background-color: #28a745;
             color: white;
+        }
+
+        .time-slot.booked {
+            background-color: #dc3545;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        .time-slot.selected {
+            background-color: #007bff;
+            color: white;
+            transform: scale(1.05);
         }
 
         .time-slot.reserved {
@@ -324,6 +336,353 @@
             border-radius: 50%;
             margin-right: 5px;
         }
+
+        .day-column {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 180px;
+            border: 2px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #495057;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 8px;
+            margin: -15px -15px 10px -15px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .day-column.selected {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(33, 150, 243, 0.2);
+        }
+
+        .day-column:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        .slots-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 5px;
+        }
+
+        .time-slot {
+            padding: 8px 12px;
+            margin: 2px 0;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .time-slot.available {
+            background-color: #4caf50;
+            color: white;
+            border: 1px solid #43a047;
+        }
+
+        .time-slot.available:hover {
+            background-color: #43a047;
+            transform: scale(1.03);
+        }
+
+        .time-slot.reserved {
+            background-color: #f44336;
+            color: white;
+            border: 1px solid #e53935;
+            opacity: 0.7;
+        }
+
+        .no-slots {
+            color: #757575;
+            font-style: italic;
+            padding: 10px;
+            text-align: center;
+            background: #f5f5f5;
+            border-radius: 6px;
+            margin: 5px 0;
+        }
+
+        /* Style pour le bouton de recherche */
+        .search-btn {
+            margin-top: 25px;
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: linear-gradient(45deg, #1976d2, #1565c0);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        /* Responsive design amélioré */
+        @media (max-width: 768px) {
+            .days-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur tablette */
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .days-grid {
+                grid-template-columns: 1fr; /* 1 colonne sur mobile */
+            }
+            
+            .day-column {
+                min-height: 150px;
+            }
+        }
+
+        /* Dark mode amélioré */
+        @media (prefers-color-scheme: dark) {
+            .week-calendar {
+                background: #1e1e1e;
+            }
+
+            .day-column {
+                background: #2d2d2d;
+                border-color: #404040;
+            }
+
+            .day-header {
+                background: #333;
+                color: #fff;
+                border-bottom-color: #404040;
+            }
+
+            .day-column.selected {
+                background: #1a237e;
+                border-color: #3f51b5;
+            }
+
+            .no-slots {
+                background: #333;
+                color: #bdbdbd;
+            }
+        }
+
+        .calendar-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .weekdays-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .weekday-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .weekday-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .weekday-card.selected {
+            border-color: #2196f3;
+            background: #e3f2fd;
+        }
+
+        .weekday-header {
+            background: #4a90e2;
+            color: white;
+            padding: 12px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .weekday-content {
+            padding: 15px;
+        }
+
+        .slots-preview {
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slot-item {
+            background: #28a745;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .slot-item.unavailable {
+            background: #dc3545;
+            opacity: 0.7;
+        }
+
+        .no-slots-message {
+            color: #666;
+            text-align: center;
+            padding: 10px;
+            font-style: italic;
+        }
+
+        .loading-slots {
+            text-align: center;
+            color: #666;
+            padding: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .weekdays-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .calendar-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .days-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .day-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .day-info {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .day-info:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .day-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .slots-count {
+            background: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .slots-count.has-slots {
+            background: #4caf50;
+            color: white;
+        }
+
+        .slots-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #fff;
+        }
+
+        .slots-content {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .slot-item {
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .slot-item.available {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .slot-item.reserved {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+            cursor: not-allowed;
+        }
+
+        .slot-item.available:hover {
+            background: #c8e6c9;
+            transform: translateY(-2px);
+        }
+
+        .day-item.expanded {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .day-item.expanded .day-info {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 10px;
+            grid-column: 1 / -1;
+        }
     </style>
 </head>
 <body>
@@ -356,29 +715,23 @@
         </div>
 
         <div class="phone-frame" id="day-box" style="display: none;">
-            <h1 id="day-question-title">Choix des jours</h1>
-            <p id="question-text">Sélectionnez les jours qui vous conviennent :</p>
-            <div class="buttons">
-                <div class="button-box">
-                    <button onclick="toggleDay(this, 'lundi')" class="btn day-btn" data-day="lundi">Lundi</button>
-                </div>
-                <div class="button-box">
-                    <button onclick="toggleDay(this, 'mardi')" class="btn day-btn" data-day="mardi">Mardi</button>
-                </div>
-                <div class="button-box">
-                    <button onclick="toggleDay(this, 'mercredi')" class="btn day-btn" data-day="mercredi">Mercredi</button>
-                </div>
-                <div class="button-box">
-                    <button onclick="toggleDay(this, 'jeudi')" class="btn day-btn" data-day="jeudi">Jeudi</button>
-                </div>
-                <div class="button-box">
-                    <button onclick="toggleDay(this, 'vendredi')" class="btn day-btn" data-day="vendredi">Vendredi</button>
-                </div>
-                <div class="button-box">
-                    <button onclick="toggleDay(this, 'samedi')" class="btn day-btn" data-day="samedi">Samedi</button>
-                </div>
-                <div class="button-box">
-                    <button onclick="searchAvailabilities()" class="btn search-btn">Rechercher les disponibilités</button>
+            <h1 id="day-question-title">Disponibilités</h1>
+            
+            <div class="calendar-container">
+                <div class="days-list">
+                    {% for day in ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'] %}
+                    <div class="day-item" data-day="{{ day }}">
+                        <div class="day-info">
+                            <span class="day-name">{{ day|capitalize }}</span>
+                            <span class="slots-count" id="count-{{ day }}">...</span>
+                        </div>
+                        <div class="slots-panel">
+                            <div class="slots-content" id="slots-{{ day }}">
+                                <div class="loading">Chargement...</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -398,6 +751,18 @@
                 <div class="modal-buttons">
                     <button onclick="confirmBooking()" class="btn yes">Confirmer</button>
                     <button onclick="closeModal()" class="btn no">Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de notification -->
+        <div id="notification-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>Aucune disponibilité</h2>
+                <p>Souhaitez-vous être notifié par email lorsqu'un créneau sera disponible ?</p>
+                <div class="modal-buttons">
+                    <button onclick="setupNotification()" class="btn yes">Oui, je veux tre notifié</button>
+                    <button onclick="closeNotificationModal()" class="btn no">Non, retour au choix des jours</button>
                 </div>
             </div>
         </div>
@@ -425,27 +790,32 @@
         }
 
         function fetchHairdressers() {
-            fetch("{{ url_for('main.get_hairdressers') }}")
+            const hairdresserBox = document.getElementById('hairdresser-box');
+            const hairdresserButtons = document.getElementById('hairdresser-buttons');
+            
+            hairdresserBox.style.display = 'block';
+            hairdresserButtons.innerHTML = 'Chargement des coiffeurs...';
+
+            fetch('/api/hairdressers')
                 .then(response => response.json())
                 .then(hairdressers => {
-                    const container = document.getElementById('hairdresser-buttons');
-                    container.innerHTML = '';
-                    
+                    hairdresserButtons.innerHTML = '';
                     hairdressers.forEach(hairdresser => {
                         const buttonBox = document.createElement('div');
                         buttonBox.className = 'button-box';
                         
                         const button = document.createElement('button');
-                        button.className = 'btn yes';
-                        button.textContent = hairdresser.name;
+                        button.className = 'btn';
                         button.onclick = () => handleHairdresserChoice(hairdresser.id);
+                        button.textContent = `${hairdresser.name} - ${hairdresser.specialties}`;
                         
                         buttonBox.appendChild(button);
-                        container.appendChild(buttonBox);
+                        hairdresserButtons.appendChild(buttonBox);
                     });
-
-                    const hairdresserBox = document.getElementById('hairdresser-box');
-                    hairdresserBox.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    hairdresserButtons.innerHTML = '<p class="error">Erreur lors du chargement des coiffeurs</p>';
                 });
         }
 
@@ -458,6 +828,7 @@
             setTimeout(() => {
                 hairdresserBox.style.display = 'none';
                 dayBox.style.display = 'block';
+                initializeDays();
             }, 300);
         }
 
@@ -474,101 +845,17 @@
         }
 
         function searchAvailabilities() {
-            if (selectedDays.size === 0) {
+            const selectedDays = Array.from(document.querySelectorAll('.day-column.selected'));
+            
+            if (selectedDays.length === 0) {
                 alert('Veuillez sélectionner au moins un jour');
                 return;
             }
 
-            const dayBox = document.getElementById('day-box');
-            const slotsBox = document.getElementById('slots-box');
-            const slotsContainer = document.getElementById('slots-container');
-            
-            slotsContainer.innerHTML = '<p>Recherche des créneaux disponibles...</p>';
-            
-            dayBox.style.display = 'none';
-            slotsBox.style.display = 'block';
-
-            console.log('Selected days:', Array.from(selectedDays));
-            console.log('Selected hairdresser:', selectedHairdresser);
-
-            const promises = Array.from(selectedDays).map(day => {
-                const url = `/get_availability?hairdresser_id=${selectedHairdresser}&day=${day}`;
-                console.log('Fetching URL:', url);
-                
-                return fetch(url)
-                    .then(response => {
-                        console.log(`Response status for ${day}:`, response.status);
-                        return response.json();
-                    })
-                    .then(slots => {
-                        console.log(`Slots received for ${day}:`, slots);
-                        return { day, slots };
-                    })
-                    .catch(error => {
-                        console.error(`Error fetching slots for ${day}:`, error);
-                        return { day, slots: [] };
-                    });
+            selectedDays.forEach(dayColumn => {
+                const day = dayColumn.dataset.day;
+                fetchAvailability(selectedHairdresser, day);
             });
-
-            Promise.all(promises)
-                .then(results => {
-                    slotsContainer.innerHTML = '';
-                    let hasSlots = false;
-
-                    results.forEach(({ day, slots }) => {
-                        if (slots && slots.length > 0) {
-                            hasSlots = true;
-                            const daySection = document.createElement('div');
-                            daySection.className = 'day-section';
-                            daySection.innerHTML = `
-                                <h3>${day}</h3>
-                                <div class="buttons">
-                                    ${slots.map(slot => {
-                                        const isAvailable = slot.is_available;
-                                        const bookingInfo = slot.booking_info;
-                                        return `
-                                            <div class="time-slot ${isAvailable ? 'available' : 'reserved'}"
-                                                 ${isAvailable ? `onclick="handleSlotChoice(${slot.id}, '${day}', '${slot.time}')"` : ''}>
-                                                ${slot.time}
-                                                ${!isAvailable && bookingInfo ? `
-                                                    <div class="booking-info">
-                                                        Réservé par: ${bookingInfo.client_name}
-                                                        <br>
-                                                        Status: ${bookingInfo.status}
-                                                    </div>
-                                                ` : ''}
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                            `;
-                            slotsContainer.appendChild(daySection);
-                        }
-                    });
-
-                    // Ajouter la légende
-                    const legend = document.createElement('div');
-                    legend.className = 'legend';
-                    legend.innerHTML = `
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: #28a745;"></span>
-                            Disponible
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: #dc3545;"></span>
-                            Réservé
-                        </div>
-                    `;
-                    slotsContainer.appendChild(legend);
-
-                    if (!hasSlots) {
-                        slotsContainer.innerHTML = '<p>Aucun créneau pour les jours sélectionnés.</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    slotsContainer.innerHTML = `<p>Erreur lors de la recherche des créneaux : ${error.message}</p>`;
-                });
         }
 
         function handleSlotChoice(slotId, day, time) {
@@ -582,55 +869,40 @@
         }
 
         function confirmBooking() {
+            if (!selectedSlotId || !selectedHairdresser) {
+                alert('Veuillez sélectionner un créneau');
+                return;
+            }
+
             const bookingData = {
                 slot_id: selectedSlotId,
                 hairdresser_id: selectedHairdresser
             };
             
-            console.log('Données envoyées:', bookingData);
+            console.log('Envoi de la réservation:', bookingData);
 
-            fetch("{{ url_for('main.book_appointment') }}", {
+            fetch('/book_appointment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
                     'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
                 },
                 body: JSON.stringify(bookingData)
             })
-            .then(response => {
-                console.log('Status:', response.status);
-                return response.text().then(text => {
-                    console.log('Réponse brute:', text);
-                    try {
-                        return JSON.parse(text);
-                    } catch (e) {
-                        console.error('Erreur parsing JSON:', e);
-                        throw new Error('Réponse invalide du serveur');
-                    }
-                });
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Données reçues:', data);
                 if (data.success) {
-                    const slotsContainer = document.getElementById('slots-container');
-                    slotsContainer.innerHTML = `
-                        <div class="success-message">
-                            <h3>Réservation confirmée !</h3>
-                            <p>Votre rendez-vous a été enregistré avec succès.</p>
-                        </div>
-                    `;
-                    setTimeout(() => {
-                        window.location.href = "{{ url_for('main.client_dashboard') }}";
-                    }, 1500);
+                    alert('Réservation confirmée !');
+                    window.location.href = '/client/dashboard';
                 } else {
                     throw new Error(data.error || 'Erreur lors de la réservation');
                 }
-                closeModal();
             })
             .catch(error => {
-                console.error('Erreur détaillée:', error);
-                alert('Erreur lors de la réservation : ' + error.message);
+                console.error('Erreur:', error);
+                alert('Erreur : ' + error.message);
+            })
+            .finally(() => {
                 closeModal();
             });
         }
@@ -641,6 +913,119 @@
             if (event.target === modal) {
                 closeModal();
             }
+        }
+
+        function fetchAvailability(hairdresserId, day, countOnly = false) {
+            const slotsContainer = document.getElementById(`slots-${day}`);
+            const countElement = document.getElementById(`count-${day}`);
+            
+            fetch(`/api/hairdresser_slots/${hairdresserId}/${day}`)
+                .then(response => response.json())
+                .then(data => {
+                    const availableSlots = data.slots.filter(slot => slot.is_available);
+                    countElement.textContent = `${availableSlots.length} créneaux`;
+                    countElement.classList.toggle('has-slots', availableSlots.length > 0);
+                    
+                    if (!countOnly) {
+                        let html = '';
+                        if (data.slots.length > 0) {
+                            data.slots.forEach(slot => {
+                                html += `
+                                    <div class="slot-item ${slot.is_available ? 'available' : 'reserved'}"
+                                         ${slot.is_available ? `onclick="handleSlotChoice(${slot.id}, '${day}', '${slot.time}')"` : ''}>
+                                        ${slot.time}
+                                    </div>`;
+                            });
+                        } else {
+                            html = '<div class="loading">Aucun créneau disponible</div>';
+                        }
+                        slotsContainer.innerHTML = html;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    countElement.textContent = 'Erreur';
+                    if (!countOnly) {
+                        slotsContainer.innerHTML = '<div class="error">Erreur de chargement</div>';
+                    }
+                });
+        }
+
+        function showNotificationModal() {
+            document.getElementById('notification-modal').style.display = 'block';
+        }
+
+        function closeNotificationModal() {
+            document.getElementById('notification-modal').style.display = 'none';
+        }
+
+        function setupNotification() {
+            const notificationData = {
+                hairdresser_id: selectedHairdresser,
+                email: '{{ current_user.email }}',
+                days: Array.from(document.querySelectorAll('.day-column.selected')).map(el => el.dataset.day)
+            };
+
+            fetch('/api/setup_notification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                },
+                body: JSON.stringify(notificationData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Vous serez notifié lorsqu\'un créneau sera disponible.');
+                } else {
+                    alert('Erreur lors de la configuration de la notification.');
+                }
+                closeNotificationModal();
+            });
+        }
+
+        // Gestion de la sélection des jours
+        document.querySelectorAll('.weekday-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const wasSelected = this.classList.contains('selected');
+                
+                // Désélectionner tous les autres jours
+                document.querySelectorAll('.weekday-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                
+                if (!wasSelected) {
+                    this.classList.add('selected');
+                    if (selectedHairdresser) {
+                        fetchAvailability(selectedHairdresser, this.dataset.day);
+                    }
+                }
+            });
+        });
+
+        function initializeDays() {
+            document.querySelectorAll('.day-item').forEach(day => {
+                const dayName = day.dataset.day;
+                fetchAvailability(selectedHairdresser, dayName, true);
+                
+                day.querySelector('.day-info').addEventListener('click', () => {
+                    const wasExpanded = day.classList.contains('expanded');
+                    
+                    // Fermer tous les autres jours
+                    document.querySelectorAll('.day-item').forEach(d => {
+                        d.classList.remove('expanded');
+                        d.querySelector('.slots-panel').style.maxHeight = null;
+                    });
+                    
+                    if (!wasExpanded) {
+                        day.classList.add('expanded');
+                        const panel = day.querySelector('.slots-panel');
+                        panel.style.maxHeight = panel.scrollHeight + "px";
+                        fetchAvailability(selectedHairdresser, dayName);
+                    }
+                });
+            });
         }
     </script>
 </body>
