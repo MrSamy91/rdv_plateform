@@ -9,19 +9,18 @@ from flask_mail import Message
 from app import mail
 from flask import render_template
 
-def send_email_notification(to_email, subject, content):
-    message = Mail(
-        from_email='votre_email@example.com',
-        to_emails=to_email,
-        subject=subject,
-        html_content=content)
+def send_email_notification(to_email, subject, template, **kwargs):
     try:
-        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-        response = sg.send(message)
-        return response.status_code
+        msg = Message(
+            subject,
+            recipients=[to_email]
+        )
+        msg.html = render_template(template, **kwargs)
+        mail.send(msg)
+        return True
     except Exception as e:
-        print(str(e))
-        return None
+        print(f"Erreur d'envoi d'email: {str(e)}")
+        return False
 
 def add_to_google_calendar(rendezvous, access_token):
     creds = Credentials(access_token)

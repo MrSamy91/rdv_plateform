@@ -319,7 +319,10 @@ def book_appointment():
 
         print(f"Réservation pour slot_id={slot_id}, hairdresser_id={hairdresser_id}")
 
+        # Récupérer le coiffeur
+        coiffeur = Coiffeur.query.get_or_404(hairdresser_id)
         time_slot = TimeSlot.query.get(slot_id)
+        
         if not time_slot:
             return jsonify({'success': False, 'error': 'Créneau non trouvé'}), 404
         
@@ -377,12 +380,36 @@ def book_appointment():
         db.session.commit()
 
         print("Réservation créée avec succès")
+        
+        # Envoyer email au client
+        send_email_notification(
+            current_user.email,
+            'Confirmation de votre rendez-vous',
+            'emails/booking_confirmation.html',
+            is_client=True,
+            username=current_user.username,
+            coiffeur_name=coiffeur.user.username,
+            date=booking.datetime.strftime('%d/%m/%Y'),
+            time=booking.datetime.strftime('%H:%M')
+        )
+        
+        # Envoyer email au coiffeur
+        send_email_notification(
+            coiffeur.user.email,
+            'Nouveau rendez-vous',
+            'emails/booking_confirmation.html',
+            is_client=False,
+            username=coiffeur.user.username,
+            client_name=current_user.username,
+            date=booking.datetime.strftime('%d/%m/%Y'),
+            time=booking.datetime.strftime('%H:%M')
+        )
+        
         return jsonify({'success': True})
 
     except Exception as e:
-        print(f"Exception dans book_appointment: {str(e)}")
-        print(f"Type de l'exception: {type(e)}")
         db.session.rollback()
+        print(f"Erreur de réservation: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @main.route('/api/cancel_appointment/<int:appointment_id>', methods=['POST'])
@@ -390,18 +417,39 @@ def book_appointment():
 def cancel_appointment(appointment_id):
     try:
         appointment = Booking.query.get_or_404(appointment_id)
+        coiffeur = Coiffeur.query.get(appointment.coiffeur_id)
         
-        # Vérifier que c'est bien le rendez-vous du client connecté
         if appointment.client_id != current_user.id:
             return jsonify({'success': False, 'error': 'Non autorisé'}), 403
             
-        # Mettre à jour le statut et libérer le créneau
         appointment.status = 'cancelled'
         time_slot = TimeSlot.query.get(appointment.time_slot_id)
         if time_slot:
             time_slot.is_available = True
         
         db.session.commit()
+        
+        # Email au client
+        send_email_notification(
+            current_user.email,
+            'Confirmation d\'annulation de votre rendez-vous',
+            'emails/cancellation_client.html',
+            username=current_user.username,
+            coiffeur_name=coiffeur.user.username,
+            date=appointment.datetime.strftime('%d/%m/%Y'),
+            time=appointment.datetime.strftime('%H:%M')
+        )
+        
+        # Email au coiffeur
+        send_email_notification(
+            coiffeur.user.email,
+            'Annulation d\'un rendez-vous',
+            'emails/cancellation_coiffeur.html',
+            client_name=current_user.username,
+            date=appointment.datetime.strftime('%d/%m/%Y'),
+            time=appointment.datetime.strftime('%H:%M')
+        )
+        
         return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
@@ -609,30 +657,47 @@ def use_reward(reward_id):
 
 @main.route('/coiffeur/confirm_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
-def coiffeur_confirm_appointment(appointment_id):
+def confirm_appointment(appointment_id):
     if current_user.role != 'coiffeur':
         return jsonify({'success': False, 'error': 'Non autorisé'}), 403
-
+        
     try:
         appointment = Booking.query.get_or_404(appointment_id)
-        coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
-        if appointment.coiffeur_id != coiffeur.id:
-            return jsonify({'success': False, 'error': 'Non autorisé'}), 403
-            
+        client = User.query.get(appointment.client_id)
+        
+        # Mettre à jour le statut
         appointment.status = 'confirmed'
+        
+        # Ajouter les points de fidélité (par exemple 10 points)
+        points_earned = 10
+        client.loyalty_points += points_earned
+        
         db.session.commit()
+        
+        # Envoyer l'email de confirmation au client
+        send_email_notification(
+            client.email,
+            'Rendez-vous confirmé - Points de fidélité gagnés',
+            'emails/appointment_confirmed.html',
+            username=client.username,
+            coiffeur_name=current_user.username,
+            date=appointment.datetime.strftime('%d/%m/%Y'),
+            time=appointment.datetime.strftime('%H:%M'),
+            service_name=appointment.service.name if appointment.service else "Non spécifié",
+            points_earned=points_earned,
+            total_points=client.loyalty_points
+        )
+        
         return jsonify({'success': True})
     except Exception as e:
-        print(f"Erreur de confirmation: {str(e)}")
+        db.session.rollback()
+        print(f"Erreur confirmation: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 # Route pour l'annulation côté client
 @main.route('/client/cancel_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
 def client_cancel_appointment(appointment_id):
-    if current_user.role != 'client':
-        return jsonify({'success': False, 'error': 'Non autorisé'}), 403
-
     try:
         appointment = Booking.query.get_or_404(appointment_id)
         if appointment.client_id != current_user.id:
@@ -640,6 +705,28 @@ def client_cancel_appointment(appointment_id):
             
         appointment.status = 'cancelled'
         db.session.commit()
+        
+        # Email au client
+        send_email_notification(
+            current_user.email,
+            'Confirmation d\'annulation de votre rendez-vous',
+            'emails/cancellation_client.html',
+            username=current_user.username,
+            coiffeur_name=appointment.coiffeur.user.username,
+            date=appointment.datetime.strftime('%d/%m/%Y'),
+            time=appointment.datetime.strftime('%H:%M')
+        )
+        
+        # Email au coiffeur
+        send_email_notification(
+            appointment.coiffeur.user.email,
+            'Annulation d\'un rendez-vous',
+            'emails/cancellation_coiffeur.html',
+            client_name=current_user.username,
+            date=appointment.datetime.strftime('%d/%m/%Y'),
+            time=appointment.datetime.strftime('%H:%M')
+        )
+        
         return jsonify({'success': True})
     except Exception as e:
         print(f"Erreur d'annulation client: {str(e)}")
@@ -919,6 +1006,9 @@ def propose_earlier_time(appointment_id):
         return jsonify({'success': False, 'error': 'Non autorisé'}), 403
 
     try:
+        data = request.get_json()
+        new_datetime = datetime.strptime(data.get('new_datetime'), '%Y-%m-%d %H:%M')
+        
         appointment = Booking.query.get_or_404(appointment_id)
         client = User.query.get(appointment.client_id)
         
@@ -926,11 +1016,66 @@ def propose_earlier_time(appointment_id):
         send_email_notification(
             client.email,
             'Possibilité d\'avancer votre rendez-vous',
-            f'Votre coiffeur est disponible plus tôt que prévu. ' \
-            f'Contactez-le pour avancer votre rendez-vous du {appointment.datetime.strftime("%d/%m/%Y à %H:%M")}.'
+            'emails/earlier_appointment.html',
+            username=client.username,
+            coiffeur_name=current_user.username,
+            original_date=appointment.datetime.strftime('%d/%m/%Y'),
+            original_time=appointment.datetime.strftime('%H:%M'),
+            new_date=new_datetime.strftime('%d/%m/%Y'),
+            new_time=new_datetime.strftime('%H:%M')
         )
         
         return jsonify({'success': True})
     except Exception as e:
         print(f"Erreur proposition avancement: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main.route('/coiffeur/complete_appointment/<int:appointment_id>', methods=['POST'])
+@login_required
+def complete_appointment(appointment_id):
+    if current_user.role != 'coiffeur':
+        return jsonify({'success': False, 'error': 'Non autorisé'}), 403
+        
+    try:
+        appointment = Booking.query.get_or_404(appointment_id)
+        client = User.query.get(appointment.client_id)
+        
+        # Mettre à jour le statut
+        appointment.status = 'completed'
+        
+        # Ajouter les points de fidélité (10 points par rendez-vous)
+        points_earned = 10
+        client.loyalty_points += points_earned
+        client.completed_bookings += 1
+        
+        # Libérer le créneau horaire
+        time_slot = TimeSlot.query.get(appointment.time_slot_id)
+        if time_slot:
+            time_slot.is_available = True
+        
+        db.session.commit()
+        
+        # Envoyer l'email de confirmation au client
+        send_email_notification(
+            client.email,
+            'Merci pour votre visite - Points de fidélité gagnés',
+            'emails/appointment_completed.html',
+            username=client.username,
+            coiffeur_name=current_user.username,
+            date=appointment.datetime.strftime('%d/%m/%Y'),
+            time=appointment.datetime.strftime('%H:%M'),
+            points_earned=points_earned,
+            total_points=client.loyalty_points
+        )
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Rendez-vous terminé avec succès',
+            'points_earned': points_earned,
+            'total_points': client.loyalty_points
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Erreur confirmation: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500

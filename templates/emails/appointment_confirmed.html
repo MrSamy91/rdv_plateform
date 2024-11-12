@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* Même style que booking_confirmation.html */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rendez-vous confirmé</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour {{ username }},</p>
+            <p>Votre rendez-vous a été confirmé par votre coiffeur :</p>
+            <ul>
+                <li>Coiffeur : {{ coiffeur_name }}</li>
+                <li>Date : {{ date }}</li>
+                <li>Heure : {{ time }}</li>
+                <li>Service : {{ service_name }}</li>
+            </ul>
+            
+            <p>Félicitations ! Vous avez gagné {{ points_earned }} points de fidélité pour cette réservation.</p>
+            <p>Votre nouveau solde de points est de : {{ total_points }} points</p>
+        </div>
+        <div class="footer">
+            <p>© 2024 Agendaide - Tous droits réservés</p>
+        </div>
+    </div>
+</body>
+</html> 
