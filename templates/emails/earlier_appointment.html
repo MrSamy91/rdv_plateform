@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* Même style que booking_confirmation.html */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Possibilité d'avancer votre rendez-vous</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour {{ username }},</p>
+            <p>Votre coiffeur {{ coiffeur_name }} vous propose d'avancer votre rendez-vous prévu le {{ original_date }} à {{ original_time }}.</p>
+            <p>Nouveau créneau proposé : {{ new_date }} à {{ new_time }}</p>
+            <p>Pour accepter ce nouveau créneau, veuillez contacter votre coiffeur ou vous connecter à votre espace client.</p>
+        </div>
+        <div class="footer">
+            <p>© 2024 Agendaide - Tous droits réservés</p>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* Même style que booking_confirmation.html */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Merci pour votre visite !</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour {{ username }},</p>
+            <p>Nous vous remercions pour votre visite chez {{ coiffeur_name }} le {{ date }} à {{ time }}.</p>
+            
+            <div class="points-info">
+                <p>🎉 Félicitations ! Vous avez gagné {{ points_earned }} points de fidélité !</p>
+                <p>Votre nouveau solde est de : {{ total_points }} points</p>
+                {% if total_points >= 50 %}
+                <p>Rappel : Avec 50 points, vous pouvez bénéficier d'une réduction sur votre prochain rendez-vous !</p>
+                {% endif %}
+            </div>
+            
+            <p>Au plaisir de vous revoir bientôt !</p>
+        </div>
+        <div class="footer">
+            <p>© 2024 Agendaide - Tous droits réservés</p>
+        </div>
+    </div>
+</body>
+</html> 
