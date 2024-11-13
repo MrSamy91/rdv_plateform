@@ -13,16 +13,18 @@
 </head>
 <body>
     <div class="container">
-        <h2 class="header">Confirmation d'annulation</h2>
+        <div class="header">
+            <h1>Confirmation d'annulation</h1>
+        </div>
         <div class="content">
             <p>Bonjour {{ username }},</p>
-            <p>Nous confirmons l'annulation de votre rendez-vous :</p>
+            <p>Votre rendez-vous a bien été annulé :</p>
             <ul>
+                <li>Coiffeur : {{ coiffeur_name }}</li>
                 <li>Date : {{ date }}</li>
                 <li>Heure : {{ time }}</li>
-                <li>Coiffeur : {{ coiffeur_name }}</li>
             </ul>
-            <p>Vous pouvez reprendre un nouveau rendez-vous à tout moment sur notre plateforme.</p>
+            <p>N'hésitez pas à reprendre rendez-vous à une date qui vous convient mieux.</p>
         </div>
         <div class="footer">
             <p>Cordialement,<br>L'équipe Agendaide</p>
