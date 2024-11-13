@@ -6,6 +6,13 @@
     <title>Dashboard Coiffeur - Agendaide</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@4.4.0/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@4.4.0/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@4.4.0/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@4.4.0/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@4.4.0/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@4.4.0/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@4.4.0/main.min.js'></script>
     <style>
         * {
             box-sizing: border-box;
@@ -440,16 +447,370 @@
         .save-btn:hover {
             background: #0056b3;
         }
+
+        .stats-section {
+            grid-column: 1 / -1;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-right: 15px;
+        }
+
+        .stat-icon i {
+            font-size: 24px;
+            color: #4a90e2;
+        }
+
+        .stat-content h3 {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+
+        .stat-trend {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-trend.positive {
+            color: #2ecc71;
+        }
+
+        .stat-trend.negative {
+            color: #e74c3c;
+        }
+
+        .progress-bar {
+            background: #f0f2f5;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress {
+            background: #4a90e2;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .stat-detail {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .calendar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #appointments-calendar {
+            min-height: 400px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .manage-slots-btn {
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            padding: 12px;
+            background: #4a90e2;
+            color: white;
+            border-radius: 8px;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .manage-slots-btn:hover {
+            background: #357abd;
+        }
+
+        .fc-event {
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .fc-event-pending {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .fc-event-confirmed {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .fc-event {
+            border: none;
+            padding: 2px 4px;
+            margin: 1px 0;
+            border-radius: 3px;
+        }
+
+        .event-pending {
+            background-color: #ffa500 !important;  /* Orange pour les RDV en attente */
+            border-color: #ff8c00 !important;
+        }
+
+        .event-completed {
+            background-color: #4CAF50 !important;  /* Vert pour les RDV terminés */
+            border-color: #45a049 !important;
+        }
+
+        .fc-content {
+            color: white;
+            padding: 2px;
+        }
+
+        .fc-title {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .fc-status {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        .fc-time {
+            font-size: 0.9em;
+        }
+
+        /* Amélioration de la lisibilité du calendrier */
+        .fc-time-grid-event {
+            min-height: 45px !important;
+        }
+
+        .fc-time-grid-event .fc-content {
+            padding: 4px !important;
+        }
+
+        .fc-today {
+            background-color: rgba(255,220,40,.15) !important;
+        }
+
+        /* Styles pour les événements du calendrier */
+        .fc-time-grid-event {
+            border: none !important;
+            padding: 4px !important;
+        }
+
+        .fc-time-grid-event .fc-content {
+            white-space: normal !important;
+            overflow: hidden;
+        }
+
+        .fc-time-grid-event .fc-title {
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .fc-time-grid-event .fc-time {
+            font-weight: normal;
+            color: white !important;
+        }
+
+        /* Améliorer la lisibilité du calendrier */
+        .fc-time-grid .fc-slats td {
+            height: 2.5em !important;
+        }
+
+        .fc-time-grid .fc-event-container {
+            margin: 0 !important;
+        }
+
+        #appointments-calendar {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Réduire la taille des événements */
+        .fc-time-grid-event {
+            min-height: 25px !important;
+            margin: 1px 0 !important;
+            padding: 2px !important;
+        }
+
+        .fc-time-grid-event .fc-content {
+            padding: 2px !important;
+            white-space: nowrap !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .fc-time-grid-event .fc-title {
+            font-size: 0.9em !important;
+            font-weight: normal !important;
+            color: white !important;
+        }
+
+        .fc-time-grid-event .fc-time {
+            font-size: 0.8em !important;
+            color: white !important;
+            opacity: 0.9;
+        }
+
+        /* Ajuster la hauteur des slots */
+        .fc-time-grid .fc-slats td {
+            height: 2em !important;
+        }
+
+        #appointments-calendar {
+            background: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
+        .calendar-section {
+            grid-column: 1 / -1;  /* Pour que le calendrier prenne toute la largeur */
+        }
+
+        .logout-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .logout-button a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ff4757;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logout-button a:hover {
+            background: #ff6b81;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .logout-button i {
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
-    <div class="logout-button">
-        <a href="{{ url_for('main.logout') }}">Déconnexion</a>
-    </div>
+
     <div class="dashboard-container">
-        <!-- Section des rendez-vous -->
+        <!-- Nouvelle section des statistiques -->
+        <div class="section stats-section">
+            <h2><i class="fas fa-chart-line"></i> Statistiques</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Clients par semaine</h3>
+                        <p class="stat-number">{{ stats.clients_per_week }}</p>
+                        <div class="stat-trend {% if stats.weekly_trend > 0 %}positive{% else %}negative{% endif %}">
+                            <i class="fas fa-arrow-{% if stats.weekly_trend > 0 %}up{% else %}down{% endif %}"></i>
+                            {{ stats.weekly_trend }}%
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Jour le plus demandé</h3>
+                        <p class="stat-number">{{ stats.most_booked_day }}</p>
+                        <p class="stat-detail">{{ stats.most_booked_day_percentage }}% des RDV</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Taux d'occupation</h3>
+                        <p class="stat-number">{{ stats.occupation_rate }}%</p>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: {{ stats.occupation_rate }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Revenus du mois</h3>
+                        <p class="stat-number">{{ stats.monthly_revenue }}€</p>
+                        <div class="stat-trend {% if stats.revenue_trend > 0 %}positive{% else %}negative{% endif %}">
+                            <i class="fas fa-arrow-{% if stats.revenue_trend > 0 %}up{% else %}down{% endif %}"></i>
+                            {{ stats.revenue_trend }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section des rendez-vous du jour -->
         <div class="section">
-            <!-- Rendez-vous du jour -->
             <h2>Rendez-vous du jour</h2>
             {% if today_appointments %}
                 {% for appointment in today_appointments %}
@@ -466,58 +827,19 @@
                             </button>
                         {% endif %}
                     </div>
-                {% else %}
-                    <p>Aucun rendez-vous aujourd'hui</p>
                 {% endfor %}
-            {% endif %}
-
-            <!-- Rendez-vous à venir -->
-            <h2>Rendez-vous à venir</h2>
-            {% if upcoming_appointments %}
-                <div class="upcoming-appointments">
-                    {% for appointment in upcoming_appointments %}
-                    <div class="appointment-card">
-                        <div class="appointment-info">
-                            <h3>{{ appointment.client.username }}</h3>
-                            <p>{{ appointment.datetime.strftime('%d/%m/%Y à %H:%M') }}</p>
-                        </div>
-                        <div class="appointment-actions">
-                            <button onclick="completeAppointment({{ appointment.id }})" class="btn btn-success">
-                                <i class="fas fa-check"></i> Confirmer
-                            </button>
-                            <button onclick="proposeEarlierTime({{ appointment.id }})" class="btn btn-info">
-                                <i class="fas fa-clock"></i> Avancer
-                            </button>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
             {% else %}
-                <p>Aucun rendez-vous à venir</p>
+                <p>Aucun rendez-vous aujourd'hui</p>
             {% endif %}
         </div>
 
-        <!-- Section des disponibilités -->
-        <div class="section">
-            <h2>Gérer mes disponibilités</h2>
-            <div class="time-slots-grid">
-                {% for day, number in [('Lundi', 1), ('Mardi', 2), ('Mercredi', 3), ('Jeudi', 4), ('Vendredi', 5), ('Samedi', 6)] %}
-                <div class="day-column">
-                    <h3>{{ day }}</h3>
-                    <div class="slots-container">
-                        {% for hour in range(8, 19) %}
-                            <div class="slot-cell" 
-                                 data-day="{{ number }}" 
-                                 data-hour="{{ '%02d:00'|format(hour) }}"
-                                 onclick="toggleSlot(this)">
-                                {{ '%02d:00'|format(hour) }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            <button onclick="saveAvailability()" class="btn save-btn">Enregistrer les disponibilités</button>
+        <!-- Nouvelle section calendrier -->
+        <div class="section calendar-section">
+            <h2>Calendrier des rendez-vous</h2>
+            <div id="appointments-calendar"></div>
+            <a href="{{ url_for('main.manage_availability') }}" class="btn manage-slots-btn">
+                <i class="fas fa-cog"></i> Gérer mes disponibilités
+            </a>
         </div>
     </div>
 
@@ -588,7 +910,7 @@
                 element.classList.add('available');
                 element.title = 'Créneau disponible';
                 
-                // Appliquer les styles de disponibilité
+                // Appliquer les styles de disponibilit
                 element.style.backgroundColor = '#e8f5e9';
                 element.style.color = '#2e7d32';
             }
@@ -734,8 +1056,63 @@
             }
         }
     </script>
-    <div class="logout-button"></div>
-        <a href="{{ url_for('main.logout') }}">Déconnexion</a>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('appointments-calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            plugins: [ 'dayGrid', 'timeGrid', 'interaction' ],
+            defaultView: 'timeGridWeek',
+            header: {
+                left: 'title',
+                center: '',
+                right: 'today prev,next'
+            },
+            locale: 'fr',
+            firstDay: 1,
+            allDaySlot: false,
+            slotMinTime: '10:00:00',
+            slotMaxTime: '23:00:00',
+            slotDuration: '00:30:00',
+            height: 'auto',
+            contentHeight: 400,
+            minTime: '10:00:00',
+            maxTime: '23:00:00',
+            scrollTime: '10:00:00',
+            slotLabelInterval: '01:00',
+            slotLabelFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            },
+            events: {{ calendar_events|tojson|safe }},
+            eventRender: function(info) {
+                var event = info.event;
+                var element = info.el;
+                
+                // Simplifier l'affichage - juste le nom du client
+                element.querySelector('.fc-title').innerHTML = event.title;
+                
+                // Appliquer les styles selon le statut
+                if (event.extendedProps.status === 'completed') {
+                    element.style.backgroundColor = '#4CAF50';
+                    element.style.borderColor = '#2E7D32';
+                } else {
+                    element.style.backgroundColor = '#FFA500';
+                    element.style.borderColor = '#FF8C00';
+                }
+                
+                // Info détaillée au survol
+                element.title = `Client: ${event.title}\nHeure: ${event.start.toLocaleTimeString()}\nStatut: ${event.extendedProps.status === 'completed' ? 'Terminé' : 'En attente'}`;
+            }
+        });
+        calendar.render();
+    });
+    </script>
+    <div class="logout-button">
+        <a href="{{ url_for('main.logout') }}">
+            <i class="fas fa-sign-out-alt"></i>
+            Déconnexion
+        </a>
     </div>
 </body>
 </html>

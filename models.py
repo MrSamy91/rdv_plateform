@@ -61,8 +61,9 @@ class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     coiffeur_id = db.Column(db.Integer, db.ForeignKey('coiffeur.id'), nullable=False)
     weekday = db.Column(db.String(20), nullable=False)
-    start_time = db.Column(db.String(5), nullable=False)  # Format HH:MM
-    end_time = db.Column(db.String(5), nullable=False)    # Format HH:MM
+    date = db.Column(db.Date, nullable=True)
+    start_time = db.Column(db.String(5), nullable=False)
+    end_time = db.Column(db.String(5), nullable=False)
     is_available = db.Column(db.Boolean, default=True)
     
     # Relation avec Coiffeur
