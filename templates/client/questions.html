@@ -726,6 +726,123 @@
         .day-item.expanded .slots-panel {
             max-height: 1000px; /* Même valeur que dans le JavaScript */
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .modal i {
+            font-size: 48px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: checkmark 0.5s ease-out 0.2s both;
+        }
+
+        .modal h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .modal p {
+            margin-bottom: 25px;
+            color: #666;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-confirm {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes checkmark {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Support du mode sombre pour les modales */
+        @media (prefers-color-scheme: dark) {
+            .modal-content {
+                background-color: #2d2d2d;
+                color: #fff;
+            }
+
+            .modal h2 {
+                color: #fff;
+            }
+
+            .modal p {
+                color: #bdbdbd;
+            }
+        }
     </style>
 </head>
 <body>
@@ -787,26 +904,38 @@
         </div>
 
         <!-- Ajout du modal de confirmation -->
-        <div id="confirmation-modal" class="modal" style="display: none;">
+        <div id="confirmation-modal" class="modal">
             <div class="modal-content">
+                <i class="fas fa-calendar-check"></i>
                 <h2>Confirmation de réservation</h2>
                 <p>Êtes-vous sûr de vouloir réserver ce créneau ?</p>
                 <div class="modal-buttons">
-                    <button onclick="confirmBooking()" class="btn yes">Confirmer</button>
-                    <button onclick="closeModal()" class="btn no">Annuler</button>
+                    <button onclick="confirmBooking()" class="btn-confirm">Confirmer</button>
+                    <button onclick="closeModal('confirmation-modal')" class="btn-cancel">Annuler</button>
                 </div>
             </div>
         </div>
 
         <!-- Modal de notification -->
-        <div id="notification-modal" class="modal" style="display: none;">
+        <div id="notification-modal" class="modal">
             <div class="modal-content">
+                <i class="fas fa-bell"></i>
                 <h2>Aucune disponibilité</h2>
                 <p>Souhaitez-vous être notifié par email lorsqu'un créneau sera disponible ?</p>
                 <div class="modal-buttons">
-                    <button onclick="setupNotification()" class="btn yes">Oui, je veux tre notifié</button>
-                    <button onclick="closeNotificationModal()" class="btn no">Non, retour au choix des jours</button>
+                    <button onclick="setupNotification()" class="btn-confirm">Oui, je veux être notifié</button>
+                    <button onclick="closeModal('notification-modal')" class="btn-cancel">Non, merci</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Modal de succès -->
+        <div id="success-modal" class="modal">
+            <div class="modal-content">
+                <i class="fas fa-check-circle"></i>
+                <h2>Succès !</h2>
+                <p id="success-message"></p>
+                <button onclick="closeModal('success-modal')" class="btn-confirm">OK</button>
             </div>
         </div>
     </div>
@@ -907,8 +1036,8 @@
             modal.style.display = 'block';
         }
 
-        function closeModal() {
-            document.getElementById('confirmation-modal').style.display = 'none';
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         function confirmBooking() {
@@ -935,10 +1064,12 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Réservation confirmée !');
-                    window.location.href = '/client/dashboard';
-                } else {
-                    throw new Error(data.error || 'Erreur lors de la réservation');
+                    closeModal('confirmation-modal');
+                    document.getElementById('success-message').textContent = 'Réservation confirmée !';
+                    showModal('success-modal');
+                    setTimeout(() => {
+                        window.location.href = '/client/dashboard';
+                    }, 2000);
                 }
             })
             .catch(error => {
@@ -946,7 +1077,7 @@
                 alert('Erreur : ' + error.message);
             })
             .finally(() => {
-                closeModal();
+                closeModal('confirmation-modal');
             });
         }
 
@@ -954,7 +1085,7 @@
         window.onclick = function(event) {
             const modal = document.getElementById('confirmation-modal');
             if (event.target === modal) {
-                closeModal();
+                closeModal('confirmation-modal');
             }
         }
 
@@ -1020,11 +1151,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Vous serez notifié lorsqu\'un créneau sera disponible.');
-                } else {
-                    alert('Erreur lors de la configuration de la notification.');
+                    closeModal('notification-modal');
+                    document.getElementById('success-message').textContent = 'Vous serez notifié lorsqu\'un créneau sera disponible.';
+                    showModal('success-modal');
                 }
-                closeNotificationModal();
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la configuration de la notification.');
             });
         }
 
@@ -1075,6 +1209,10 @@
                     }
                 });
             });
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
         }
     </script>
 </body>

@@ -1140,23 +1140,18 @@ def propose_earlier_time(appointment_id):
         return jsonify({'success': False, 'error': 'Non autorisé'}), 403
 
     try:
-        data = request.get_json()
-        new_datetime = datetime.strptime(data.get('new_datetime'), '%Y-%m-%d %H:%M')
-        
         appointment = Booking.query.get_or_404(appointment_id)
         client = User.query.get(appointment.client_id)
         
         # Envoyer l'email au client
         send_email_notification(
             client.email,
-            'Possibilité d\'avancer votre rendez-vous',
+            'Possibilité de venir plus tôt',
             'emails/earlier_appointment.html',
             username=client.username,
             coiffeur_name=current_user.username,
             original_date=appointment.datetime.strftime('%d/%m/%Y'),
-            original_time=appointment.datetime.strftime('%H:%M'),
-            new_date=new_datetime.strftime('%d/%m/%Y'),
-            new_time=new_datetime.strftime('%H:%M')
+            original_time=appointment.datetime.strftime('%H:%M')
         )
         
         return jsonify({'success': True})
