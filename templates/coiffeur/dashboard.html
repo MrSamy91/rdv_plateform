@@ -25,15 +25,134 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
             color: #333;
+            padding: 20px;
+            margin: 0;
         }
 
         .dashboard-container {
             max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            margin: 0 auto;
+            padding: 60px 15px 20px;
+            display: flex;
+            flex-direction: column;
             gap: 20px;
+        }
+
+        .dashboard-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 10px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .logout-button {
+            position: static;
+        }
+
+        .section {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+
+        .manage-availability-button {
+            margin: 0 0 15px 0;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .manage-availability-button .btn {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 80px 10px 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .section {
+                padding: 10px;
+            }
+
+            .appointment-card {
+                flex-direction: column;
+            }
+
+            .appointment-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .appointment-actions button {
+                width: 100%;
+            }
+
+            .manage-availability-button {
+                justify-content: center;
+            }
+
+            .manage-availability-button .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            #appointments-calendar {
+                font-size: 0.8rem;
+            }
+
+            .fc-header-toolbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        .stats-section,
+        .upcoming-appointments,
+        .calendar-section {
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+
+        .manage-availability-button {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .manage-availability-button .btn {
+            background: #2196F3;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .manage-availability-button .btn:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .section {
@@ -792,13 +911,106 @@
         .fc-today {
             background-color: rgba(0, 123, 255, 0.1) !important;
         }
+
+        .appointment-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .appointment-time {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2196F3;
+            margin-bottom: 10px;
+        }
+
+        .appointment-details {
+            margin: 15px 0;
+        }
+
+        .appointment-details p {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirm {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-complete {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .no-appointments {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-style: italic;
+        }
+
+        .status-pending {
+            color: #FFA000;
+            font-weight: 500;
+        }
+
+        i {
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
 
+    <div class="dashboard-header">
+        <h1>Dashboard Coiffeur</h1>
+        <div class="logout-button">
+            <a href="{{ url_for('main.logout') }}">
+                <i class="fas fa-sign-out-alt"></i>
+                Déconnexion
+            </a>
+        </div>
+    </div>
+
     <div class="dashboard-container">
-        <!-- Nouvelle section des statistiques -->
-        <div class="section stats-section">
+        <!-- Section des statistiques -->
+        <div class="stats-section">
             <h2><i class="fas fa-chart-line"></i> Statistiques</h2>
             <div class="stats-grid">
                 <div class="stat-card">
@@ -855,42 +1067,9 @@
             </div>
         </div>
 
-        <!-- Section des rendez-vous du jour -->
-        <div class="section">
-            <h2>Rendez-vous du jour</h2>
-            {% if today_appointments %}
-                {% for appointment in today_appointments %}
-                    <div class="appointment-card">
-                        <div class="appointment-time">{{ appointment.datetime.strftime('%H:%M') }}</div>
-                        <div class="appointment-details">
-                            <p>Client: {{ appointment.client.username }}</p>
-                            <p>Téléphone: {{ appointment.client.phone_number }}</p>
-                            <p class="status-{{ appointment.status }}">Status: {{ appointment.status }}</p>
-                        </div>
-                        {% if appointment.status != 'completed' %}
-                            <button onclick="completeAppointment({{ appointment.id }})" class="btn">
-                                Marquer comme terminé
-                            </button>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>Aucun rendez-vous aujourd'hui</p>
-            {% endif %}
-        </div>
-
-        <!-- Nouvelle section calendrier -->
-        <div class="section calendar-section">
-            <h2>Calendrier des rendez-vous</h2>
-            <div id="appointments-calendar"></div>
-            <a href="{{ url_for('main.manage_availability') }}" class="btn manage-slots-btn">
-                <i class="fas fa-cog"></i> Gérer mes disponibilités
-            </a>
-        </div>
-
-        <!-- Section des prochains rendez-vous -->
-        <div class="section">
-            <h2>Prochains rendez-vous</h2>
+        <!-- Section des prochains rendez-vous en attente -->
+        <div class="section upcoming-appointments">
+            <h2><i class="fas fa-clock"></i> Prochains rendez-vous en attente</h2>
             {% if upcoming_appointments %}
                 {% for appointment in upcoming_appointments %}
                     <div class="appointment-card">
@@ -898,20 +1077,39 @@
                             {{ appointment.datetime.strftime('%d/%m/%Y %H:%M') }}
                         </div>
                         <div class="appointment-details">
-                            <p>Client: {{ appointment.client.username }}</p>
-                            <p>Téléphone: {{ appointment.client.phone_number }}</p>
-                            <p class="status-{{ appointment.status }}">Status: {{ appointment.status }}</p>
+                            <p><i class="fas fa-user"></i> Client: {{ appointment.client.username }}</p>
+                            <p><i class="fas fa-phone"></i> Téléphone: {{ appointment.client.phone_number }}</p>
+                            <p class="status-pending">
+                                <i class="fas fa-clock"></i> Status: En attente
+                            </p>
                         </div>
-                        {% if appointment.status == 'pending' %}
-                            <button onclick="confirmAppointment({{ appointment.id }})" class="btn">
-                                Confirmer
+                        <div class="appointment-actions">
+                            <button onclick="finishAppointment({{ appointment.id }})" class="btn btn-success">
+                                <i class="fas fa-check-double"></i> Terminer le RDV
                             </button>
-                        {% endif %}
+                            <button onclick="proposeEarlierTime({{ appointment.id }})" class="btn btn-info">
+                                <i class="fas fa-clock"></i> Avancer le RDV
+                            </button>
+                        </div>
                     </div>
                 {% endfor %}
             {% else %}
-                <p>Aucun rendez-vous à venir</p>
+                <p class="no-appointments">
+                    <i class="fas fa-calendar-times"></i>
+                    Aucun rendez-vous en attente
+                </p>
             {% endif %}
+        </div>
+
+        <!-- Section du calendrier avec bouton de gestion -->
+        <div class="section calendar-section">
+            <div class="manage-availability-button">
+                <a href="{{ url_for('main.manage_availability') }}" class="btn btn-primary">
+                    <i class="fas fa-clock"></i> Gérer mes disponibilités
+                </a>
+            </div>
+            <h2><i class="fas fa-calendar-alt"></i> Calendrier des rendez-vous</h2>
+            <div id="appointments-calendar"></div>
         </div>
     </div>
 
@@ -1170,11 +1368,5 @@
         calendar.render();
     });
     </script>
-    <div class="logout-button">
-        <a href="{{ url_for('main.logout') }}">
-            <i class="fas fa-sign-out-alt"></i>
-            Déconnexion
-        </a>
-    </div>
 </body>
 </html>
