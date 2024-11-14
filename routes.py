@@ -607,13 +607,12 @@ def coiffeur_dashboard():
         Booking.datetime
     ).all()
     
-    # Rendez-vous à venir
+    # Rendez-vous à venir (seulement les pending)
     upcoming_appointments = Booking.query.filter(
         Booking.coiffeur_id == coiffeur.id,
         Booking.datetime > today_end,
-        Booking.datetime <= today + timedelta(days=7),
-        Booking.status.in_(['pending', 'confirmed'])
-    ).order_by(Booking.datetime).all()
+        Booking.status == 'pending'  # Uniquement les rendez-vous en attente
+    ).order_by(Booking.datetime).all()  # Tri par date
 
     # Préparation des événements du calendrier
     calendar_events = []
