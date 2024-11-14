@@ -746,6 +746,52 @@
         .logout-button i {
             font-size: 1.1em;
         }
+
+        /* Styles spécifiques pour le calendrier */
+        .fc-event {
+            border: none !important;
+            padding: 2px 4px !important;
+            border-radius: 4px !important;
+        }
+
+        /* Style pour les rendez-vous en attente (booked) */
+        .event-pending {
+            background-color: #ffa726 !important;
+            border-color: #fb8c00 !important;
+        }
+
+        /* Style pour les rendez-vous terminés */
+        .event-completed {
+            background-color: #66bb6a !important;
+            border-color: #43a047 !important;
+        }
+
+        /* Amélioration de la lisibilité des heures */
+        .fc-time-grid .fc-slats td {
+            height: 2.5em !important;
+            border-bottom: 1px solid #eee !important;
+        }
+
+        /* Style pour l'en-tête du calendrier */
+        .fc-header-toolbar {
+            margin-bottom: 1.5em !important;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .fc-button {
+            background-color: #007bff !important;
+            border-color: #0056b3 !important;
+        }
+
+        .fc-button:hover {
+            background-color: #0056b3 !important;
+        }
+
+        .fc-today {
+            background-color: rgba(0, 123, 255, 0.1) !important;
+        }
     </style>
 </head>
 <body>
@@ -840,6 +886,32 @@
             <a href="{{ url_for('main.manage_availability') }}" class="btn manage-slots-btn">
                 <i class="fas fa-cog"></i> Gérer mes disponibilités
             </a>
+        </div>
+
+        <!-- Section des prochains rendez-vous -->
+        <div class="section">
+            <h2>Prochains rendez-vous</h2>
+            {% if upcoming_appointments %}
+                {% for appointment in upcoming_appointments %}
+                    <div class="appointment-card">
+                        <div class="appointment-time">
+                            {{ appointment.datetime.strftime('%d/%m/%Y %H:%M') }}
+                        </div>
+                        <div class="appointment-details">
+                            <p>Client: {{ appointment.client.username }}</p>
+                            <p>Téléphone: {{ appointment.client.phone_number }}</p>
+                            <p class="status-{{ appointment.status }}">Status: {{ appointment.status }}</p>
+                        </div>
+                        {% if appointment.status == 'pending' %}
+                            <button onclick="confirmAppointment({{ appointment.id }})" class="btn">
+                                Confirmer
+                            </button>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Aucun rendez-vous à venir</p>
+            {% endif %}
         </div>
     </div>
 
@@ -1060,51 +1132,41 @@
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('appointments-calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
-            plugins: [ 'dayGrid', 'timeGrid', 'interaction' ],
+            plugins: ['dayGrid', 'timeGrid', 'interaction'],
             defaultView: 'timeGridWeek',
             header: {
-                left: 'title',
-                center: '',
-                right: 'today prev,next'
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            locale: 'fr',
-            firstDay: 1,
-            allDaySlot: false,
-            slotMinTime: '10:00:00',
-            slotMaxTime: '23:00:00',
-            slotDuration: '00:30:00',
-            height: 'auto',
-            contentHeight: 400,
             minTime: '10:00:00',
             maxTime: '23:00:00',
-            scrollTime: '10:00:00',
-            slotLabelInterval: '01:00',
-            slotLabelFormat: {
+            slotDuration: '00:30:00',
+            allDaySlot: false,
+            locale: 'fr',
+            firstDay: 1,
+            height: 'auto',
+            eventRender: function(info) {
+                // Le style est déjà appliqué via className dans les données
+                // Ajouter le tooltip
+                var tooltip = new Tooltip(info.el, {
+                    title: `Client: ${info.event.title}<br>
+                            Téléphone: ${info.event.extendedProps.client_phone}<br>
+                            Statut: ${info.event.extendedProps.status}`,
+                    placement: 'top',
+                    trigger: 'hover',
+                    container: 'body',
+                    html: true
+                });
+            },
+            events: {{ calendar_events|tojson|safe }},
+            eventTimeFormat: {
                 hour: '2-digit',
                 minute: '2-digit',
                 hour12: false
-            },
-            events: {{ calendar_events|tojson|safe }},
-            eventRender: function(info) {
-                var event = info.event;
-                var element = info.el;
-                
-                // Simplifier l'affichage - juste le nom du client
-                element.querySelector('.fc-title').innerHTML = event.title;
-                
-                // Appliquer les styles selon le statut
-                if (event.extendedProps.status === 'completed') {
-                    element.style.backgroundColor = '#4CAF50';
-                    element.style.borderColor = '#2E7D32';
-                } else {
-                    element.style.backgroundColor = '#FFA500';
-                    element.style.borderColor = '#FF8C00';
-                }
-                
-                // Info détaillée au survol
-                element.title = `Client: ${event.title}\nHeure: ${event.start.toLocaleTimeString()}\nStatut: ${event.extendedProps.status === 'completed' ? 'Terminé' : 'En attente'}`;
             }
         });
+
         calendar.render();
     });
     </script>

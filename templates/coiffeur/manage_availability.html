@@ -192,6 +192,142 @@
             color: #666;
             margin-top: 4px;
         }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .notification.success {
+            background-color: #4CAF50;
+        }
+
+        .notification.error {
+            background-color: #f44336;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        /* Animations pour la modal */
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes checkmark {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .modal i {
+            font-size: 48px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: checkmark 0.5s ease-out 0.2s both,
+                       bounce 1s ease-in-out 1s;
+        }
+
+        .modal h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            animation: fadeIn 0.5s ease-out 0.3s both;
+        }
+
+        .modal p {
+            margin-bottom: 25px;
+            color: #666;
+            animation: fadeIn 0.5s ease-out 0.4s both;
+        }
+
+        .modal button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out 0.5s both;
+        }
+
+        .modal button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .modal button:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -218,13 +354,17 @@
             </div>
 
             <div class="time-slots-grid">
-                {% for day, number in [('Lundi', 1), ('Mardi', 2), ('Mercredi', 3), ('Jeudi', 4), ('Vendredi', 5), ('Samedi', 6)] %}
+                {% for day in range(1, 7) %}
                 <div class="day-column">
-                    <h3>{{ day }} <span class="date" data-day="{{ number }}"></span></h3>
+                    <h3>
+                        <span class="weekday">{{ ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'][day-1] }}</span>
+                        <br>
+                        <span class="date" data-day="{{ day }}"></span>
+                    </h3>
                     <div class="slots-container">
-                        {% for hour in range(8, 19) %}
+                        {% for hour in range(9, 19) %}
                             <div class="slot-cell" 
-                                 data-day="{{ number }}" 
+                                 data-day="{{ day }}" 
                                  data-hour="{{ '%02d:00'|format(hour) }}"
                                  onclick="toggleSlot(this)">
                                 {{ '%02d:00'|format(hour) }}
@@ -237,6 +377,15 @@
             <button onclick="saveAvailability()" class="save-btn">
                 <i class="fas fa-save"></i> Enregistrer les disponibilités
             </button>
+        </div>
+    </div>
+
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <i class="fas fa-check-circle"></i>
+            <h2>Créneaux enregistrés !</h2>
+            <p>Vos disponibilités ont été mises à jour avec succès.</p>
+            <button onclick="closeModal()">OK</button>
         </div>
     </div>
 
@@ -338,38 +487,63 @@
             element.classList.toggle('available');
         }
 
+        function showModal() {
+            document.getElementById('confirmationModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('confirmationModal').style.display = 'none';
+        }
+
         function saveAvailability() {
+            const slots = [];
+            
+            // Pour chaque jour
             for (let day = 1; day <= 6; day++) {
-                const selectedSlots = Array.from(document.querySelectorAll(`.slot-cell[data-day="${day}"].available`))
-                    .map(cell => cell.dataset.hour);
-                
                 const dateElement = document.querySelector(`.date[data-day="${day}"]`);
                 const date = dateElement.dataset.fullDate;
-
-                if (selectedSlots.length > 0) {
-                    fetch('/coiffeur/add_availability', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: JSON.stringify({
-                            weekday: day,
-                            date: date,
-                            slots: selectedSlots
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log(`Créneaux enregistrés pour le ${date}`);
-                        } else {
-                            console.error(`Erreur lors de l'enregistrement pour le ${date}:`, data.error);
-                        }
-                    })
-                    .catch(error => console.error('Erreur:', error));
-                }
+                
+                // Récupérer tous les créneaux disponibles pour ce jour
+                const availableSlots = document.querySelectorAll(`.slot-cell[data-day="${day}"].available`);
+                
+                availableSlots.forEach(slot => {
+                    slots.push({
+                        date: date,
+                        start_time: slot.dataset.hour,
+                        end_time: incrementTime(slot.dataset.hour, 1) // Ajoute 1 heure
+                    });
+                });
             }
+
+            // Envoyer les données au serveur
+            fetch('/coiffeur/save_slots', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ slots: slots })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showModal();  // Afficher la modal au lieu de la notification
+                    loadSlotsForCurrentWeek();
+                } else {
+                    showNotification('Erreur lors de l\'enregistrement', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de l\'enregistrement', 'error');
+            });
+        }
+
+        function incrementTime(time, hours) {
+            const [h, m] = time.split(':');
+            const date = new Date(2000, 0, 1, parseInt(h), parseInt(m));
+            date.setHours(date.getHours() + hours);
+            return `${String(date.getHours()).padStart(2, '0')}:00`;
         }
     </script>
 </body>

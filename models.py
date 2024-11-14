@@ -66,10 +66,7 @@ class TimeSlot(db.Model):
     end_time = db.Column(db.String(5), nullable=False)
     is_available = db.Column(db.Boolean, default=True)
     
-    # Relation avec Coiffeur
     coiffeur = db.relationship('Coiffeur', backref='time_slots', lazy=True)
-    
-    # Ne définissez pas la relation bookings ici
     
     def __repr__(self):
         return f'<TimeSlot id={self.id} coiffeur_id={self.coiffeur_id} {self.weekday} {self.start_time}-{self.end_time}>'

@@ -1,15 +1,15 @@
 from app import create_app, db
-from models import User, Coiffeur, Service, TimeSlot, Booking, Review, Reward
+from sqlalchemy import text
+import os
 
 def reset_database():
     app = create_app()
+    
     with app.app_context():
-        # Demander confirmation
-        confirm = input("⚠️ ATTENTION: Ceci va effacer toutes les données. Êtes-vous sûr ? (oui/non): ")
-        if confirm.lower() != 'oui':
-            print("Opération annulée.")
-            return
-
+        # Supprimer toutes les tables existantes
+        db.drop_all()
+        
+        # Supprimer la table alembic_version si elle existe
         try:
             # Supprimer toutes les tables
             print("Suppression des tables...")
