@@ -1,19 +1,18 @@
 from flask import render_template, flash, redirect, url_for, request, jsonify, abort
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from models import User, Coiffeur, Service, Booking, Review, TimeSlot, Reward
 from forms import LoginForm, RegistrationForm, RendezvousForm, ReviewForm
-from datetime import datetime, timedelta
 from utils import send_email_notification, add_to_google_calendar, generate_verification_token, send_verification_email
 from flask_mail import Message, Mail
 from itsdangerous import URLSafeTimedSerializer
-from db import db  # Import db directly from db.py
+from db import db
 from flask import Blueprint
 from collections import Counter
-from sqlalchemy import func
-from app import mail  # Assurez-vous que cela correspond à l'endroit où vous avez initialisé mail
+from sqlalchemy import func, desc
+from app import mail
 from flask_wtf.csrf import validate_csrf
 from wtforms.validators import ValidationError
 
@@ -489,39 +488,156 @@ def coiffeur_dashboard():
         return redirect(url_for('main.index'))
         
     coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
-    
-    # Calcul des statistiques
-    stats = calculate_coiffeur_stats(coiffeur.id)
-    
-    # Début et fin de la semaine en cours
-    today = datetime.now()
-    start_of_week = today - timedelta(days=today.weekday())
-    end_of_week = start_of_week + timedelta(days=6)
-    
-    # Rendez-vous de la semaine (uniquement pending et completed)
-    appointments = Booking.query.filter(
+    today = datetime.now().date()
+    week_ago = today - timedelta(days=7)
+    two_weeks_ago = today - timedelta(days=14)
+    month_ago = today - timedelta(days=30)
+
+    # Initialisation du dictionnaire stats AVANT de l'utiliser
+    stats = {
+        'clients_per_week': Booking.query.filter(
+            Booking.coiffeur_id == coiffeur.id,
+            Booking.datetime >= week_ago
+        ).count(),
+        'weekly_trend': Booking.query.filter(
+            Booking.coiffeur_id == coiffeur.id,
+            Booking.datetime >= week_ago
+        ).count() - Booking.query.filter(
+            Booking.coiffeur_id == coiffeur.id,
+            Booking.datetime >= two_weeks_ago,
+            Booking.datetime < week_ago
+        ).count(),
+        'clients_per_month': Booking.query.filter(
+            Booking.coiffeur_id == coiffeur.id,
+            Booking.datetime >= month_ago
+        ).count(),
+        'completed_appointments': Booking.query.filter(
+            Booking.coiffeur_id == coiffeur.id,
+            Booking.status == 'completed'
+        ).count()
+    }
+
+    # Calcul des revenus
+    current_revenue = db.session.query(func.sum(Service.price)).join(
+        Booking, Service.id == Booking.service_id
+    ).filter(
         Booking.coiffeur_id == coiffeur.id,
-        Booking.datetime >= start_of_week,
-        Booking.datetime <= end_of_week,
-        Booking.status.in_(['pending', 'completed'])
-    ).order_by(Booking.datetime).all()
+        Booking.datetime >= week_ago,
+        Booking.status == 'completed'
+    ).scalar() or 0
+
+    previous_revenue = db.session.query(func.sum(Service.price)).join(
+        Booking, Service.id == Booking.service_id
+    ).filter(
+        Booking.coiffeur_id == coiffeur.id,
+        Booking.datetime >= two_weeks_ago,
+        Booking.datetime < week_ago,
+        Booking.status == 'completed'
+    ).scalar() or 0
+
+    # Mise à jour des stats avec les revenus
+    stats.update({
+        'total_revenue': current_revenue,
+        'revenue_trend': current_revenue - previous_revenue
+    })
+
+    # Calcul du taux d'occupation
+    total_slots = TimeSlot.query.filter(
+        TimeSlot.coiffeur_id == coiffeur.id,
+        TimeSlot.date >= today,
+        TimeSlot.date <= today + timedelta(days=7)
+    ).count()
     
+    booked_slots = TimeSlot.query.filter(
+        TimeSlot.coiffeur_id == coiffeur.id,
+        TimeSlot.date >= today,
+        TimeSlot.date <= today + timedelta(days=7),
+        TimeSlot.is_available == False
+    ).count()
+    
+    occupation_rate = (booked_slots / total_slots * 100) if total_slots > 0 else 0
+
+    # Calcul du jour le plus demandé
+    bookings_by_day = db.session.query(
+        func.strftime('%w', Booking.datetime).label('weekday'),
+        func.count(Booking.id).label('count')
+    ).filter(
+        Booking.coiffeur_id == coiffeur.id,
+        Booking.status != 'cancelled'
+    ).group_by('weekday').all()
+    
+    days_map = {
+        '0': 'Dimanche', '1': 'Lundi', '2': 'Mardi',
+        '3': 'Mercredi', '4': 'Jeudi', '5': 'Vendredi', '6': 'Samedi'
+    }
+    
+    most_booked_day = None
+    most_booked_count = 0
+    total_bookings = 0
+    
+    for day in bookings_by_day:
+        total_bookings += day.count
+        if day.count > most_booked_count:
+            most_booked_count = day.count
+            most_booked_day = days_map.get(day.weekday)
+    
+    most_booked_day_percentage = round((most_booked_count / total_bookings * 100) if total_bookings > 0 else 0)
+
+    # Mise à jour des stats avec les nouvelles informations
+    stats.update({
+        'occupation_rate': round(occupation_rate, 1),
+        'most_booked_day': most_booked_day or 'N/A',
+        'most_booked_day_percentage': most_booked_day_percentage
+    })
+
+    # Rendez-vous du jour avec datetime exact et tri
+    today_start = datetime.combine(today, datetime.min.time())
+    today_end = datetime.combine(today, datetime.max.time())
+    
+    today_appointments = Booking.query.filter(
+        Booking.coiffeur_id == coiffeur.id,
+        Booking.datetime >= today_start,
+        Booking.datetime <= today_end,
+        Booking.status.in_(['pending', 'confirmed', 'completed'])
+    ).join(
+        User, User.id == Booking.client_id  # Pour avoir les infos client
+    ).join(
+        Service, Service.id == Booking.service_id  # Pour avoir le service
+    ).order_by(
+        Booking.datetime
+    ).all()
+    
+    # Rendez-vous à venir
+    upcoming_appointments = Booking.query.filter(
+        Booking.coiffeur_id == coiffeur.id,
+        Booking.datetime > today_end,
+        Booking.datetime <= today + timedelta(days=7),
+        Booking.status.in_(['pending', 'confirmed'])
+    ).order_by(Booking.datetime).all()
+
+    # Préparation des événements du calendrier
     calendar_events = []
-    for apt in appointments:
+    all_appointments = today_appointments + upcoming_appointments
+    
+    for apt in all_appointments:
+        event_class = 'event-completed' if apt.status == 'completed' else 'event-pending'
         calendar_events.append({
+            'id': apt.id,
             'title': f"{apt.client.username}",
             'start': apt.datetime.strftime('%Y-%m-%dT%H:%M:00'),
-            'end': (apt.datetime + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:00'),
-            'status': apt.status,
+            'end': (apt.datetime + timedelta(minutes=60)).strftime('%Y-%m-%dT%H:%M:00'),
+            'className': event_class,
             'extendedProps': {
                 'status': apt.status,
                 'client_phone': apt.client.phone_number
             }
         })
-    
+
     return render_template('coiffeur/dashboard.html',
                          coiffeur=coiffeur,
                          stats=stats,
+                         today_appointments=today_appointments,
+                         upcoming_appointments=upcoming_appointments,
                          calendar_events=calendar_events)
 
 @main.route('/coiffeur/manage-availability')
@@ -531,50 +647,6 @@ def manage_availability():
         return redirect(url_for('main.index'))
     coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
     return render_template('coiffeur/manage_availability.html', coiffeur=coiffeur)
-
-def calculate_coiffeur_stats(coiffeur_id):
-    # Calcul des statistiques sur les 30 derniers jours
-    thirty_days_ago = datetime.now() - timedelta(days=30)
-    
-    # Requêtes pour les statistiques
-    bookings = Booking.query.filter(
-        Booking.coiffeur_id == coiffeur_id,
-        Booking.datetime >= thirty_days_ago
-    ).all()
-    
-    # Clients par semaine
-    total_clients = len(bookings)
-    clients_per_week = round(total_clients * 7 / 30, 1)
-    
-    # Jour le plus réservé
-    bookings_by_day = Counter([b.datetime.strftime('%A') for b in bookings])
-    most_booked_day = max(bookings_by_day.items(), key=lambda x: x[1])[0] if bookings_by_day else "N/A"
-    most_booked_count = max(bookings_by_day.values()) if bookings_by_day else 0
-    most_booked_percentage = round((most_booked_count / total_clients * 100) if total_clients > 0 else 0, 1)
-    
-    # Taux d'occupation
-    available_slots = TimeSlot.query.filter_by(coiffeur_id=coiffeur_id, is_available=True).count()
-    total_slots = TimeSlot.query.filter_by(coiffeur_id=coiffeur_id).count()
-    occupation_rate = round((1 - available_slots / total_slots) * 100 if total_slots > 0 else 0, 1)
-    
-    # Calcul des tendances
-    previous_month = datetime.now() - timedelta(days=60)
-    previous_bookings = Booking.query.filter(
-        Booking.coiffeur_id == coiffeur_id,
-        Booking.datetime.between(previous_month, thirty_days_ago)
-    ).count()
-    
-    weekly_trend = round(((total_clients - previous_bookings) / previous_bookings * 100) if previous_bookings > 0 else 0, 1)
-    
-    return {
-        'clients_per_week': clients_per_week,
-        'weekly_trend': weekly_trend,
-        'most_booked_day': most_booked_day,
-        'most_booked_day_percentage': most_booked_percentage,
-        'occupation_rate': occupation_rate,
-        'monthly_revenue': total_clients * 30,  # Exemple simple
-        'revenue_trend': weekly_trend  # Utilisation de la même tendance pour l'exemple
-    }
 
 @main.route('/coiffeur/finish_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
@@ -1091,4 +1163,49 @@ def propose_earlier_time(appointment_id):
         return jsonify({'success': True})
     except Exception as e:
         print(f"Erreur proposition avancement: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main.route('/coiffeur/save_slots', methods=['POST'])
+@login_required
+def save_slots():
+    if current_user.role != 'coiffeur':
+        return jsonify({'success': False, 'error': 'Non autorisé'}), 403
+        
+    try:
+        data = request.get_json()
+        slots = data.get('slots', [])
+        coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
+        
+        if not slots:
+            return jsonify({'success': False, 'error': 'Données manquantes'}), 400
+
+        # Pour chaque créneau à sauvegarder
+        for slot in slots:
+            date = datetime.strptime(slot['date'], '%Y-%m-%d').date()
+            
+            # Supprimer les anciens créneaux non réservés pour cette date et ce créneau horaire
+            TimeSlot.query.filter_by(
+                coiffeur_id=coiffeur.id,
+                date=date,
+                start_time=slot['start_time'],
+                is_available=True
+            ).delete()
+
+            # Créer le nouveau créneau
+            time_slot = TimeSlot(
+                coiffeur_id=coiffeur.id,
+                date=date,
+                weekday=str(date.weekday() + 1),  # 1 = Lundi, 2 = Mardi, etc.
+                start_time=slot['start_time'],
+                end_time=slot['end_time'],
+                is_available=True
+            )
+            db.session.add(time_slot)
+
+        db.session.commit()
+        return jsonify({'success': True})
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Erreur sauvegarde créneaux: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
