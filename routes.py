@@ -644,8 +644,50 @@ def coiffeur_dashboard():
 def manage_availability():
     if current_user.role != 'coiffeur':
         return redirect(url_for('main.index'))
+    
     coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
-    return render_template('coiffeur/manage_availability.html', coiffeur=coiffeur)
+    
+    # Initialiser le dictionnaire des créneaux par jour
+    slots_by_day = {
+        'lundi': {},
+        'mardi': {},
+        'mercredi': {},
+        'jeudi': {},
+        'vendredi': {},
+        'samedi': {}
+    }
+    
+    # Récupérer les créneaux existants
+    today = datetime.now().date()
+    existing_slots = TimeSlot.query.filter(
+        TimeSlot.coiffeur_id == coiffeur.id,
+        TimeSlot.date >= today,
+        TimeSlot.date <= today + timedelta(days=6)
+    ).all()
+
+    # Remplir le dictionnaire avec les créneaux existants
+    weekdays = {
+        '1': 'lundi',
+        '2': 'mardi',
+        '3': 'mercredi',
+        '4': 'jeudi',
+        '5': 'vendredi',
+        '6': 'samedi'
+    }
+    
+    for slot in existing_slots:
+        day_name = weekdays.get(str(slot.weekday))
+        if day_name:
+            slots_by_day[day_name][slot.start_time] = {
+                'is_available': slot.is_available,
+                'is_booked': not slot.is_available
+            }
+
+    print("Slots by day:", slots_by_day)  # Debug
+
+    return render_template('coiffeur/manage_availability.html', 
+                         coiffeur=coiffeur,
+                         slots_by_day=slots_by_day)
 
 @main.route('/coiffeur/finish_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
@@ -885,35 +927,55 @@ def confirm_appointment(appointment_id):
 def client_cancel_appointment(appointment_id):
     try:
         appointment = Booking.query.get_or_404(appointment_id)
+        
+        # Vérifier que le client est bien le propriétaire du rendez-vous
         if appointment.client_id != current_user.id:
             return jsonify({'success': False, 'error': 'Non autorisé'}), 403
             
+        # Vérifier que le rendez-vous n'est pas déjà annulé
+        if appointment.status == 'cancelled':
+            return jsonify({'success': False, 'error': 'Ce rendez-vous est déjà annulé'}), 400
+            
+        # Annuler le rendez-vous
         appointment.status = 'cancelled'
+        
+        # Libérer le créneau horaire
+        time_slot = TimeSlot.query.get(appointment.time_slot_id)
+        if time_slot:
+            time_slot.is_available = True
+        
         db.session.commit()
         
-        # Email au client
-        send_email_notification(
-            current_user.email,
-            'Confirmation d\'annulation de votre rendez-vous',
-            'emails/cancellation_client.html',
-            username=current_user.username,
-            coiffeur_name=appointment.coiffeur.user.username,
-            date=appointment.datetime.strftime('%d/%m/%Y'),
-            time=appointment.datetime.strftime('%H:%M')
-        )
-        
-        # Email au coiffeur
-        send_email_notification(
-            appointment.coiffeur.user.email,
-            'Annulation d\'un rendez-vous',
-            'emails/cancellation_coiffeur.html',
-            client_name=current_user.username,
-            date=appointment.datetime.strftime('%d/%m/%Y'),
-            time=appointment.datetime.strftime('%H:%M')
-        )
+        # Envoyer les emails de notification
+        try:
+            # Email au client
+            send_email_notification(
+                current_user.email,
+                'Confirmation d\'annulation de votre rendez-vous',
+                'emails/cancellation_client.html',
+                username=current_user.username,
+                coiffeur_name=appointment.coiffeur.user.username,
+                date=appointment.datetime.strftime('%d/%m/%Y'),
+                time=appointment.datetime.strftime('%H:%M')
+            )
+            
+            # Email au coiffeur
+            send_email_notification(
+                appointment.coiffeur.user.email,
+                'Annulation d\'un rendez-vous',
+                'emails/cancellation_coiffeur.html',
+                client_name=current_user.username,
+                date=appointment.datetime.strftime('%d/%m/%Y'),
+                time=appointment.datetime.strftime('%H:%M')
+            )
+        except Exception as e:
+            print(f"Erreur envoi email: {str(e)}")
+            # On continue même si l'email échoue
         
         return jsonify({'success': True})
+        
     except Exception as e:
+        db.session.rollback()
         print(f"Erreur d'annulation client: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -1054,52 +1116,36 @@ def get_available_slots(coiffeur_id, date):
 @login_required
 def get_hairdresser_slots(hairdresser_id, day):
     try:
-        days_map = {
-            'lundi': 1,
-            'mardi': 2,
-            'mercredi': 3,
-            'jeudi': 4,
-            'vendredi': 5,
-            'samedi': 6
-        }
-        weekday = days_map.get(day.lower())
-        print(f"Jour demandé: {day}, weekday: {weekday}")
+        print(f"Requête reçue pour le coiffeur {hairdresser_id} le jour {day}")
+        weekday = get_weekday_number(day)
         
-        if weekday is None:
-            return jsonify({'error': 'Jour invalide'}), 400
+        if not weekday:
+            return jsonify({
+                'success': False,
+                'error': 'Jour invalide'
+            }), 400
 
         slots = TimeSlot.query.filter_by(
             coiffeur_id=hairdresser_id,
-            weekday=weekday  # Utilisons le nombre
+            weekday=weekday,
+            is_available=True
         ).all()
-        print(f"Nombre de créneaux trouvés: {len(slots)}")
-
-        # Récupérons les réservations
-        booked_slots = Booking.query.join(TimeSlot).filter(
-            TimeSlot.coiffeur_id == hairdresser_id,
-            TimeSlot.weekday == weekday,
-            Booking.status != 'cancelled'
-        ).all()
-        print(f"Nombre de réservations: {len(booked_slots)}")
-
-        booked_slot_ids = {booking.time_slot_id for booking in booked_slots}
-
-        slots_data = []
-        for slot in slots:
-            slots_data.append({
-                'id': slot.id,
-                'time': slot.start_time,
-                'is_available': slot.is_available and slot.id not in booked_slot_ids
-            })
-        print(f"Données des créneaux: {slots_data}")
-
+        
+        slots_data = [{
+            'id': slot.id,
+            'time': slot.start_time,
+            'is_available': slot.is_available
+        } for slot in slots]
+        
+        print(f"Créneaux trouvés pour {day}: {slots_data}")
+        
         return jsonify({
             'success': True,
             'slots': slots_data
         })
-
+        
     except Exception as e:
-        print(f"Erreur dans get_hairdresser_slots: {str(e)}")
+        print(f"Erreur récupération créneaux: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -1203,3 +1249,15 @@ def save_slots():
         db.session.rollback()
         print(f"Erreur sauvegarde créneaux: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+def get_weekday_number(day_name):
+    weekdays = {
+        'lundi': '1',
+        'mardi': '2',
+        'mercredi': '3',
+        'jeudi': '4',
+        'vendredi': '5',
+        'samedi': '6',
+        'dimanche': '7'
+    }
+    return weekdays.get(day_name.lower())
