@@ -18,6 +18,8 @@ class User(UserMixin, db.Model):
     token_expiration = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     completed_bookings = db.Column(db.Integer, default=0)
+    reset_token = db.Column(db.String(100), unique=True, name='uq_user_reset_token')
+    reset_token_expiration = db.Column(db.DateTime)
 
     __table_args__ = (
         db.UniqueConstraint('verification_token', name='uq_user_verification_token'),

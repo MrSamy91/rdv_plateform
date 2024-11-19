@@ -1,8 +1,8 @@
-"""Initial migration
+"""initial migration with reset password
 
-Revision ID: 1419cca50924
+Revision ID: 4ee1fa8dd928
 Revises: 
-Create Date: 2024-11-14 06:47:17.402917
+Create Date: 2024-11-19 21:31:45.432727
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1419cca50924'
+revision = '4ee1fa8dd928'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -39,7 +39,10 @@ def upgrade():
     sa.Column('token_expiration', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('completed_bookings', sa.Integer(), nullable=True),
+    sa.Column('uq_user_reset_token', sa.String(length=100), nullable=True),
+    sa.Column('reset_token_expiration', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('uq_user_reset_token'),
     sa.UniqueConstraint('verification_token', name='uq_user_verification_token')
     )
     with op.batch_alter_table('user', schema=None) as batch_op:
