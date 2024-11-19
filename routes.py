@@ -15,6 +15,7 @@ from sqlalchemy import func, desc
 from app import mail
 from flask_wtf.csrf import validate_csrf
 from wtforms.validators import ValidationError
+from flask_wtf.csrf import CSRFProtect
 
 main = Blueprint('main', __name__)
 
@@ -112,18 +113,66 @@ def logout():
 
 @main.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
     if request.method == 'POST':
-        email = request.form['email']
+        email = request.form.get('email')
         user = User.query.filter_by(email=email).first()
+        
         if user:
-            send_reset_email(user)
-            flash('Un e-mail avec les instructions pour réinitialiser votre mot de passe a été envoyé.', 'info')
+            try:
+                # Générer un token de réinitialisation
+                reset_token = generate_verification_token()
+                user.reset_token = reset_token
+                user.reset_token_expiration = datetime.now() + timedelta(hours=1)
+                db.session.commit()
+                
+                # Envoyer l'email avec le lien de réinitialisation
+                send_email_notification(
+                    user.email,
+                    'Réinitialisation de votre mot de passe',
+                    'emails/reset_password.html',
+                    username=user.username,
+                    reset_link=url_for('main.reset_password_confirm', token=reset_token, _external=True)
+                )
+                
+                flash('Un email de réinitialisation vous a été envoyé.', 'success')
+                return redirect(url_for('main.login'))
+            except Exception as e:
+                print(f"Erreur envoi email reset: {str(e)}")
+                flash('Une erreur est survenue lors de l\'envoi de l\'email.', 'error')
         else:
-            flash('Adresse e-mail non trouvée.', 'error')
-        return redirect(url_for('main.login'))
+            # Pour la sécurité, ne pas indiquer si l'email existe ou non
+            flash('Si cette adresse email existe, vous recevrez un lien de réinitialisation.', 'info')
+            
     return render_template('public/reset_password.html')
+
+@main.route('/reset_password_confirm/<token>', methods=['GET', 'POST'])
+def reset_password_confirm(token):
+    user = User.query.filter_by(reset_token=token).first()
+    
+    if not user or user.reset_token_expiration < datetime.now():
+        flash('Le lien de réinitialisation est invalide ou a expiré.', 'error')
+        return redirect(url_for('main.reset_password'))
+        
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if password != confirm_password:
+            flash('Les mots de passe ne correspondent pas.', 'error')
+        else:
+            try:
+                user.set_password(password)
+                user.reset_token = None
+                user.reset_token_expiration = None
+                db.session.commit()
+                
+                flash('Votre mot de passe a été réinitialisé avec succès.', 'success')
+                return redirect(url_for('main.login'))
+            except Exception as e:
+                print(f"Erreur reset password: {str(e)}")
+                flash('Une erreur est survenue lors de la réinitialisation.', 'error')
+    
+    return render_template('public/reset_password_confirm.html')
 
 # Fin des pages
 
