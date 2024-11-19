@@ -4,846 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Questionnaire RDV</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .phone-frame {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .phone-frame::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #007bff, #00ff88);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .phone-frame:hover::before {
-            opacity: 1;
-        }
-
-        .phone-frame.fade-out {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-
-        #question-title, #initial-question-title, #hairdresser-question-title {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 1.5rem;
-        }
-
-        #question-text {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 18px;
-            color: #666;
-        }
-
-        .buttons {
-            display: grid;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 15px 30px;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            width: 100%;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            background: white;
-            color: #333;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .yes {
-            background: #28a745;
-            color: white;
-        }
-
-        .no {
-            background: #dc3545;
-            color: white;
-        }
-
-        .back-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: white;
-            border-radius: 8px;
-            text-decoration: none;
-            color: #333;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .btn.disabled {
-            background: #f8f9fa;
-            color: #6c757d;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .success-message {
-            text-align: center;
-            color: #28a745;
-            padding: 20px;
-        }
-
-        .success-message h3 {
-            margin-bottom: 10px;
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-                color: #fff;
-            }
-
-            .phone-frame {
-                background: #282c34;
-                color: #fff;
-            }
-
-            #question-title, #initial-question-title, #hairdresser-question-title {
-                color: #fff;
-            }
-
-            #question-text {
-                color: #adb5bd;
-            }
-
-            .btn:not(.yes):not(.no) {
-                background: #343a40;
-                color: #fff;
-            }
-
-            .back-btn {
-                background: #343a40;
-                color: #fff;
-            }
-        }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-
-            .btn {
-                padding: 12px 20px;
-            }
-        }
-
-        /* Style pour les boutons de jour sélectionnés */
-        .btn.day-btn.selected {
-            background: #007bff;
-            color: white;
-            transform: scale(0.98);
-        }
-
-        .search-btn {
-            background: #28a745;
-            color: white;
-            margin-top: 20px;
-        }
-
-        .day-section {
-            margin-bottom: 30px;
-        }
-
-        .day-section h3 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        /* Styles pour le modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            margin: 20% auto;
-            position: relative;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .modal-content h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .modal-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        /* Dark mode pour le modal */
-        @media (prefers-color-scheme: dark) {
-            .modal-content {
-                background: #282c34;
-                color: #fff;
-            }
-
-            .modal-content h2 {
-                color: #fff;
-            }
-
-            .day-section h3 {
-                color: #fff;
-            }
-        }
-
-        #slots-box {
-            display: none;
-            margin-top: 20px;
-        }
-
-        .day-section {
-            margin-bottom: 20px;
-        }
-
-        .day-section h3 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .time-slot {
-            padding: 8px;
-            margin: 4px 0;
-            border-radius: 4px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .time-slot.available {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .time-slot.booked {
-            background-color: #dc3545;
-            color: white;
-            cursor: not-allowed;
-        }
-
-        .time-slot.selected {
-            background-color: #007bff;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .time-slot.reserved {
-            background-color: #dc3545;
-            color: white;
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
-
-        .time-slot.reserved:hover .booking-info {
-            display: block;
-        }
-
-        .booking-info {
-            display: none;
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            margin-top: 5px;
-            z-index: 1000;
-        }
-
-        .legend {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 0.9em;
-        }
-
-        .legend-item {
-            display: inline-block;
-            margin: 0 10px;
-        }
-
-        .legend-color {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .day-column {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            min-height: 180px;
-            border: 2px solid #e9ecef;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .day-header {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #495057;
-            padding: 10px;
-            background: #e9ecef;
-            border-radius: 8px;
-            margin: -15px -15px 10px -15px;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .day-column.selected {
-            background: #e3f2fd;
-            border-color: #2196f3;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(33, 150, 243, 0.2);
-        }
-
-        .day-column:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-        }
-
-        .slots-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 5px;
-        }
-
-        .time-slot {
-            padding: 8px 12px;
-            margin: 2px 0;
-            border-radius: 6px;
-            font-size: 0.95em;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .time-slot.available {
-            background-color: #4caf50;
-            color: white;
-            border: 1px solid #43a047;
-        }
-
-        .time-slot.available:hover {
-            background-color: #43a047;
-            transform: scale(1.03);
-        }
-
-        .time-slot.reserved {
-            background-color: #f44336;
-            color: white;
-            border: 1px solid #e53935;
-            opacity: 0.7;
-        }
-
-        .no-slots {
-            color: #757575;
-            font-style: italic;
-            padding: 10px;
-            text-align: center;
-            background: #f5f5f5;
-            border-radius: 6px;
-            margin: 5px 0;
-        }
-
-        /* Style pour le bouton de recherche */
-        .search-btn {
-            margin-top: 25px;
-            background: linear-gradient(45deg, #2196f3, #1976d2);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .search-btn:hover {
-            background: linear-gradient(45deg, #1976d2, #1565c0);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
-        }
-
-        /* Responsive design amélioré */
-        @media (max-width: 768px) {
-            .days-grid {
-                grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur tablette */
-                gap: 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .days-grid {
-                grid-template-columns: 1fr; /* 1 colonne sur mobile */
-            }
-            
-            .day-column {
-                min-height: 150px;
-            }
-        }
-
-        /* Dark mode amélioré */
-        @media (prefers-color-scheme: dark) {
-            .week-calendar {
-                background: #1e1e1e;
-            }
-
-            .day-column {
-                background: #2d2d2d;
-                border-color: #404040;
-            }
-
-            .day-header {
-                background: #333;
-                color: #fff;
-                border-bottom-color: #404040;
-            }
-
-            .day-column.selected {
-                background: #1a237e;
-                border-color: #3f51b5;
-            }
-
-            .no-slots {
-                background: #333;
-                color: #bdbdbd;
-            }
-        }
-
-        .calendar-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .weekdays-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            padding: 10px;
-        }
-
-        .weekday-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .weekday-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .weekday-card.selected {
-            border-color: #2196f3;
-            background: #e3f2fd;
-        }
-
-        .weekday-header {
-            background: #4a90e2;
-            color: white;
-            padding: 12px;
-            font-weight: bold;
-            text-align: center;
-            font-size: 1.1em;
-        }
-
-        .weekday-content {
-            padding: 15px;
-        }
-
-        .slots-preview {
-            min-height: 100px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .slot-item {
-            background: #28a745;
-            color: white;
-            padding: 8px;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 0.9em;
-        }
-
-        .slot-item.unavailable {
-            background: #dc3545;
-            opacity: 0.7;
-        }
-
-        .no-slots-message {
-            color: #666;
-            text-align: center;
-            padding: 10px;
-            font-style: italic;
-        }
-
-        .loading-slots {
-            text-align: center;
-            color: #666;
-            padding: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .weekdays-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .calendar-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .days-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .day-item {
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .day-info {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .day-info:hover {
-            background: #f8f9fa;
-            transform: translateX(5px);
-        }
-
-        .day-name {
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #495057;
-        }
-
-        .slots-count {
-            background: #e9ecef;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .slots-count.has-slots {
-            background: #4caf50;
-            color: white;
-        }
-
-        .slots-panel {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-        }
-
-        .slots-content {
-            padding: 0 20px;
-        }
-
-        .slot-item {
-            padding: 12px 15px;
-            text-align: center;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            font-size: 1em;
-        }
-
-        .slot-item.available {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #a5d6a7;
-        }
-
-        .slot-item.reserved {
-            background: #ffebee;
-            color: #c62828;
-            border: 1px solid #ef9a9a;
-            cursor: not-allowed;
-        }
-
-        .slot-item.available:hover {
-            background: #c8e6c9;
-            transform: translateY(-2px);
-        }
-
-        .day-item.expanded {
-            margin: 20px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .day-item.expanded .day-info {
-            background: #e3f2fd;
-            border-bottom: 1px solid #bbdefb;
-            border-radius: 8px 8px 0 0;
-        }
-
-        .loading {
-            text-align: center;
-            color: #666;
-            padding: 10px;
-            grid-column: 1 / -1;
-        }
-
-        .slots-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-            padding: 15px;
-        }
-
-        .day-item.expanded .slots-content {
-            animation: expandSlots 0.3s ease-out forwards;
-        }
-
-        .slots-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        }
-
-        .days-list {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        @keyframes expandSlots {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 768px) {
-            .slots-content {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
-            
-            .days-list {
-                padding: 10px;
-            }
-        }
-
-        .slots-panel {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-        }
-
-        .day-item.expanded .slots-panel {
-            max-height: 1000px; /* Même valeur que dans le JavaScript */
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .modal i {
-            font-size: 48px;
-            color: #4CAF50;
-            margin-bottom: 20px;
-            display: inline-block;
-            animation: checkmark 0.5s ease-out 0.2s both;
-        }
-
-        .modal h2 {
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-
-        .modal p {
-            margin-bottom: 25px;
-            color: #666;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn-confirm {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-cancel {
-            padding: 10px 20px;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes checkmark {
-            0% {
-                transform: scale(0);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.2);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* Support du mode sombre pour les modales */
-        @media (prefers-color-scheme: dark) {
-            .modal-content {
-                background-color: #2d2d2d;
-                color: #fff;
-            }
-
-            .modal h2 {
-                color: #fff;
-            }
-
-            .modal p {
-                color: #bdbdbd;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
 </head>
 <body>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -906,9 +68,20 @@
         <!-- Ajout du modal de confirmation -->
         <div id="confirmation-modal" class="modal">
             <div class="modal-content">
-                <i class="fas fa-calendar-check"></i>
+                <div class="success-checkmark">
+                    <div class="check-icon">
+                        <span class="icon-line line-tip"></span>
+                        <span class="icon-line line-long"></span>
+                        <div class="icon-circle"></div>
+                        <div class="icon-fix"></div>
+                    </div>
+                </div>
                 <h2>Confirmation de réservation</h2>
-                <p>Êtes-vous sûr de vouloir réserver ce créneau ?</p>
+                <div class="booking-summary">
+                    <p><i class="fas fa-user-circle"></i> Coiffeur: <span id="modal-hairdresser"></span></p>
+                    <p><i class="fas fa-calendar-day"></i> Jour: <span id="modal-day"></span></p>
+                    <p><i class="fas fa-clock"></i> Heure: <span id="modal-time"></span></p>
+                </div>
                 <div class="modal-buttons">
                     <button onclick="confirmBooking()" class="btn-confirm">Confirmer</button>
                     <button onclick="closeModal('confirmation-modal')" class="btn-cancel">Annuler</button>
@@ -938,70 +111,299 @@
                 <button onclick="closeModal('success-modal')" class="btn-confirm">OK</button>
             </div>
         </div>
+
+        <!-- Modal de confirmation de réservation -->
+        <div id="booking-confirmation-modal" class="modal">
+            <div class="modal-content">
+                <h2>Confirmer votre rendez-vous</h2>
+                <div class="booking-summary">
+                    <p><i class="fas fa-user-circle"></i> Coiffeur: <span id="modal-hairdresser"></span></p>
+                    <p><i class="fas fa-calendar-day"></i> Jour: <span id="modal-day"></span></p>
+                    <p><i class="fas fa-clock"></i> Heure: <span id="modal-time"></span></p>
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="confirmBooking()" class="btn yes">Confirmer</button>
+                    <button onclick="closeModal('booking-confirmation-modal')" class="btn no">Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ajouter ce modal de chargement -->
+        <div id="loading-modal" class="modal">
+            <div class="modal-content">
+                <div class="loading-spinner"></div>
+                <p>Confirmation de votre rendez-vous en cours...</p>
+            </div>
+        </div>
     </div>
+
+    <style>
+        .btn {
+            cursor: pointer;
+            padding: 15px 30px;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 8px 0;
+        }
+
+        .btn.yes {
+            background: #4a90e2;  /* Couleur bleue du thème */
+            color: white;
+        }
+
+        .btn.no {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-confirm {
+            background: #4a90e2;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-confirm:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6C63FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transform: scale(0.7);
+            transition: transform 0.3s ease;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .booking-details {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .booking-details p {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .booking-details i {
+            color: #4CAF50;
+            width: 20px;
+        }
+
+        .success-animation {
+            animation: successPop 0.5s ease-out;
+        }
+
+        @keyframes successPop {
+            0% {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .email-sent {
+            margin: 20px 0;
+            color: #4a90e2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a90e2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .success-checkmark {
+            margin: 20px auto;
+        }
+
+        .check-icon {
+            position: relative;
+            border-radius: 50%;
+            height: 80px;
+            width: 80px;
+            transform: scale(1);
+            border: 4px solid #4a90e2;
+        }
+
+        .check-icon::before,
+        .check-icon::after {
+            content: '';
+            position: absolute;
+            background: #4a90e2;
+        }
+
+        .check-icon::before {
+            width: 4px;
+            height: 30px;
+            left: 38%;
+            top: 20%;
+            transform: rotate(45deg);
+        }
+
+        .check-icon::after {
+            width: 4px;
+            height: 45px;
+            left: 55%;
+            top: 15%;
+            transform: rotate(-45deg);
+        }
+    </style>
 
     <script>
         let selectedHairdresser = null;
+        let selectedHairdresserName = '';
         let selectedDays = new Set();
         let selectedSlotId = null;
 
         function handleChoice(choice) {
-            const questionBox = document.getElementById('question-box');
-            questionBox.classList.add('fade-out');
-            
+            console.log('handleChoice called with:', choice);
+
             if (choice === 'yes') {
-                setTimeout(() => {
-                    questionBox.style.display = 'none';
-                    fetchHairdressers();
-                }, 300);
+                const questionBox = document.getElementById('question-box');
+                const hairdresserBox = document.getElementById('hairdresser-box');
+
+                if (!questionBox || !hairdresserBox) {
+                    console.error('Elements not found:', { questionBox, hairdresserBox });
+                    return;
+                }
+
+                fetch('/api/hairdressers')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Hairdressers loaded:', data);
+                        const container = document.getElementById('hairdresser-buttons');
+                        container.innerHTML = '';
+
+                        data.forEach(hairdresser => {
+                            const buttonBox = document.createElement('div');
+                            buttonBox.className = 'button-box';
+                            buttonBox.innerHTML = `
+                                <button class="btn" onclick="selectHairdresser(${hairdresser.id}, '${hairdresser.name}')">
+                                    ${hairdresser.name}
+                                </button>
+                            `;
+                            container.appendChild(buttonBox);
+                        });
+
+                        questionBox.style.display = 'none';
+                        hairdresserBox.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors du chargement des coiffeurs:', error);
+                        alert('Erreur lors du chargement des coiffeurs');
+                    });
             } else {
-                setTimeout(() => {
-                    window.location.href = "{{ url_for('main.client_dashboard') }}";
-                }, 300);
+                window.location.href = "{{ url_for('main.client_dashboard') }}";
             }
         }
 
-        function fetchHairdressers() {
-            const hairdresserBox = document.getElementById('hairdresser-box');
-            const hairdresserButtons = document.getElementById('hairdresser-buttons');
-            
-            hairdresserBox.style.display = 'block';
-            hairdresserButtons.innerHTML = 'Chargement des coiffeurs...';
+        function selectHairdresser(id, name) {
+            console.log('selectHairdresser called with:', { id, name });
+            selectedHairdresser = id;
+            selectedHairdresserName = name;
 
-            fetch('/api/hairdressers')
-                .then(response => response.json())
-                .then(hairdressers => {
-                    hairdresserButtons.innerHTML = '';
-                    hairdressers.forEach(hairdresser => {
-                        const buttonBox = document.createElement('div');
-                        buttonBox.className = 'button-box';
-                        
-                        const button = document.createElement('button');
-                        button.className = 'btn';
-                        button.onclick = () => handleHairdresserChoice(hairdresser.id);
-                        button.textContent = `${hairdresser.name} - ${hairdresser.specialties}`;
-                        
-                        buttonBox.appendChild(button);
-                        hairdresserButtons.appendChild(buttonBox);
-                    });
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    hairdresserButtons.innerHTML = '<p class="error">Erreur lors du chargement des coiffeurs</p>';
-                });
-        }
-
-        function handleHairdresserChoice(hairdresserId) {
-            selectedHairdresser = hairdresserId;
             const hairdresserBox = document.getElementById('hairdresser-box');
             const dayBox = document.getElementById('day-box');
-            
-            hairdresserBox.classList.add('fade-out');
-            setTimeout(() => {
+
+            if (hairdresserBox && dayBox) {
                 hairdresserBox.style.display = 'none';
                 dayBox.style.display = 'block';
                 initializeDays();
-            }, 300);
+            } else {
+                console.error('Elements not found:', { hairdresserBox, dayBox });
+            }
         }
 
         function toggleDay(btn, day) {
@@ -1037,21 +439,38 @@
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
         }
 
         function confirmBooking() {
             if (!selectedSlotId || !selectedHairdresser) {
-                alert('Veuillez sélectionner un créneau');
+                alert('Erreur: Informations manquantes');
                 return;
             }
+
+            // Fermer le modal de confirmation immédiatement
+            closeModal('confirmation-modal');
+
+            // Afficher le modal de chargement
+            const loadingModal = document.getElementById('loading-modal');
+            loadingModal.innerHTML = `
+                <div class="modal-content">
+                    <div class="loading-spinner"></div>
+                    <p>Confirmation de votre rendez-vous en cours...</p>
+                </div>
+            `;
+            showModal('loading-modal');
 
             const bookingData = {
                 slot_id: selectedSlotId,
                 hairdresser_id: selectedHairdresser
             };
-            
-            console.log('Envoi de la réservation:', bookingData);
 
             fetch('/book_appointment', {
                 method: 'POST',
@@ -1064,65 +483,107 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    closeModal('confirmation-modal');
-                    document.getElementById('success-message').textContent = 'Réservation confirmée !';
-                    showModal('success-modal');
+                    // Transformer le modal de chargement en modal de succès
+                    loadingModal.innerHTML = `
+                        <div class="modal-content success-animation">
+                            <div class="success-checkmark">
+                                <div class="check-icon">
+                                    <span class="icon-line line-tip"></span>
+                                    <span class="icon-line line-long"></span>
+                                    <div class="icon-circle"></div>
+                                    <div class="icon-fix"></div>
+                                </div>
+                            </div>
+                            <h2>Rendez-vous confirmé !</h2>
+                            <div class="booking-details">
+                                <p><i class="fas fa-user-circle"></i> <strong>Coiffeur:</strong> ${selectedHairdresserName}</p>
+                                <p><i class="fas fa-calendar-day"></i> <strong>Jour:</strong> ${document.getElementById('modal-day').textContent}</p>
+                                <p><i class="fas fa-clock"></i> <strong>Heure:</strong> ${document.getElementById('modal-time').textContent}</p>
+                            </div>
+                            <p class="email-sent"><i class="fas fa-envelope"></i> Un email de confirmation vous a été envoyé</p>
+                        </div>
+                    `;
+
+                    // Attendre 2 secondes avant de fermer et rediriger
                     setTimeout(() => {
-                        window.location.href = '/client/dashboard';
+                        closeModal('loading-modal');
+                        setTimeout(() => {
+                            redirectToDashboard();
+                        }, 300); // Attendre que l'animation de fermeture soit terminée
                     }, 2000);
+                } else {
+                    closeModal('loading-modal');
+                    showError('Une erreur est survenue lors de la réservation');
                 }
             })
             .catch(error => {
                 console.error('Erreur:', error);
-                alert('Erreur : ' + error.message);
-            })
-            .finally(() => {
-                closeModal('confirmation-modal');
+                closeModal('loading-modal');
+                showError('Une erreur est survenue');
             });
         }
 
-        // Fermer le modal si on clique en dehors
+        function redirectToDashboard() {
+            window.location.href = "{{ url_for('main.client_dashboard') }}";
+        }
+
         window.onclick = function(event) {
-            const modal = document.getElementById('confirmation-modal');
-            if (event.target === modal) {
-                closeModal('confirmation-modal');
+            if (event.target.classList.contains('modal')) {
+                closeModal(event.target.id);
             }
         }
 
         function fetchAvailability(hairdresserId, day, countOnly = false) {
-            const slotsContainer = document.getElementById(`slots-${day}`);
-            const countElement = document.getElementById(`count-${day}`);
-            
-            fetch(`/api/hairdresser_slots/${hairdresserId}/${day}`)
+            return fetch(`/api/hairdresser_slots/${hairdresserId}/${day}`)
                 .then(response => response.json())
                 .then(data => {
-                    const availableSlots = data.slots.filter(slot => slot.is_available);
-                    countElement.textContent = `${availableSlots.length} créneaux`;
-                    countElement.classList.toggle('has-slots', availableSlots.length > 0);
-                    
-                    if (!countOnly) {
-                        let html = '';
-                        if (data.slots.length > 0) {
+                    if (data.success) {
+                        const slotsContainer = document.getElementById(`slots-${day}`);
+                        const countElement = document.getElementById(`count-${day}`);
+                        
+                        const availableSlots = data.slots.filter(slot => slot.is_available).length;
+                        countElement.textContent = `${availableSlots} créneau${availableSlots > 1 ? 'x' : ''}`;
+                        
+                        if (!countOnly && slotsContainer) {
+                            slotsContainer.innerHTML = '';
+                            
+                            if (data.slots.length === 0) {
+                                slotsContainer.innerHTML = '<p>Aucun créneau disponible</p>';
+                                return;
+                            }
+                            
                             data.slots.forEach(slot => {
-                                html += `
-                                    <div class="slot-item ${slot.is_available ? 'available' : 'reserved'}"
-                                         ${slot.is_available ? `onclick="handleSlotChoice(${slot.id}, '${day}', '${slot.time}')"` : ''}>
-                                        ${slot.time}
-                                    </div>`;
+                                if (slot.is_available) {
+                                    const slotElement = document.createElement('div');
+                                    slotElement.className = 'time-slot';
+                                    slotElement.setAttribute('data-slot-id', slot.id);
+                                    slotElement.setAttribute('data-time', slot.time);
+                                    slotElement.setAttribute('data-day', day);
+                                    slotElement.textContent = slot.time;
+                                    slotElement.onclick = () => showBookingConfirmation(slot.id, day, slot.time);
+                                    slotsContainer.appendChild(slotElement);
+                                }
                             });
-                        } else {
-                            html = '<div class="loading">Aucun créneau disponible</div>';
                         }
-                        slotsContainer.innerHTML = html;
                     }
                 })
                 .catch(error => {
-                    console.error('Erreur:', error);
+                    console.error('Erreur lors du chargement des créneaux:', error);
+                    const countElement = document.getElementById(`count-${day}`);
                     countElement.textContent = 'Erreur';
-                    if (!countOnly) {
-                        slotsContainer.innerHTML = '<div class="error">Erreur de chargement</div>';
-                    }
                 });
+        }
+
+        function showBookingConfirmation(slotId, day, time) {
+            selectedSlotId = slotId;
+            
+            document.getElementById('modal-hairdresser').textContent = selectedHairdresserName;
+            document.getElementById('modal-day').textContent = day.charAt(0).toUpperCase() + day.slice(1);
+            document.getElementById('modal-time').textContent = time;
+            
+            const modal = document.getElementById('booking-confirmation-modal');
+            modal.style.display = 'flex';
+            modal.classList.add('show');
         }
 
         function showNotificationModal() {
@@ -1162,12 +623,10 @@
             });
         }
 
-        // Gestion de la sélection des jours
         document.querySelectorAll('.weekday-card').forEach(card => {
             card.addEventListener('click', function() {
                 const wasSelected = this.classList.contains('selected');
                 
-                // Désélectionner tous les autres jours
                 document.querySelectorAll('.weekday-card').forEach(c => {
                     c.classList.remove('selected');
                 });
@@ -1182,14 +641,17 @@
         });
 
         function initializeDays() {
+            console.log('Initialisation des jours');
             document.querySelectorAll('.day-item').forEach(day => {
                 const dayName = day.dataset.day;
+                console.log('Chargement des créneaux pour:', dayName);
+                
                 fetchAvailability(selectedHairdresser, dayName, true);
                 
                 day.querySelector('.day-info').addEventListener('click', () => {
+                    console.log('Jour cliqué:', dayName);
                     const wasExpanded = day.classList.contains('expanded');
                     
-                    // Fermer tous les autres jours
                     document.querySelectorAll('.day-item').forEach(d => {
                         d.classList.remove('expanded');
                         d.querySelector('.slots-panel').style.maxHeight = null;
@@ -1198,13 +660,9 @@
                     if (!wasExpanded) {
                         day.classList.add('expanded');
                         const panel = day.querySelector('.slots-panel');
-                        // Charger d'abord les créneaux
-                        fetchAvailability(selectedHairdresser, dayName)
+                        fetchAvailability(selectedHairdresser, dayName, false)
                             .then(() => {
-                                // Attendre un court instant pour que le contenu soit chargé
-                                setTimeout(() => {
-                                    panel.style.maxHeight = '1000px'; // Valeur fixe suffisamment grande
-                                }, 50);
+                                panel.style.maxHeight = panel.scrollHeight + 'px';
                             });
                     }
                 });
@@ -1212,7 +670,13 @@
         }
 
         function showModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                // Force reflow
+                modal.offsetHeight;
+                modal.classList.add('show');
+            }
         }
     </script>
 </body>
