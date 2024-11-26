@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect  # Ajoutez cet import
 from models import User, TimeSlot, Booking  # Assurez-vous d'importer tous les modèles
 import logging
+from commands import add_hairdresser_email
 
 # Initialize extensions without app
 migrate = Migrate()
@@ -81,6 +82,8 @@ def create_app():
     login_manager.login_view = 'main.login'
     login_manager.login_message = 'Veuillez vous connecter pour accéder à cette page.'
     login_manager.login_message_category = 'info'
+
+    app.cli.add_command(add_hairdresser_email)
 
     return app
 

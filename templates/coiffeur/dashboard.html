@@ -37,7 +37,7 @@
             left: 0;
             right: 0;
             background: white;
-            padding: 10px 20px;
+            padding: 0 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             z-index: 1000;
             display: flex;
@@ -46,33 +46,63 @@
             height: 60px;
         }
 
-        .dashboard-header h1 {
+        .header-title h1 {
             font-size: 1.2rem;
             margin: 0;
+            color: #333;
         }
 
-        .logout-button {
-            position: static;
-            margin-left: auto;
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
         }
 
-        .logout-button a {
+        .nav-button {
             display: flex;
             align-items: center;
             gap: 6px;
-            background: #ff4757;
-            color: white;
-            padding: 6px 12px;
+            padding: 8px 15px;
             border-radius: 6px;
             text-decoration: none;
             font-weight: 500;
             transition: all 0.3s ease;
             font-size: 0.9em;
+            color: #333;
+            background: #f0f2f5;
         }
 
-        .logout-button a:hover {
-            background: #ff6b81;
+        .nav-button:hover {
+            background: #e4e6e9;
             transform: translateY(-2px);
+        }
+
+        .nav-button.logout {
+            background: #ff4757;
+            color: white;
+        }
+
+        .nav-button.logout:hover {
+            background: #ff6b81;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 0 10px;
+            }
+
+            .nav-links {
+                gap: 8px;
+            }
+
+            .nav-button {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+
+            .header-title h1 {
+                font-size: 1rem;
+            }
         }
 
         .section {
@@ -1243,11 +1273,15 @@
 <body>
 
     <div class="dashboard-header">
-        <h1>Dashboard Coiffeur</h1>
-        <div class="logout-button">
-            <a href="{{ url_for('main.logout') }}">
-                <i class="fas fa-sign-out-alt"></i>
-                Déconnexion
+        <div class="header-title">
+            <h1>Tableau de bord</h1>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('main.coiffeur_profile') }}" class="nav-button">
+                <i class="fas fa-user-edit"></i> Mon Profil
+            </a>
+            <a href="{{ url_for('main.logout') }}" class="nav-button logout">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
             </a>
         </div>
     </div>
@@ -1386,6 +1420,21 @@
         </div>
     </div>
 
+    <div id="completeProfileModal" class="modal">
+        <div class="modal-content">
+            <h2>Complétez votre profil</h2>
+            <p>Pour offrir une meilleure expérience à vos clients, nous vous recommandons de compléter votre profil professionnel.</p>
+            <div class="modal-buttons">
+                <button onclick="window.location.href='{{ url_for('main.complete_coiffeur_profile') }}'" class="btn primary">
+                    Compléter maintenant
+                </button>
+                <button onclick="closeModal('completeProfileModal')" class="btn secondary">
+                    Plus tard
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
     let currentAppointmentId = null;
 
@@ -1461,6 +1510,12 @@
             showModal('successModal');
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if show_profile_popup %}
+            showModal('completeProfileModal');
+        {% endif %}
+    });
     </script>
 </body>
 </html>

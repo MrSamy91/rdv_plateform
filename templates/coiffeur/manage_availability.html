@@ -6,6 +6,7 @@
     <title>Gérer mes disponibilités - Agendaide</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -71,12 +72,12 @@
         .slots-panel {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: max-height 0.3s ease-out;
             background: #f8f9fa;
         }
 
         .slots-panel.open {
-            max-height: 500px; /* Hauteur maximale du panneau */
+            max-height: 1000px; /* Hauteur maximale suffisante pour le contenu */
         }
 
         .slots-content {
@@ -94,25 +95,57 @@
             background: white;
             border-radius: 10px;
             transition: all 0.3s ease;
+            touch-action: pan-y pinch-zoom; /* Permet le scroll vertical tout en gardant le swipe horizontal */
+            position: relative;
+            overflow: hidden;
         }
 
         .time-slot.available {
             border-left: 4px solid #4CAF50;
-            transform: translateX(5px);
+            background: #e8f5e9;
+            cursor: pointer;
         }
 
         .time-slot.booked {
             border-left: 4px solid #ff9800;
             background: #fff3e0;
-            opacity: 0.7;
             cursor: not-allowed;
         }
 
         .time-slot.past {
-            border-left: 4px solid #9e9e9e;
-            background: #f5f5f5;
-            opacity: 0.5;
+            border-left: 4px solid #f44336;
+            background: #ffebee;
             cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .time-slot .slot-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .delete-slot {
+            color: #f44336;
+            cursor: pointer;
+            padding: 5px;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .time-slot.available:hover .delete-slot {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .time-slot .slot-time {
+            flex: 1;
+        }
+
+        .time-slot .slot-status {
+            font-size: 0.9em;
+            margin-right: 10px;
         }
 
         /* Bouton de sauvegarde */
@@ -349,6 +382,72 @@
                 top: 38px;
             }
         }
+
+        .time-slot:not(.booked):not(.past) {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .time-slot:not(.booked):not(.past):hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .time-slot.available {
+            border-left: 4px solid #4CAF50;
+            background: #e8f5e9;
+        }
+
+        /* Indication visuelle pour les créneaux cliquables */
+        .time-slot:not(.booked):not(.past):not(.available)::before {
+            content: "Cliquer pour sélectionner";
+            position: absolute;
+            right: 10px;
+            font-size: 0.8em;
+            color: #666;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .time-slot:not(.booked):not(.past):not(.available):hover::before {
+            opacity: 1;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 5px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border-radius: 3px;
+            font-size: 0.8em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .swipe-left {
+            left: -100%;
+        }
+
+        .swipe-right {
+            right: -100%;
+        }
+
+        .time-slot:not(.booked):not(.past):hover .swipe-indicator {
+            opacity: 0.7;
+        }
+
+        /* Animation pour le swipe */
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
     </style>
 </head>
 <body>
@@ -362,30 +461,41 @@
     <div class="container">
         {% for day in ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'] %}
         <div class="day-accordion">
-            <div class="day-header" onclick="toggleDay(this)">
-                <div class="day-name">
-                    <i class="fas fa-calendar-day"></i>
-                    {{ day }}
-                </div>
-                <div class="day-info">
-                    <span class="day-status">3 créneaux disponibles</span>
-                    <i class="fas fa-chevron-down rotate-icon"></i>
-                </div>
+            <div class="day-header" onclick="togglePanel(this)">
+                <span class="day-name">{{ day }}</span>
+                <span class="day-status">
+                    {% set available_count = slots_by_day[day|lower].values()|selectattr('is_available')|list|length %}
+                    {{ available_count }} créneau(x) disponible(s)
+                </span>
             </div>
             <div class="slots-panel">
                 <div class="slots-content">
                     {% for hour in range(8, 19) %}
-                    {% set time = '%02d:00'|format(hour) %}
-                    <div class="time-slot 
-                        {% if time in slots_by_day[day|lower] %}
+                        {% set time = '%02d:00'|format(hour) %}
+                        {% set current_date = now.strftime('%Y-%m-%d') %}
+                        {% set current_time = now.strftime('%H:%M') %}
+                        {% set is_past = day|lower == now.strftime('%A')|lower and time < current_time %}
+                        
+                        <div class="time-slot {% if day|lower in slots_by_day and time in slots_by_day[day|lower] %}
                             {% if slots_by_day[day|lower][time].is_booked %}booked
-                            {% elif slots_by_day[day|lower][time].is_available %}available{% endif %}
+                            {% elif is_past %}past
+                            {% else %}available{% endif %}
                         {% endif %}"
-                        onclick="toggleSlot(this)"
-                        data-time="{{ time }}">
-                        <span>{{ time }}</span>
-                        <i class="fas fa-check"></i>
-                    </div>
+                        data-time="{{ time }}"
+                        data-day="{{ day|lower }}">
+                            <span class="slot-time">{{ time }}</span>
+                            <div class="slot-actions">
+                                {% if day|lower in slots_by_day and time in slots_by_day[day|lower] %}
+                                    {% if slots_by_day[day|lower][time].is_booked %}
+                                        <span class="slot-status">Réservé</span>
+                                    {% elif is_past %}
+                                        <span class="slot-status">Passé</span>
+                                    {% else %}
+                                        <i class="fas fa-times delete-slot" onclick="deleteSlot(event, this)"></i>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
                     {% endfor %}
                 </div>
             </div>
@@ -436,7 +546,8 @@
         }
 
         function toggleSlot(slot) {
-            if (!slot.classList.contains('booked')) {
+            const status = slot.getAttribute('data-status');
+            if (status !== 'booked' && status !== 'past') {
                 slot.classList.toggle('available');
                 updateDayStatus(slot.closest('.day-accordion'));
             }
@@ -445,7 +556,11 @@
         function updateDayStatus(accordion) {
             const availableSlots = accordion.querySelectorAll('.time-slot.available').length;
             const statusElement = accordion.querySelector('.day-status');
-            statusElement.textContent = `${availableSlots} créneau${availableSlots > 1 ? 'x' : ''} disponible${availableSlots > 1 ? 's' : ''}`;
+            if (statusElement) {
+                statusElement.textContent = availableSlots > 0 ? 
+                    `${availableSlots} créneau(x) disponible(s)` : 
+                    'Aucun créneau disponible';
+            }
         }
 
         function saveAvailability() {
@@ -457,7 +572,6 @@
                 const availableSlots = Array.from(accordion.querySelectorAll('.time-slot.available'));
                 
                 if (availableSlots.length > 0) {
-                    // Calculer la date pour ce jour
                     const dayOffset = {
                         'lundi': 1, 'mardi': 2, 'mercredi': 3,
                         'jeudi': 4, 'vendredi': 5, 'samedi': 6
@@ -467,16 +581,23 @@
                     slotDate.setDate(today.getDate() + (dayOffset + 7) % 7);
                     
                     availableSlots.forEach(slot => {
-                        slots.push({
-                            date: slotDate.toISOString().split('T')[0],
-                            start_time: slot.dataset.time,
-                            end_time: addHour(slot.dataset.time)
-                        });
+                        const timeElement = slot.querySelector('.slot-time');
+                        if (timeElement) {
+                            const startTime = timeElement.textContent.trim();
+                            slots.push({
+                                date: slotDate.toISOString().split('T')[0],
+                                start_time: startTime,
+                                end_time: addHour(startTime)
+                            });
+                        }
                     });
                 }
             });
 
-            console.log('Données à envoyer:', { slots }); // Debug
+            if (slots.length === 0) {
+                alert('Veuillez sélectionner au moins un créneau');
+                return;
+            }
 
             fetch('/coiffeur/save_slots', {
                 method: 'POST',
@@ -523,14 +644,180 @@
 
         // Fonction utilitaire pour ajouter une heure
         function addHour(time) {
-            const [hours, minutes] = time.split(':').map(Number);
-            const date = new Date();
-            date.setHours(hours + 1, minutes);
-            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            if (!time) return null;
+            
+            try {
+                const [hours, minutes] = time.split(':').map(Number);
+                const date = new Date();
+                date.setHours(hours + 1, minutes);
+                return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            } catch (error) {
+                console.error('Erreur dans addHour:', error);
+                return null;
+            }
         }
 
         // Ajouter l'event listener sur le bouton de sauvegarde
-        document.querySelector('.save-button').addEventListener('click', saveAvailability);
+        document.addEventListener('DOMContentLoaded', function() {
+            const saveButton = document.querySelector('.save-button');
+            if (saveButton) {
+                saveButton.addEventListener('click', saveAvailability);
+            }
+        });
+
+        function deleteSlot(event, element) {
+            event.stopPropagation();
+            const slot = element.closest('.time-slot');
+            const timeElement = slot.querySelector('.slot-time');
+            const dayAccordion = slot.closest('.day-accordion');
+            const dayName = dayAccordion.querySelector('.day-name').textContent.trim().toLowerCase();
+            
+            if (slot.classList.contains('available')) {
+                const today = new Date();
+                const dayOffset = {
+                    'lundi': 1, 'mardi': 2, 'mercredi': 3,
+                    'jeudi': 4, 'vendredi': 5, 'samedi': 6
+                }[dayName] - today.getDay();
+                
+                const slotDate = new Date(today);
+                slotDate.setDate(today.getDate() + (dayOffset + 7) % 7);
+                
+                fetch('/coiffeur/delete_slot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        date: slotDate.toISOString().split('T')[0],
+                        start_time: timeElement.textContent.trim()
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        slot.classList.remove('available');
+                        updateDayStatus(dayAccordion);
+                    } else {
+                        alert('Erreur lors de la suppression : ' + (data.error || 'Erreur inconnue'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de la suppression du créneau');
+                });
+            }
+        }
+
+        // Ajouter cette fonction pour gérer le clic sur un créneau
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.addEventListener('click', function(e) {
+                    // Ne pas déclencher si on clique sur le bouton de suppression
+                    if (!e.target.classList.contains('delete-slot') && 
+                        !e.target.closest('.delete-slot')) {
+                        // Vérifier que le créneau n'est pas réservé ou passé
+                        if (!this.classList.contains('booked') && 
+                            !this.classList.contains('past')) {
+                            this.classList.toggle('available');
+                            updateDayStatus(this.closest('.day-accordion'));
+                        }
+                    }
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                if (!slot.classList.contains('booked') && !slot.classList.contains('past')) {
+                    // Ajouter les indicateurs de swipe
+                    slot.innerHTML += `
+                        <span class="swipe-indicator swipe-left">⟶ Disponible</span>
+                        <span class="swipe-indicator swipe-right">Indisponible ⟵</span>
+                    `;
+                    
+                    // Initialiser Hammer
+                    const hammer = new Hammer(slot);
+                    hammer.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
+                    
+                    // Gérer le swipe
+                    hammer.on('swipe', function(e) {
+                        if (slot.classList.contains('booked') || slot.classList.contains('past')) {
+                            return;
+                        }
+                        
+                        if (e.direction === Hammer.DIRECTION_LEFT) {
+                            // Swipe gauche pour supprimer/désélectionner
+                            if (slot.classList.contains('available')) {
+                                // Si le créneau a un bouton de suppression, c'est qu'il est en base
+                                const deleteButton = slot.querySelector('.delete-slot');
+                                if (deleteButton) {
+                                    const deleteEvent = new Event('delete-slot');
+                                    slot.dispatchEvent(deleteEvent);
+                                } else {
+                                    // Sinon c'est juste une sélection temporaire
+                                    slot.classList.remove('available', 'slide-in');
+                                    updateDayStatus(slot.closest('.day-accordion'));
+                                }
+                            }
+                        } else if (e.direction === Hammer.DIRECTION_RIGHT) {
+                            // Swipe droit pour ajouter
+                            if (!slot.classList.contains('available')) {
+                                slot.classList.add('available', 'slide-in');
+                                updateDayStatus(slot.closest('.day-accordion'));
+                            }
+                        }
+                    });
+
+                    // Gérer l'animation de feedback
+                    hammer.on('swipemove', function(e) {
+                        const opacity = Math.min(Math.abs(e.deltaX) / 100, 1);
+                        if (e.direction === Hammer.DIRECTION_LEFT && slot.classList.contains('available')) {
+                            slot.querySelector('.swipe-right').style.opacity = opacity;
+                        } else if (e.direction === Hammer.DIRECTION_RIGHT && !slot.classList.contains('available')) {
+                            slot.querySelector('.swipe-left').style.opacity = opacity;
+                        }
+                    });
+
+                    // Réinitialiser l'animation
+                    hammer.on('swipeend', function() {
+                        slot.querySelectorAll('.swipe-indicator').forEach(indicator => {
+                            indicator.style.opacity = '';
+                        });
+                    });
+                }
+            });
+
+            // Écouter l'événement personnalisé de suppression
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.addEventListener('delete-slot', function() {
+                    const deleteButton = this.querySelector('.delete-slot');
+                    if (deleteButton) {
+                        deleteSlot(new Event('click'), deleteButton);
+                    }
+                });
+            });
+        });
+
+        // Ajouter cette fonction pour gérer l'accordéon
+        function togglePanel(header) {
+            const panel = header.nextElementSibling;
+            const isOpen = panel.classList.contains('open');
+            
+            // Fermer tous les panneaux
+            document.querySelectorAll('.slots-panel').forEach(p => {
+                p.classList.remove('open');
+            });
+            document.querySelectorAll('.day-header').forEach(h => {
+                h.classList.remove('active');
+            });
+            
+            // Si le panneau n'était pas ouvert, l'ouvrir
+            if (!isOpen) {
+                panel.classList.add('open');
+                header.classList.add('active');
+            }
+        }
     </script>
 </body>
 </html> 

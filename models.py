@@ -45,9 +45,9 @@ class User(UserMixin, db.Model):
 class Coiffeur(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True)
-    specialties = db.Column(db.String(200))
-    years_of_experience = db.Column(db.Integer)
-    bio = db.Column(db.Text)
+    specialties = db.Column(db.String(200), nullable=True, default="Non spécifié")
+    years_of_experience = db.Column(db.Integer, nullable=True, default=0)
+    bio = db.Column(db.Text, nullable=True, default="")
     user = db.relationship('User', backref=db.backref('coiffeur', uselist=False))
 
 class Service(db.Model):
@@ -141,3 +141,12 @@ class Reward(db.Model):
     used_at = db.Column(db.DateTime)
     
     client = db.relationship('User', backref='rewards')
+
+class AuthorizedHairdresserEmail(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<AuthorizedEmail {self.email}>'

@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from functools import wraps
-from models import User, Coiffeur, Service, Booking, Review, TimeSlot, Reward
+from models import User, Coiffeur, Service, Booking, Review, TimeSlot, Reward, AuthorizedHairdresserEmail
 from forms import LoginForm, RegistrationForm, RendezvousForm, ReviewForm
 from utils import send_email_notification, add_to_google_calendar, generate_verification_token, send_verification_email
 from flask_mail import Message, Mail
@@ -42,6 +42,15 @@ def register():
                 flash('Cette adresse email est déjà utilisée.', 'danger')
                 return render_template('public/register.html', form=form)
             
+            # Vérifier si l'email est dans la liste des coiffeurs autorisés
+            is_authorized_hairdresser = AuthorizedHairdresserEmail.query.filter_by(
+                email=form.email.data, 
+                is_active=True
+            ).first()
+            
+            # Définir le rôle en fonction de l'autorisation
+            role = 'coiffeur' if is_authorized_hairdresser else 'client'
+            
             # Générer le token
             verification_token = generate_verification_token()
             
@@ -50,27 +59,37 @@ def register():
                 username=form.username.data,
                 email=form.email.data,
                 phone_number=form.phone_number.data,
-                role='client',
+                role=role,
                 is_verified=False,
                 verification_token=verification_token,
                 token_expiration=datetime.now() + timedelta(hours=24)
             )
             user.set_password(form.password.data)
             
-            # Sauvegarder l'utilisateur
             db.session.add(user)
+            
+            # Si c'est un coiffeur, créer son profil
+            if role == 'coiffeur':
+                coiffeur = Coiffeur(
+                    user=user,
+                    specialties=None,
+                    years_of_experience=None,
+                    bio=None
+                )
+                db.session.add(coiffeur)
+            
             db.session.commit()
             
-            # Envoyer l'email de vérification
-            if send_verification_email(user, verification_token):
-                flash('Un email de vérification a été envoyé à votre adresse email.', 'success')
+            # Envoyer l'email approprié
+            if role == 'coiffeur':
+                send_verification_email(user, verification_token, template='emails/verify_hairdresser.html')
+                flash('Compte coiffeur créé! Veuillez compléter votre profil.', 'success')
+                login_user(user)
+                return redirect(url_for('main.complete_coiffeur_profile'))
             else:
-                flash('Erreur lors de l\'envoi de l\'email de vérification.', 'danger')
+                send_verification_email(user, verification_token)
+                flash('Compte client créé! Veuillez vérifier votre email.', 'success')
             
-            # Connecter l'utilisateur
-            login_user(user)
-            
-            # Rediriger vers la page de vérification
             return redirect(url_for('main.verify_account'))
             
         except Exception as e:
@@ -103,7 +122,6 @@ def login():
             print(f"Erreur de connexion: {str(e)}")
             flash('Une erreur est survenue lors de la connexion.', 'error')
     return render_template('public/login.html', form=form)
-
 
 @main.route('/logout')
 @login_required
@@ -535,8 +553,10 @@ def client_history():
 def coiffeur_dashboard():
     if current_user.role != 'coiffeur':
         return redirect(url_for('main.index'))
-        
+    
     coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
+    show_profile_popup = not coiffeur.bio or coiffeur.bio == ""
+    
     today = datetime.now().date()
     week_ago = today - timedelta(days=7)
     two_weeks_ago = today - timedelta(days=14)
@@ -681,12 +701,60 @@ def coiffeur_dashboard():
             }
         })
 
-    return render_template('coiffeur/dashboard.html',
+    return render_template('coiffeur/dashboard.html', 
                          coiffeur=coiffeur,
                          stats=stats,
                          today_appointments=today_appointments,
                          upcoming_appointments=upcoming_appointments,
-                         calendar_events=calendar_events)
+                         calendar_events=calendar_events,
+                         show_profile_popup=show_profile_popup)
+
+# Ajouter cette fonction avant la route manage_availability
+def get_slots_by_day():
+    if current_user.role != 'coiffeur':
+        return {}
+        
+    coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
+    if not coiffeur:
+        return {}
+
+    # Initialiser le dictionnaire des créneaux par jour
+    slots_by_day = {
+        'lundi': {}, 'mardi': {}, 'mercredi': {},
+        'jeudi': {}, 'vendredi': {}, 'samedi': {}
+    }
+
+    # Récupérer tous les créneaux pour ce coiffeur
+    time_slots = TimeSlot.query.filter_by(coiffeur_id=coiffeur.id).all()
+    
+    # Récupérer les réservations
+    bookings = Booking.query.filter_by(coiffeur_id=coiffeur.id).all()
+    
+    # Créer un dictionnaire des réservations pour une recherche rapide
+    booked_slots = {
+        (b.datetime.strftime('%Y-%m-%d'), b.datetime.strftime('%H:%M')): True 
+        for b in bookings if b.status != 'cancelled'
+    }
+    
+    weekday_map = {
+        '1': 'lundi', '2': 'mardi', '3': 'mercredi',
+        '4': 'jeudi', '5': 'vendredi', '6': 'samedi'
+    }
+
+    # Organiser les créneaux par jour
+    for slot in time_slots:
+        weekday = weekday_map.get(slot.weekday)
+        if weekday:
+            # Vérifier si le créneau est réservé
+            is_booked = (slot.date.strftime('%Y-%m-%d'), slot.start_time) in booked_slots
+            
+            slots_by_day[weekday][slot.start_time] = {
+                'is_available': slot.is_available,
+                'is_booked': is_booked,
+                'end_time': slot.end_time
+            }
+    
+    return slots_by_day
 
 @main.route('/coiffeur/manage-availability')
 @login_required
@@ -694,49 +762,9 @@ def manage_availability():
     if current_user.role != 'coiffeur':
         return redirect(url_for('main.index'))
     
-    coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
-    
-    # Initialiser le dictionnaire des créneaux par jour
-    slots_by_day = {
-        'lundi': {},
-        'mardi': {},
-        'mercredi': {},
-        'jeudi': {},
-        'vendredi': {},
-        'samedi': {}
-    }
-    
-    # Récupérer les créneaux existants
-    today = datetime.now().date()
-    existing_slots = TimeSlot.query.filter(
-        TimeSlot.coiffeur_id == coiffeur.id,
-        TimeSlot.date >= today,
-        TimeSlot.date <= today + timedelta(days=6)
-    ).all()
-
-    # Remplir le dictionnaire avec les créneaux existants
-    weekdays = {
-        '1': 'lundi',
-        '2': 'mardi',
-        '3': 'mercredi',
-        '4': 'jeudi',
-        '5': 'vendredi',
-        '6': 'samedi'
-    }
-    
-    for slot in existing_slots:
-        day_name = weekdays.get(str(slot.weekday))
-        if day_name:
-            slots_by_day[day_name][slot.start_time] = {
-                'is_available': slot.is_available,
-                'is_booked': not slot.is_available
-            }
-
-    print("Slots by day:", slots_by_day)  # Debug
-
-    return render_template('coiffeur/manage_availability.html', 
-                         coiffeur=coiffeur,
-                         slots_by_day=slots_by_day)
+    return render_template('coiffeur/manage_availability.html',
+                         slots_by_day=get_slots_by_day(),
+                         now=datetime.now())
 
 @main.route('/coiffeur/finish_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
@@ -1126,7 +1154,7 @@ def get_slots(day):
         })
 
     except Exception as e:
-        print(f"Erreur récupération slots: {str(e)}")
+        print(f"Erreur rcupération slots: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @main.route('/api/available_slots/<int:coiffeur_id>/<string:date>')
@@ -1194,7 +1222,7 @@ def get_hairdresser_slots(hairdresser_id, day):
         })
         
     except Exception as e:
-        print(f"Erreur récupération créneaux: {str(e)}")
+        print(f"Erreur récupration créneaux: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -1310,3 +1338,124 @@ def get_weekday_number(day_name):
         'dimanche': '7'
     }
     return weekdays.get(day_name.lower())
+
+@main.route('/admin/authorized-emails', methods=['GET', 'POST'])
+@login_required
+def manage_authorized_emails():
+    if current_user.role != 'admin':
+        abort(403)
+        
+    if request.method == 'POST':
+        email = request.form.get('email')
+        action = request.form.get('action')
+        
+        if action == 'add':
+            if not AuthorizedHairdresserEmail.query.filter_by(email=email).first():
+                new_auth = AuthorizedHairdresserEmail(email=email)
+                db.session.add(new_auth)
+                db.session.commit()
+                flash(f'Email {email} ajouté à la liste des coiffeurs autorisés.', 'success')
+        
+        elif action == 'remove':
+            auth_email = AuthorizedHairdresserEmail.query.filter_by(email=email).first()
+            if auth_email:
+                db.session.delete(auth_email)
+                db.session.commit()
+                flash(f'Email {email} retiré de la liste.', 'success')
+    
+    authorized_emails = AuthorizedHairdresserEmail.query.all()
+    return render_template('admin/authorized_emails.html', authorized_emails=authorized_emails)
+
+@main.route('/coiffeur/complete-profile', methods=['GET', 'POST'])
+@login_required
+def complete_coiffeur_profile():
+    if current_user.role != 'coiffeur':
+        return redirect(url_for('main.index'))
+        
+    coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
+    
+    if request.method == 'POST':
+        try:
+            coiffeur.bio = request.form.get('bio')
+            coiffeur.specialties = request.form.get('specialties')
+            coiffeur.years_of_experience = request.form.get('years_of_experience')
+            
+            db.session.commit()
+            flash('Profil mis à jour avec succès!', 'success')
+            return redirect(url_for('main.coiffeur_dashboard'))
+            
+        except Exception as e:
+            flash('Une erreur est survenue lors de la mise à jour.', 'error')
+            print(f"Erreur: {str(e)}")
+    
+    return render_template('coiffeur/complete_profile.html', coiffeur=coiffeur)
+
+@main.route('/coiffeur/profile', methods=['GET', 'POST'])
+@login_required
+def coiffeur_profile():
+    if current_user.role != 'coiffeur':
+        return redirect(url_for('main.index'))
+        
+    coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
+    
+    if request.method == 'POST':
+        try:
+            # Mise à jour des informations du coiffeur
+            coiffeur.bio = request.form.get('bio', coiffeur.bio)
+            coiffeur.specialties = request.form.get('specialties', coiffeur.specialties)
+            coiffeur.years_of_experience = request.form.get('years_of_experience', coiffeur.years_of_experience)
+            
+            # Mise à jour des informations de l'utilisateur
+            current_user.username = request.form.get('username', current_user.username)
+            current_user.phone_number = request.form.get('phone_number', current_user.phone_number)
+            
+            # Changement de mot de passe si fourni
+            new_password = request.form.get('new_password')
+            if new_password:
+                if current_user.check_password(request.form.get('current_password')):
+                    current_user.set_password(new_password)
+                    flash('Mot de passe mis à jour avec succès!', 'success')
+                else:
+                    flash('Mot de passe actuel incorrect', 'error')
+                    return redirect(url_for('main.coiffeur_profile'))
+            
+            db.session.commit()
+            flash('Profil mis à jour avec succès!', 'success')
+            
+        except Exception as e:
+            flash('Une erreur est survenue lors de la mise à jour.', 'error')
+            print(f"Erreur: {str(e)}")
+            
+    return render_template('coiffeur/profile.html', coiffeur=coiffeur)
+
+@main.route('/coiffeur/delete_slot', methods=['POST'])
+@login_required
+def delete_slot():
+    if current_user.role != 'coiffeur':
+        return jsonify({'success': False, 'error': 'Non autorisé'}), 403
+        
+    try:
+        data = request.get_json()
+        date = data.get('date')
+        start_time = data.get('start_time')
+        coiffeur = Coiffeur.query.filter_by(user_id=current_user.id).first()
+        
+        # Supprimer le créneau s'il n'est pas réservé
+        slot = TimeSlot.query.filter_by(
+            coiffeur_id=coiffeur.id,
+            date=datetime.strptime(date, '%Y-%m-%d').date(),
+            start_time=start_time,
+            is_available=True
+        ).first()
+        
+        if slot:
+            db.session.delete(slot)
+            db.session.commit()
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Créneau non trouvé ou déjà réservé'})
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Erreur suppression créneau: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
