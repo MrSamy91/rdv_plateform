@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Sora } from 'next/font/google'
+import { env } from '@/lib/env'
 import './globals.css'
 
 // Police Sora (Google Fonts) — voir docs/charte-graphique.html
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   keywords: ['reservation', 'rdv', 'booking', 'salon', 'pro', 'planning', 'agenda en ligne'],
   authors: [{ name: 'Samy & Adil' }],
   creator: 'CutBook Team',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
