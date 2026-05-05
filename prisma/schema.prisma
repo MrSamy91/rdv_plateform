@@ -1,0 +1,258 @@
+// CutBook — Schema Prisma
+// Doc complete : voir docs/03-architecture.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7 : l'url est dans prisma.config.ts (plus de `url` ici)
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================
+// AUTH (geree par BetterAuth)
+// Les tables Session, Account, Verification sont gerees par BetterAuth.
+// On etend le User avec nos champs custom (role, loyaltyPoints, etc.).
+// =============================================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  name          String
+  image         String?
+  phone         String?
+  role          Role     @default(CLIENT)
+  loyaltyPoints Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations metier
+  bookings   Booking[]
+  reviews    Review[]
+  rewards    Reward[]
+  ownedOrg   Organization? @relation("OrgOwner")
+  membership Member?
+
+  // Relations BetterAuth (a definir une fois BetterAuth setup)
+  sessions Session[]
+  accounts Account[]
+
+  @@map("user")
+}
+
+enum Role {
+  CLIENT
+  OWNER
+  MEMBER
+}
+
+// =============================================================
+// BETTERAUTH — tables requises par le module auth
+// =============================================================
+
+model Session {
+  id        String   @id
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// =============================================================
+// ORGANISATION (= 1 structure pro : salon, cabinet, studio)
+// =============================================================
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique // pour /@slug
+  address     String
+  phone       String
+  description String?
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownerId  String    @unique
+  owner    User      @relation("OrgOwner", fields: [ownerId], references: [id])
+  members  Member[]
+  services Service[]
+
+  @@map("organization")
+}
+
+model Member {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  orgId       String
+  specialties String?
+  bio         String?
+  experience  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id])
+  organization Organization @relation(fields: [orgId], references: [id])
+  timeSlots    TimeSlot[]
+  bookings     Booking[]
+  reviews      Review[]
+
+  @@map("member")
+}
+
+// =============================================================
+// SERVICES proposes par l'organisation
+// =============================================================
+
+model Service {
+  id          String   @id @default(cuid())
+  orgId       String
+  name        String
+  description String?
+  duration    Int // en minutes
+  price       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  bookings     Booking[]
+
+  @@map("service")
+}
+
+// =============================================================
+// CRENEAUX
+// =============================================================
+
+model TimeSlot {
+  id          String   @id @default(cuid())
+  memberId    String
+  date        DateTime @db.Date
+  startTime   String // "09:00"
+  endTime     String // "09:30"
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  member  Member   @relation(fields: [memberId], references: [id])
+  booking Booking?
+
+  @@map("time_slot")
+}
+
+// =============================================================
+// RESERVATIONS
+// =============================================================
+
+model Booking {
+  id              String        @id @default(cuid())
+  clientId        String
+  memberId        String
+  serviceId       String
+  timeSlotId      String        @unique
+  status          BookingStatus @default(PENDING)
+  totalPrice      Float
+  stripePaymentId String?
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  completedAt     DateTime?
+
+  client   User     @relation(fields: [clientId], references: [id])
+  member   Member   @relation(fields: [memberId], references: [id])
+  service  Service  @relation(fields: [serviceId], references: [id])
+  timeSlot TimeSlot @relation(fields: [timeSlotId], references: [id])
+
+  @@map("booking")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+// =============================================================
+// AVIS clients
+// =============================================================
+
+model Review {
+  id        String   @id @default(cuid())
+  clientId  String
+  memberId  String
+  rating    Int // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client User   @relation(fields: [clientId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@map("review")
+}
+
+// =============================================================
+// FIDELITE (rewards)
+// =============================================================
+
+model Reward {
+  id             String       @id @default(cuid())
+  clientId       String
+  type           String // "free_haircut", "discount_20"
+  status         RewardStatus @default(AVAILABLE)
+  expirationDate DateTime
+  usedAt         DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  client User @relation(fields: [clientId], references: [id])
+
+  @@map("reward")
+}
+
+enum RewardStatus {
+  AVAILABLE
+  USED
+  EXPIRED
+}
