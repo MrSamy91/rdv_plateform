@@ -1,0 +1,31 @@
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+# Skip pour merge / squash / template / commit -m existant avec body
+if [ -n "$COMMIT_SOURCE" ] && [ "$COMMIT_SOURCE" != "message" ]; then
+  exit 0
+fi
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+if [ -z "$branch" ]; then
+  exit 0
+fi
+
+# Extraire le 1er nombre du nom de branche (ex: feat/123-add-booking → 123)
+ticket=$(echo "$branch" | grep -oE '[0-9]+' | head -1)
+
+if [ -z "$ticket" ]; then
+  exit 0
+fi
+
+msg=$(cat "$COMMIT_MSG_FILE")
+
+# Si le message contient deja #ticket, ne rien faire
+if echo "$msg" | grep -qE "#$ticket\b"; then
+  exit 0
+fi
+
+# Ajouter (#ticket) apres le type Conventional Commits
+new_msg=$(echo "$msg" | sed -E "1s/^(feat|fix|docs|chore|refactor|test|perf|ci|revert|build|style|setup)(\([^)]*\))?: /\1(#$ticket): /")
+
+echo "$new_msg" > "$COMMIT_MSG_FILE"

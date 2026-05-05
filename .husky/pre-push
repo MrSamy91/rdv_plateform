@@ -1,8 +1,30 @@
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+# Convention de nommage des branches
+# Autorise : main, dev
+# Autorise : legacy/<nom>
+# Autorise : <type>/<nom> ou <type>-<nom> avec types feat|fix|docs|chore|refactor|test|perf|ci|revert|build|style|setup
+valid_pattern='^(main|dev|legacy/.+|(feat|fix|docs|chore|refactor|test|perf|ci|revert|build|style|setup)[/-].+)$'
+
+if ! echo "$branch" | grep -qE "$valid_pattern"; then
+  echo "❌ Nom de branche invalide : '$branch'"
+  echo "   Convention :"
+  echo "   - main, dev (branches principales)"
+  echo "   - legacy/<nom> (branches archive)"
+  echo "   - feat/<nom> | fix/<nom> | docs/<nom> | chore/<nom> | refactor/<nom>"
+  echo "   - test/<nom> | perf/<nom> | ci/<nom> | revert/<nom> | build/<nom> | style/<nom> | setup/<nom>"
+  echo "   (le tiret '-' est aussi accepte a la place du slash)"
+  exit 1
+fi
+
 echo "🔍 Type-check..."
 pnpm typecheck || exit 1
 
 echo "🧹 Lint complet..."
 pnpm lint || exit 1
+
+echo "🧪 Tests..."
+pnpm test || exit 1
 
 echo "🏗️  Build Next.js..."
 pnpm build || exit 1
