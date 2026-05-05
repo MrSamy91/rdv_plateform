@@ -1,0 +1,67 @@
+name: CI
+
+# Pourquoi cette CI : valider le code de maniere reproductible cote serveur,
+# meme si quelqu'un bypass Husky avec --no-verify. Sans CI, du code casse
+# pourrait atterrir sur main/dev.
+#
+# Les checks sont identiques au pre-push hook Husky (typecheck + lint + test
+# + build) mais executes dans un env Ubuntu propre, et bloquent le merge des
+# PR si la branch protection est activee cote GitHub.
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+
+# Annule les runs precedents sur la meme branche/PR pour economiser les minutes CI
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
+
+      - name: Secret scan
+        run: pnpm secretlint
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+        env:
+          # Secrets factices pour que le build compile (ne sont jamais utilises)
+          BETTER_AUTH_SECRET: ci-build-fake-secret-not-real
+          BETTER_AUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
