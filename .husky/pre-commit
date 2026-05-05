@@ -1,1 +1,9 @@
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+if [ "$branch" = "main" ] || [ "$branch" = "dev" ]; then
+  echo "❌ Commit direct interdit sur '$branch'"
+  echo "   Utilise une branche feat/fix/chore/... et passe par une PR."
+  exit 1
+fi
+
 pnpm lint-staged

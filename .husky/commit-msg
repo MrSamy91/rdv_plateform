@@ -1,1 +1,21 @@
+msg=$(head -n 1 "$1")
+
+# Skip si commit de merge / revert / fixup / squash auto-genere
+case "$msg" in
+  Merge*|Revert*|fixup!*|squash!*) exit 0 ;;
+esac
+
+# Extraire le subject (apres "type:" ou "type(scope):")
+subject=$(echo "$msg" | sed -E 's/^(feat|fix|docs|chore|refactor|test|perf|ci|revert|build|style|setup)(\([^)]+\))?: //')
+
+# Compter les mots
+word_count=$(echo "$subject" | wc -w | tr -d ' ')
+
+if [ "$word_count" -gt 5 ]; then
+  echo "❌ Le subject doit faire max 5 mots (regle franglish CLAUDE.md)"
+  echo "   Actuel : '$subject' ($word_count mots)"
+  exit 1
+fi
+
+# Validation Conventional Commits
 pnpm exec commitlint --edit "$1"
