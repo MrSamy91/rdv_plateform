@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CutBook — Charte Graphique</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --slate-800: #253122;
+      --green-500: #489B6E;
+      --gold-500: #C5A56E;
+
+      --slate-50: #F8F9F7;
+      --slate-100: #EFF1ED;
+      --slate-200: #DFE3DA;
+      --slate-300: #C9D3C5;
+      --slate-400: #9FB39A;
+      --slate-500: #7A927E;
+      --slate-600: #5A7363;
+      --slate-700: #3F5248;
+      --slate-900: #1B2419;
+      --slate-950: #0F1410;
+
+      --green-50: #F0FAF5;
+      --green-100: #D9F1E7;
+      --green-200: #B3E3CF;
+      --green-300: #8DD5B8;
+      --green-400: #67C7A0;
+      --green-600: #3B8259;
+      --green-700: #2E6945;
+      --green-800: #215030;
+      --green-900: #15371D;
+
+      --gold-50: #FBF9F3;
+      --gold-100: #F5F0E5;
+      --gold-200: #ECDECB;
+      --gold-300: #E2CBB1;
+      --gold-400: #D4B491;
+      --gold-600: #B39456;
+      --gold-700: #9F7F44;
+      --gold-800: #8A6A33;
+      --gold-900: #6F5527;
+
+      --success: #10B981;
+      --warning: #F59E0B;
+      --error: #EF4444;
+      --info: #3B82F6;
+    }
+
+    body { font-family: 'Sora', sans-serif; background: var(--slate-50); color: var(--slate-800); }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+
+    .hero {
+      text-align: center; padding: 4rem 2rem 3rem;
+      background: #fff;
+      border-bottom: 1px solid var(--slate-200);
+    }
+    .hero h1 { font-size: 3rem; font-weight: 800; color: var(--slate-800); letter-spacing: -0.03em; }
+    .hero p { font-size: 1rem; color: var(--slate-500); margin-top: 0.5rem; font-weight: 400; }
+
+    .section { margin-bottom: 4rem; }
+    .section-label {
+      font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--green-600); margin-bottom: 0.5rem;
+    }
+    .section-title { font-size: 1.75rem; font-weight: 700; color: var(--slate-800); margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+
+    /* ===== Couleurs ===== */
+    .color-group { margin-bottom: 2rem; }
+    .color-group-name { font-size: 0.85rem; font-weight: 600; color: var(--slate-600); margin-bottom: 0.6rem; }
+    .color-row { display: flex; gap: 4px; border-radius: 12px; overflow: hidden; }
+    .color-chip {
+      flex: 1; height: 64px; display: flex; align-items: flex-end; padding: 0.3rem 0.5rem;
+      font-size: 0.55rem; font-weight: 500;
+    }
+    .color-chip span { opacity: 0.8; }
+
+    .base-colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .base-card { border-radius: 14px; overflow: hidden; border: 1px solid var(--slate-200); }
+    .base-swatch { height: 100px; display: flex; align-items: center; justify-content: center; }
+    .base-swatch span { font-size: 1.4rem; font-weight: 700; }
+    .base-info { padding: 0.8rem 1rem; background: #fff; }
+    .base-info .name { font-size: 0.8rem; font-weight: 600; color: var(--slate-800); }
+    .base-info .hex { font-size: 0.7rem; color: var(--slate-500); font-family: monospace; }
+    .base-info .role { font-size: 0.65rem; color: var(--slate-500); margin-top: 0.2rem; }
+
+    .rule-bar { display: flex; height: 48px; border-radius: 12px; overflow: hidden; margin-bottom: 0.8rem; }
+    .rule-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--slate-500); }
+
+    /* ===== Typography ===== */
+    .typo-row {
+      display: grid; grid-template-columns: 120px 1fr 200px; align-items: baseline;
+      padding: 1rem 0; border-bottom: 1px solid var(--slate-100);
+    }
+    .typo-label { font-size: 0.65rem; color: var(--slate-500); font-weight: 500; }
+    .typo-specs { font-size: 0.6rem; color: var(--slate-400); font-family: monospace; text-align: right; line-height: 1.6; }
+
+    /* ===== Boutons ===== */
+    .btn-group { background: #fff; border-radius: 14px; padding: 1.5rem; border: 1px solid var(--slate-200); }
+    .btn-group h4 { font-size: 0.75rem; color: var(--slate-600); font-weight: 600; margin-bottom: 1rem; }
+    .btn-row { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+
+    .btn {
+      padding: 0.6rem 1.4rem; border-radius: 8px; font-family: 'Sora', sans-serif;
+      font-size: 0.8rem; font-weight: 600; border: 2px solid transparent; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--green-500); color: #fff; }
+    .btn-primary:hover { background: var(--green-600); }
+
+    .btn-secondary { background: transparent; color: var(--gold-700); border-color: var(--gold-400); }
+    .btn-secondary:hover { background: var(--gold-50); color: var(--gold-800); border-color: var(--gold-500); }
+
+    .btn-ghost { background: transparent; color: var(--slate-700); border-color: var(--slate-300); }
+    .btn-ghost:hover { background: var(--slate-100); color: var(--slate-800); border-color: var(--slate-400); }
+
+    .btn-destructive { background: var(--error); color: #fff; }
+    .btn-destructive:hover { background: #DC2626; }
+
+    .btn-disabled { background: var(--slate-200); color: var(--slate-400); cursor: not-allowed; opacity: 0.6; }
+
+    /* ===== Semantic ===== */
+    .semantic-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .semantic-card { border-radius: 12px; overflow: hidden; border: 1px solid var(--slate-200); }
+    .semantic-swatch { height: 50px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; }
+    .semantic-info { padding: 0.6rem 0.8rem; background: #fff; }
+    .semantic-info .name { font-size: 0.7rem; font-weight: 600; }
+    .semantic-info .hex { font-size: 0.6rem; color: var(--slate-500); font-family: monospace; }
+
+    /* ===== Backgrounds ===== */
+    .bg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .bg-card {
+      border-radius: 12px; height: 120px; padding: 1rem;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      border: 1px solid var(--slate-200);
+    }
+    .bg-card .bg-name { font-size: 0.7rem; font-weight: 600; }
+    .bg-card .bg-hex { font-size: 0.6rem; font-family: monospace; opacity: 0.6; }
+    .bg-card .bg-use { font-size: 0.55rem; opacity: 0.5; margin-top: 0.2rem; }
+
+    /* ===== Preview ===== */
+    .preview-box {
+      border-radius: 16px; overflow: hidden; border: 1px solid var(--slate-200);
+      margin-top: 1rem; background: #fff;
+    }
+    .preview-section { padding: 2.5rem; }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>CutBook</h1>
+    <p>Charte Graphique &mdash; Sanzo Wada &times; Sora</p>
+  </div>
+
+  <div class="container">
+
+    <!-- ==================== COULEURS DE BASE ==================== -->
+    <div class="section">
+      <div class="section-label">Fondation</div>
+      <div class="section-title">3 couleurs de base &mdash; Sanzo Wada</div>
+
+      <div class="base-colors">
+        <div class="base-card">
+          <div class="base-swatch" style="background: var(--slate-800);">
+            <span style="color: var(--slate-400);">Aa</span>
+          </div>
+          <div class="base-info">
+            <div class="name">Deep Slate Olive</div>
+            <div class="hex">#253122</div>
+            <div class="role">Primaire &mdash; Textes, titres, ancrage</div>
+          </div>
+        </div>
+        <div class="base-card">
+          <div class="base-swatch" style="background: var(--green-500);">
+            <span style="color: #fff;">Aa</span>
+          </div>
+          <div class="base-info">
+            <div class="name">Green</div>
+            <div class="hex">#489B6E</div>
+            <div class="role">Secondaire &mdash; Actions, CTA, liens</div>
+          </div>
+        </div>
+        <div class="base-card">
+          <div class="base-swatch" style="background: var(--gold-500);">
+            <span style="color: var(--slate-900);">Aa</span>
+          </div>
+          <div class="base-info">
+            <div class="name">Isabella</div>
+            <div class="hex">#C5A56E</div>
+            <div class="role">Accent &mdash; Chaleur, highlights, secondaire</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <div class="color-group-name">Regle 60-30-10</div>
+        <div class="rule-bar">
+          <div style="flex: 6; background: var(--slate-50); display: flex; align-items: center; justify-content: center; border: 1px solid var(--slate-200); border-radius: 12px 0 0 12px;">
+            <span style="font-size: 0.7rem; font-weight: 600; color: var(--slate-700);">60% Fond + Texte</span>
+          </div>
+          <div style="flex: 3; background: var(--green-500); display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 0.7rem; font-weight: 600; color: #fff;">30% Green</span>
+          </div>
+          <div style="flex: 1; background: var(--gold-500); display: flex; align-items: center; justify-content: center; border-radius: 0 12px 12px 0;">
+            <span style="font-size: 0.6rem; font-weight: 600; color: var(--slate-900);">10%</span>
+          </div>
+        </div>
+        <div class="rule-label">
+          <span>Fonds clairs + texte Slate</span>
+          <span>CTA, boutons, liens, icones</span>
+          <span>Accents Gold</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PALETTES ETENDUES ==================== -->
+    <div class="section">
+      <div class="section-label">Nuances</div>
+      <div class="section-title">Palettes etendues</div>
+
+      <div class="color-group">
+        <div class="color-group-name">Slate (texte & structure)</div>
+        <div class="color-row">
+          <div class="color-chip" style="background: var(--slate-50);"><span style="color: var(--slate-800);">50</span></div>
+          <div class="color-chip" style="background: var(--slate-100);"><span style="color: var(--slate-800);">100</span></div>
+          <div class="color-chip" style="background: var(--slate-200);"><span style="color: var(--slate-800);">200</span></div>
+          <div class="color-chip" style="background: var(--slate-300);"><span style="color: var(--slate-800);">300</span></div>
+          <div class="color-chip" style="background: var(--slate-400);"><span style="color: var(--slate-900);">400</span></div>
+          <div class="color-chip" style="background: var(--slate-500);"><span style="color: #fff;">500</span></div>
+          <div class="color-chip" style="background: var(--slate-600);"><span style="color: #fff;">600</span></div>
+          <div class="color-chip" style="background: var(--slate-700);"><span style="color: #fff;">700</span></div>
+          <div class="color-chip" style="background: var(--slate-800);"><span style="color: var(--slate-400);">800</span></div>
+          <div class="color-chip" style="background: var(--slate-900);"><span style="color: var(--slate-500);">900</span></div>
+          <div class="color-chip" style="background: var(--slate-950);"><span style="color: var(--slate-500);">950</span></div>
+        </div>
+      </div>
+
+      <div class="color-group">
+        <div class="color-group-name">Green (actions & CTA)</div>
+        <div class="color-row">
+          <div class="color-chip" style="background: var(--green-50);"><span style="color: var(--green-800);">50</span></div>
+          <div class="color-chip" style="background: var(--green-100);"><span style="color: var(--green-800);">100</span></div>
+          <div class="color-chip" style="background: var(--green-200);"><span style="color: var(--green-800);">200</span></div>
+          <div class="color-chip" style="background: var(--green-300);"><span style="color: var(--green-900);">300</span></div>
+          <div class="color-chip" style="background: var(--green-400);"><span style="color: #fff;">400</span></div>
+          <div class="color-chip" style="background: var(--green-500);"><span style="color: #fff;">500</span></div>
+          <div class="color-chip" style="background: var(--green-600);"><span style="color: #fff;">600</span></div>
+          <div class="color-chip" style="background: var(--green-700);"><span style="color: #fff;">700</span></div>
+          <div class="color-chip" style="background: var(--green-800);"><span style="color: var(--green-300);">800</span></div>
+          <div class="color-chip" style="background: var(--green-900);"><span style="color: var(--green-400);">900</span></div>
+        </div>
+      </div>
+
+      <div class="color-group">
+        <div class="color-group-name">Gold / Isabella (accents chauds)</div>
+        <div class="color-row">
+          <div class="color-chip" style="background: var(--gold-50);"><span style="color: var(--gold-800);">50</span></div>
+          <div class="color-chip" style="background: var(--gold-100);"><span style="color: var(--gold-800);">100</span></div>
+          <div class="color-chip" style="background: var(--gold-200);"><span style="color: var(--gold-800);">200</span></div>
+          <div class="color-chip" style="background: var(--gold-300);"><span style="color: var(--gold-900);">300</span></div>
+          <div class="color-chip" style="background: var(--gold-400);"><span style="color: var(--gold-900);">400</span></div>
+          <div class="color-chip" style="background: var(--gold-500);"><span style="color: var(--slate-900);">500</span></div>
+          <div class="color-chip" style="background: var(--gold-600);"><span style="color: #fff;">600</span></div>
+          <div class="color-chip" style="background: var(--gold-700);"><span style="color: #fff;">700</span></div>
+          <div class="color-chip" style="background: var(--gold-800);"><span style="color: var(--gold-200);">800</span></div>
+          <div class="color-chip" style="background: var(--gold-900);"><span style="color: var(--gold-300);">900</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TYPOGRAPHIE ==================== -->
+    <div class="section">
+      <div class="section-label">Typographie</div>
+      <div class="section-title">Sora &mdash; Echelle typographique</div>
+
+      <div class="typo-row">
+        <div class="typo-label">H1</div>
+        <div style="font-size: 3rem; font-weight: 800; color: var(--slate-800); letter-spacing: -0.03em; line-height: 1.15;">Titre principal</div>
+        <div class="typo-specs">48px / 800<br>line-height: 1.15<br>letter-spacing: -0.03em<br>color: slate-800</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-label">H2</div>
+        <div style="font-size: 2.25rem; font-weight: 700; color: var(--slate-800); letter-spacing: -0.02em; line-height: 1.2;">Titre de section</div>
+        <div class="typo-specs">36px / 700<br>line-height: 1.2<br>letter-spacing: -0.02em<br>color: slate-800</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-label">H3</div>
+        <div style="font-size: 1.75rem; font-weight: 600; color: var(--slate-700); letter-spacing: -0.01em; line-height: 1.3;">Sous-titre</div>
+        <div class="typo-specs">28px / 600<br>line-height: 1.3<br>letter-spacing: -0.01em<br>color: slate-700</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-label">H4</div>
+        <div style="font-size: 1.375rem; font-weight: 600; color: var(--slate-700); line-height: 1.4;">Titre de carte</div>
+        <div class="typo-specs">22px / 600<br>line-height: 1.4<br>color: slate-700</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-label">Body</div>
+        <div style="font-size: 1rem; font-weight: 400; color: var(--slate-700); line-height: 1.6;">Texte courant pour les descriptions, paragraphes et contenus principaux de l'application.</div>
+        <div class="typo-specs">16px / 400<br>line-height: 1.6<br>color: slate-700</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-label">Small</div>
+        <div style="font-size: 0.875rem; font-weight: 400; color: var(--slate-600); line-height: 1.5;">Labels, captions et textes auxiliaires dans les formulaires.</div>
+        <div class="typo-specs">14px / 400<br>line-height: 1.5<br>color: slate-600</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-label">Caption</div>
+        <div style="font-size: 0.75rem; font-weight: 500; color: var(--slate-500); line-height: 1.4;">Metadata, timestamps, mentions legales, notes de bas de page</div>
+        <div class="typo-specs">12px / 500<br>line-height: 1.4<br>color: slate-500</div>
+      </div>
+      <div class="typo-row">
+        <div class="typo-label">Lien</div>
+        <div style="font-size: 1rem; font-weight: 500; color: var(--green-600); line-height: 1.6; text-decoration: underline; text-underline-offset: 3px;">Lien vers une autre page</div>
+        <div class="typo-specs">16px / 500<br>color: green-600<br>hover: green-800<br>underline-offset: 3px</div>
+      </div>
+      <div class="typo-row" style="border: none;">
+        <div class="typo-label">Accent</div>
+        <div style="font-size: 0.85rem; font-weight: 600; color: var(--gold-600); line-height: 1.5; text-transform: uppercase; letter-spacing: 0.08em;">Section Label</div>
+        <div class="typo-specs">13-14px / 600<br>uppercase<br>letter-spacing: 0.08em<br>color: gold-600</div>
+      </div>
+    </div>
+
+    <!-- ==================== BOUTONS ==================== -->
+    <div class="section">
+      <div class="section-label">Composants</div>
+      <div class="section-title">Boutons</div>
+
+      <div class="btn-group">
+        <h4>Boutons CutBook</h4>
+        <div class="btn-row">
+          <button class="btn btn-primary">Reserver</button>
+          <button class="btn btn-secondary">Details</button>
+          <button class="btn btn-ghost">Annuler</button>
+          <button class="btn btn-destructive">Supprimer</button>
+          <button class="btn btn-disabled" disabled>Indisponible</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem; font-size: 0.65rem; color: var(--slate-500); line-height: 1.8;">
+        <strong style="color: var(--green-600);">Primary</strong> : bg green-500 &rarr; hover green-600 | texte blanc<br>
+        <strong style="color: var(--gold-700);">Secondary</strong> : border gold-400, texte gold-700 &rarr; hover bg gold-50, texte gold-800, border gold-500<br>
+        <strong style="color: var(--slate-700);">Ghost</strong> : border slate-300, texte slate-700 &rarr; hover bg slate-100, texte slate-800, border slate-400<br>
+        <strong style="color: var(--error);">Destructive</strong> : bg #EF4444 &rarr; hover #DC2626 | texte blanc<br>
+        <strong style="color: var(--slate-400);">Disabled</strong> : bg slate-200, texte slate-400, opacity 0.6
+      </div>
+    </div>
+
+    <!-- ==================== FONDS ==================== -->
+    <div class="section">
+      <div class="section-label">Surfaces</div>
+      <div class="section-title">Fonds & arriere-plans</div>
+
+      <div class="bg-grid">
+        <div class="bg-card" style="background: #FFFFFF;">
+          <div class="bg-name" style="color: var(--slate-800);">Surface / Carte</div>
+          <div class="bg-hex" style="color: var(--slate-500);">#FFFFFF</div>
+          <div class="bg-use" style="color: var(--slate-400);">Cartes, modales, elements eleves</div>
+        </div>
+        <div class="bg-card" style="background: var(--slate-50);">
+          <div class="bg-name" style="color: var(--slate-800);">Fond principal</div>
+          <div class="bg-hex" style="color: var(--slate-500);">#F8F9F7</div>
+          <div class="bg-use" style="color: var(--slate-400);">Background page</div>
+        </div>
+        <div class="bg-card" style="background: var(--slate-100);">
+          <div class="bg-name" style="color: var(--slate-800);">Fond secondaire</div>
+          <div class="bg-hex" style="color: var(--slate-500);">#EFF1ED</div>
+          <div class="bg-use" style="color: var(--slate-400);">Hover, sections alternees</div>
+        </div>
+        <div class="bg-card" style="background: var(--gold-50);">
+          <div class="bg-name" style="color: var(--slate-800);">Section chaude</div>
+          <div class="bg-hex" style="color: var(--gold-600);">#FBF9F3</div>
+          <div class="bg-use" style="color: var(--slate-400);">CTA zone, mise en avant</div>
+        </div>
+        <div class="bg-card" style="background: var(--green-50);">
+          <div class="bg-name" style="color: var(--slate-800);">Section success</div>
+          <div class="bg-hex" style="color: var(--green-600);">#F0FAF5</div>
+          <div class="bg-use" style="color: var(--slate-400);">Confirmations, success</div>
+        </div>
+        <div class="bg-card" style="background: var(--slate-200);">
+          <div class="bg-name" style="color: var(--slate-800);">Bordures / Dividers</div>
+          <div class="bg-hex" style="color: var(--slate-500);">#DFE3DA</div>
+          <div class="bg-use" style="color: var(--slate-400);">Separateurs, bordures de cartes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SEMANTIQUES ==================== -->
+    <div class="section">
+      <div class="section-label">Etats</div>
+      <div class="section-title">Couleurs semantiques</div>
+
+      <div class="semantic-grid">
+        <div class="semantic-card">
+          <div class="semantic-swatch" style="background: var(--success); color: #fff;">Success</div>
+          <div class="semantic-info">
+            <div class="name" style="color: var(--success);">Success</div>
+            <div class="hex">#10B981</div>
+          </div>
+        </div>
+        <div class="semantic-card">
+          <div class="semantic-swatch" style="background: var(--warning); color: #fff;">Warning</div>
+          <div class="semantic-info">
+            <div class="name" style="color: var(--warning);">Warning</div>
+            <div class="hex">#F59E0B</div>
+          </div>
+        </div>
+        <div class="semantic-card">
+          <div class="semantic-swatch" style="background: var(--error); color: #fff;">Error</div>
+          <div class="semantic-info">
+            <div class="name" style="color: var(--error);">Error</div>
+            <div class="hex">#EF4444</div>
+          </div>
+        </div>
+        <div class="semantic-card">
+          <div class="semantic-swatch" style="background: var(--info); color: #fff;">Info</div>
+          <div class="semantic-info">
+            <div class="name" style="color: var(--info);">Info</div>
+            <div class="hex">#3B82F6</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PREVIEW ==================== -->
+    <div class="section">
+      <div class="section-label">Apercu</div>
+      <div class="section-title">Preview</div>
+
+      <div class="preview-box">
+        <div class="preview-section" style="background: var(--slate-50);">
+          <div style="font-size: 0.7rem; font-weight: 600; color: var(--gold-600); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">Reservation</div>
+          <div style="font-size: 2.25rem; font-weight: 700; color: var(--slate-800); letter-spacing: -0.02em; margin-bottom: 0.3rem;">Trouvez votre prochain rendez-vous</div>
+          <div style="font-size: 1rem; color: var(--slate-600); line-height: 1.6; margin-bottom: 1.5rem;">Reservez en ligne en quelques clics aupres des meilleurs professionnels.</div>
+          <div style="display: flex; gap: 0.8rem;">
+            <button class="btn btn-primary">Reserver maintenant</button>
+            <button class="btn btn-secondary">Voir les pros</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-box" style="margin-top: 1rem;">
+        <div class="preview-section" style="background: #fff;">
+          <div style="font-size: 0.7rem; font-weight: 600; color: var(--green-600); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">Dashboard</div>
+          <div style="font-size: 1.75rem; font-weight: 600; color: var(--slate-700); letter-spacing: -0.01em; margin-bottom: 0.3rem;">Vos prochains rendez-vous</div>
+          <div style="font-size: 0.875rem; color: var(--slate-500); line-height: 1.5; margin-bottom: 1.5rem;">3 rendez-vous cette semaine</div>
+          <div style="display: flex; gap: 1rem;">
+            <div style="flex: 1; background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 10px; padding: 1rem;">
+              <div style="font-size: 0.65rem; font-weight: 600; color: var(--gold-600); text-transform: uppercase; letter-spacing: 0.06em;">Aujourd'hui</div>
+              <div style="font-size: 1.1rem; font-weight: 600; color: var(--slate-800); margin-top: 0.3rem;">14:00 &mdash; Coupe homme</div>
+              <div style="font-size: 0.75rem; color: var(--slate-500); margin-top: 0.2rem;">Chez Studio Beaute &middot; 30 min</div>
+              <div style="margin-top: 0.8rem; display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.7rem;">Confirmer</button>
+                <button class="btn btn-ghost" style="padding: 0.4rem 1rem; font-size: 0.7rem;">Annuler</button>
+              </div>
+            </div>
+            <div style="flex: 1; background: var(--green-50); border: 1px solid var(--green-200); border-radius: 10px; padding: 1rem;">
+              <div style="font-size: 0.65rem; font-weight: 600; color: var(--green-600); text-transform: uppercase; letter-spacing: 0.06em;">Confirme</div>
+              <div style="font-size: 1.1rem; font-weight: 600; color: var(--slate-800); margin-top: 0.3rem;">16:30 &mdash; Barbe</div>
+              <div style="font-size: 0.75rem; color: var(--slate-500); margin-top: 0.2rem;">Chez Barber Club &middot; 20 min</div>
+              <div style="margin-top: 0.8rem;">
+                <button class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.7rem;">Details</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align: center; padding: 2rem; font-size: 0.65rem; color: var(--slate-500); background: #fff; border-top: 1px solid var(--slate-200);">
+    CutBook &mdash; Charte Graphique &mdash; Sanzo Wada "A Dictionary of Color Combinations" (1933) &times; Sora Font
+  </div>
+
+</body>
+</html>

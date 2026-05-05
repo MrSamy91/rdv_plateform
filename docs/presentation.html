@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CutBook — Pitch</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --slate-800: #253122;
+      --slate-900: #1B2419;
+      --slate-950: #0F1410;
+      --slate-700: #3F5248;
+      --slate-600: #5A7363;
+      --slate-500: #7A927E;
+      --slate-400: #9FB39A;
+      --slate-300: #C9D3C5;
+      --slate-200: #DFE3DA;
+      --slate-100: #EFF1ED;
+      --slate-50:  #F8F9F7;
+
+      --green-300: #8DD5B8;
+      --green-400: #67C7A0;
+      --green-500: #489B6E;
+      --green-600: #3B8259;
+      --green-700: #2E6945;
+
+      --gold-300: #E2CBB1;
+      --gold-400: #D4B491;
+      --gold-500: #C5A56E;
+      --gold-600: #B39456;
+      --gold-700: #9F7F44;
+    }
+
+    /* Base reveal overrides */
+    .reveal-viewport, .reveal { background: var(--slate-950); }
+    .reveal { font-family: 'Sora', sans-serif; color: var(--slate-200); }
+    .reveal .slides { text-align: left; }
+
+    /* Hierarchie typo conforme a la charte (Sora) */
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      text-transform: none; color: var(--slate-50);
+    }
+    .reveal h1 { font-size: 2.6em; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
+    .reveal h2 { font-size: 1.6em; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 0.35em; margin-top: 0; }
+    .reveal h3 { font-size: 0.95em; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; color: var(--slate-100); margin-bottom: 0.3em; }
+    .reveal h4 { font-size: 0.7em; font-weight: 600; line-height: 1.4; color: var(--slate-100); }
+    .reveal p, .reveal li { font-size: 0.68em; font-weight: 400; line-height: 1.6; color: var(--slate-300); }
+    .reveal strong { color: var(--slate-50); font-weight: 600; }
+    .reveal ul { list-style: none; padding-left: 0; margin: 0; }
+    .reveal ul li::before { content: "\2192 "; color: var(--green-500); font-weight: 700; }
+    .reveal ul li { margin-bottom: 0.35em; }
+
+    /* Section label = pattern d'accent de la charte (gold-400 uppercase 0.08em) */
+    .section-label {
+      font-size: 0.42em; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--gold-400); margin-bottom: 0.2em;
+      display: block; line-height: 1;
+    }
+
+    /* Gradients (palette 60-30-10) */
+    .grad   { background: linear-gradient(135deg, var(--green-400), var(--gold-400)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .grad-g { background: linear-gradient(135deg, var(--green-500), var(--green-300)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .grad-o { background: linear-gradient(135deg, var(--gold-500), var(--gold-300)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* Color helpers */
+    .c-green { color: var(--green-400); }
+    .c-gold  { color: var(--gold-400); }
+    .c-slate { color: var(--slate-300); }
+
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6em; margin-top: 0.7em; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8em; margin-top: 0.7em; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; margin-top: 0.7em; }
+
+    .card {
+      background: rgba(72, 155, 110, 0.06);
+      border: 1px solid rgba(72, 155, 110, 0.22);
+      border-radius: 12px; padding: 0.7em 0.9em; text-align: center;
+    }
+    .card.gold  { border-color: rgba(197, 165, 110, 0.28); background: rgba(197, 165, 110, 0.06); }
+    .card.olive { border-color: rgba(159, 179, 154, 0.22); background: rgba(63, 82, 72, 0.18); }
+    .card .icon { font-size: 1.5em; display: block; margin-bottom: 0.15em; }
+    .card .num { font-size: 1.6em; font-weight: 800; display: block; color: var(--slate-50); letter-spacing: -0.02em; }
+    /* .lbl = caption charte : weight 500, line-height 1.4 */
+    .card .lbl { font-size: 0.5em; font-weight: 500; color: var(--slate-400); line-height: 1.4; }
+
+    .tip {
+      background: rgba(197, 165, 110, 0.08);
+      border: 1px solid rgba(197, 165, 110, 0.2);
+      border-radius: 10px; padding: 0.6em 1em; margin-top: 0.6em;
+    }
+    .tip p { font-size: 0.6em; margin: 0; color: var(--slate-200); }
+
+    .tag {
+      display: inline-block; font-size: 0.48em; padding: 0.2em 0.7em; border-radius: 20px;
+      margin: 0 0.2em; font-weight: 600;
+    }
+    .tag-green { background: rgba(72, 155, 110, 0.18); color: var(--green-400); border: 1px solid rgba(72, 155, 110, 0.4); }
+    .tag-gold  { background: rgba(197, 165, 110, 0.18); color: var(--gold-400); border: 1px solid rgba(197, 165, 110, 0.4); }
+    .tag-olive { background: rgba(159, 179, 154, 0.12); color: var(--slate-300); border: 1px solid rgba(159, 179, 154, 0.3); }
+
+    .centered { text-align: center !important; }
+
+    /* Sommaire */
+    .sommaire-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3em 2em; margin-top: 0.5em; }
+    .sommaire-item { display: flex; align-items: center; gap: 0.6em; padding: 0.3em 0; border-bottom: 1px solid rgba(159, 179, 154, 0.08); }
+    .sommaire-num {
+      font-size: 0.65em; font-weight: 800; min-width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center; border-radius: 8px;
+    }
+    .sommaire-num.n-green { background: rgba(72, 155, 110, 0.15); color: var(--green-400); }
+    .sommaire-num.n-gold  { background: rgba(197, 165, 110, 0.15); color: var(--gold-400); }
+    .sommaire-num.n-olive { background: rgba(159, 179, 154, 0.12); color: var(--slate-300); }
+    .sommaire-text { font-size: 0.6em; color: var(--slate-300); }
+
+    /* Flow */
+    .flow-step { display: flex; align-items: center; gap: 0.4em; }
+    .flow-arrow { color: var(--green-500); font-size: 0.7em; font-weight: 800; }
+
+    /* Database (compacte pour tenir dans la slide) */
+    .db-table {
+      background: rgba(72, 155, 110, 0.05);
+      border: 1px solid rgba(72, 155, 110, 0.18);
+      border-radius: 8px; padding: 0.3em 0.55em; margin-bottom: 0.2em;
+    }
+    .db-table h4 { font-size: 0.55em; margin: 0 0 0.1em; color: var(--gold-400); font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
+    .db-table p  { font-size: 0.42em; margin: 0; font-weight: 400; color: var(--slate-400); line-height: 1.3; }
+    .db-rel { font-size: 0.42em; color: var(--green-400); font-weight: 600; text-align: center; margin: 0.05em 0; line-height: 1; }
+
+    /* Reveal chrome */
+    .reveal .progress span { background: linear-gradient(90deg, var(--green-500), var(--gold-500)); }
+    .reveal .slide-number { font-size: 0.45em; color: var(--slate-600); background: transparent; }
+    .reveal .controls { color: var(--green-500); }
+
+    /* Tables */
+    table.clean { width: 100%; border-collapse: collapse; margin-top: 0.5em; }
+    table.clean th {
+      font-size: 0.5em; color: var(--green-400); text-align: left; padding: 0.4em 0.6em;
+      border-bottom: 1px solid rgba(72, 155, 110, 0.25); font-weight: 700;
+    }
+    table.clean td { font-size: 0.5em; color: var(--slate-300); padding: 0.35em 0.6em; border-bottom: 1px solid rgba(159, 179, 154, 0.06); }
+    table.clean td:first-child { color: var(--slate-100); font-weight: 600; }
+
+    /* Stack hybride : icone Lucide (categorie) + logo marque + nom */
+    .stack-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0.5em; margin-top: 0.4em;
+    }
+    .stack-card {
+      display: flex; align-items: center; gap: 0.5em;
+      padding: 0.55em 0.65em; border-radius: 10px;
+      background: rgba(72, 155, 110, 0.05);
+      border: 1px solid rgba(72, 155, 110, 0.18);
+    }
+    .stack-icon { width: 22px; height: 22px; color: var(--gold-400); flex-shrink: 0; stroke-width: 2; }
+    .stack-meta { display: flex; flex-direction: column; gap: 0.05em; flex: 1; min-width: 0; }
+    .stack-cat {
+      font-size: 0.32em; font-weight: 600; color: var(--gold-400);
+      text-transform: uppercase; letter-spacing: 0.08em; line-height: 1;
+    }
+    .stack-name {
+      font-size: 0.46em; color: var(--slate-100); font-weight: 500;
+      line-height: 1.2; letter-spacing: -0.01em;
+    }
+    .stack-brand { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; }
+    .stack-extras {
+      font-size: 0.48em; color: var(--slate-400); margin-top: 0.5em; line-height: 1.6;
+      padding: 0.4em 0.7em; border-left: 2px solid var(--gold-500);
+    }
+    .stack-extras strong { color: var(--gold-400); font-weight: 600; }
+
+    /* Feature cards (slide Solution) — meme densite visuelle que Stack */
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5em; margin-top: 0.5em; }
+    .feature-card {
+      display: flex; flex-direction: column; gap: 0.25em;
+      padding: 0.7em 0.8em; border-radius: 10px;
+      background: rgba(72, 155, 110, 0.05);
+      border: 1px solid rgba(72, 155, 110, 0.18);
+    }
+    .feature-card.gold  { background: rgba(197, 165, 110, 0.06); border-color: rgba(197, 165, 110, 0.22); }
+    .feature-card.olive { background: rgba(63, 82, 72, 0.18); border-color: rgba(159, 179, 154, 0.22); }
+    .feature-icon { width: 26px; height: 26px; color: var(--gold-400); stroke-width: 2; margin-bottom: 0.15em; }
+    .feature-card.olive .feature-icon { color: var(--slate-300); }
+    .feature-cat {
+      font-size: 0.32em; font-weight: 600; color: var(--gold-400);
+      text-transform: uppercase; letter-spacing: 0.08em; line-height: 1;
+    }
+    .feature-card.olive .feature-cat { color: var(--slate-300); }
+    .feature-title {
+      font-size: 0.52em; font-weight: 600; color: var(--slate-50);
+      letter-spacing: -0.01em; line-height: 1.25;
+    }
+    .feature-desc {
+      font-size: 0.4em; color: var(--slate-400); font-weight: 400;
+      line-height: 1.45;
+    }
+
+    /* Timeline (4 cards forcees sur la meme ligne) */
+    .timeline-grid {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.5em; margin-top: 0.5em;
+    }
+    .timeline-card { padding: 0.6em 0.65em; }
+    .timeline-card .feature-desc { font-size: 0.38em; line-height: 1.4; }
+    .timeline-badge {
+      font-size: 0.36em; color: var(--gold-400); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3em;
+      padding-top: 0.3em; border-top: 1px solid rgba(197, 165, 110, 0.2);
+    }
+    .timeline-badge.demo-day { color: var(--gold-300); font-weight: 700; }
+
+    /* Architecture mono block */
+    .arch-block {
+      font-size: 0.48em; color: var(--slate-300); font-family: 'JetBrains Mono', monospace; line-height: 1.7;
+      background: rgba(72, 155, 110, 0.04);
+      border: 1px solid rgba(72, 155, 110, 0.15);
+      border-radius: 10px; padding: 0.8em;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 1 - INTRODUCTION -->
+      <section class="centered" data-background-color="#0F1410" data-background-gradient="radial-gradient(circle at 30% 50%, rgba(72,155,110,0.18), transparent 55%), radial-gradient(circle at 70% 50%, rgba(197,165,110,0.12), transparent 55%)">
+        <h1 class="grad" style="font-size: 2.4em; margin-bottom: 0.15em;">CutBook</h1>
+        <p style="font-size: 0.78em; color: var(--slate-400); margin-bottom: 1em;">La plateforme de reservation en ligne pour professionnels</p>
+        <div style="margin-bottom: 1em;">
+          <span class="tag tag-green">Samy</span>
+          <span class="tag tag-gold">Adil</span>
+        </div>
+        <p style="font-size: 0.5em; color: var(--slate-600);">Holberton School &mdash; Webstack Portfolio Project 2026</p>
+      </section>
+
+      <!-- 2 - SOMMAIRE -->
+      <section>
+        <span class="section-label">Plan</span>
+        <h2>Sommaire</h2>
+        <div class="sommaire-grid">
+          <div class="sommaire-item">
+            <div class="sommaire-num n-green">1</div>
+            <div class="sommaire-text">Contexte & Probleme</div>
+          </div>
+          <div class="sommaire-item">
+            <div class="sommaire-num n-green">2</div>
+            <div class="sommaire-text">Solution & Key Features</div>
+          </div>
+          <div class="sommaire-item">
+            <div class="sommaire-num n-green">3</div>
+            <div class="sommaire-text">Tech Stack & Architecture</div>
+          </div>
+          <div class="sommaire-item">
+            <div class="sommaire-num n-green">4</div>
+            <div class="sommaire-text">Database & Scalabilite</div>
+          </div>
+          <div class="sommaire-item">
+            <div class="sommaire-num n-green">5</div>
+            <div class="sommaire-text">Timeline du projet</div>
+          </div>
+          <div class="sommaire-item">
+            <div class="sommaire-num n-green">6</div>
+            <div class="sommaire-text">Futures Features</div>
+          </div>
+          <div class="sommaire-item">
+            <div class="sommaire-num n-green">7</div>
+            <div class="sommaire-text">Succes, Echecs & Conclusion</div>
+          </div>
+          <div class="sommaire-item">
+            <div class="sommaire-num n-green">8</div>
+            <div class="sommaire-text">Live Demo</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 - CONTEXTE -->
+      <section>
+        <span class="section-label">01 — Contexte</span>
+        <h2>Le <span class="grad-g">contexte</span></h2>
+        <ul style="margin-top: 0.4em;">
+          <li>Projet de 2e annee avec Adil : plateforme de RDV en <strong>Python/Flask</strong></li>
+          <li>Fonctionnel en local mais <strong>jamais deploye</strong>, UI basique, code monolithique</li>
+          <li><strong>Objectif V2</strong> : reprendre le projet, le migrer vers une stack moderne et le mettre en production</li>
+          <li>Apprendre un workflow d'equipe pro : Git Flow, code review, CI/CD, deploiement cloud</li>
+        </ul>
+        <div class="tip">
+          <p>Migration <strong>Python/Flask &rarr; Next.js + TypeScript</strong> : meme idee, stack plus moderne, plus scalable, avec un vrai workflow de developpement professionnel.</p>
+        </div>
+      </section>
+
+      <!-- 4 - PROBLEME -->
+      <section>
+        <span class="section-label">01 — Probleme</span>
+        <h2>Le <span class="grad-o">probleme</span></h2>
+        <ul style="margin-top: 0.4em;">
+          <li>Les professionnels (coiffeurs, coachs, estheticiennes...) gerent leurs RDV par <strong>telephone ou papier</strong></li>
+          <li>Les clients veulent reserver <strong>en ligne, 24/7</strong></li>
+          <li>Les solutions existantes (Planity, Doctolib) sont <strong>couteuses ou trop generiques</strong></li>
+          <li>Les independants n'ont pas d'outil <strong>adapte ET abordable</strong></li>
+        </ul>
+        <div class="tip">
+          <p>En France, <strong>87% des consommateurs</strong> preferent reserver en ligne plutot que par telephone. Pourtant, la majorite des petites structures n'ont toujours pas d'outil de reservation.</p>
+        </div>
+      </section>
+
+      <!-- 4 - SOLUTION & KEY FEATURES -->
+      <section>
+        <span class="section-label">02 — Quoi</span>
+        <h2>La solution : <span class="grad-g">CutBook</span></h2>
+        <p style="margin-bottom: 0.3em;">Plateforme de reservation en ligne adaptable a tout type de profession.</p>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <i data-lucide="calendar-check" class="feature-icon"></i>
+            <span class="feature-cat">Reservation</span>
+            <span class="feature-title">Booking temps reel</span>
+            <span class="feature-desc">Creneaux anti-double-booking. Confirmation instantanee.</span>
+          </div>
+          <div class="feature-card">
+            <i data-lucide="credit-card" class="feature-icon"></i>
+            <span class="feature-cat">Paiement</span>
+            <span class="feature-title">Stripe Checkout</span>
+            <span class="feature-desc">Paiement en ligne securise. Webhooks automatiques.</span>
+          </div>
+          <div class="feature-card">
+            <i data-lucide="building-2" class="feature-icon"></i>
+            <span class="feature-cat">Structure</span>
+            <span class="feature-title">Multi-organisation</span>
+            <span class="feature-desc">1 orga = Owner + Members. Accessible via <strong>/@slug</strong>.</span>
+          </div>
+          <div class="feature-card">
+            <i data-lucide="calendar-days" class="feature-icon"></i>
+            <span class="feature-cat">Calendrier</span>
+            <span class="feature-title">FullCalendar pro</span>
+            <span class="feature-desc">Vue semaine/mois interactive. Gestion des dispos.</span>
+          </div>
+          <div class="feature-card">
+            <i data-lucide="sparkles" class="feature-icon"></i>
+            <span class="feature-cat">Engagement</span>
+            <span class="feature-title">Fidelite & Avis</span>
+            <span class="feature-desc">Points par RDV. Recompenses auto. Systeme d'avis.</span>
+          </div>
+          <div class="feature-card">
+            <i data-lucide="mail" class="feature-icon"></i>
+            <span class="feature-cat">Communication</span>
+            <span class="feature-title">Emails automatiques</span>
+            <span class="feature-desc">Confirmation, rappel, annulation via React Email + Resend.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 - TECH STACK -->
+      <section>
+        <span class="section-label">03 — Comment</span>
+        <h2>Tech <span class="grad-g">Stack</span></h2>
+
+        <div class="stack-grid">
+          <!-- Frontend -->
+          <div class="stack-card">
+            <i data-lucide="code-2" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">Framework</span>
+              <span class="stack-name">Next.js 16</span>
+            </div>
+            <img src="https://skillicons.dev/icons?i=nextjs" class="stack-brand" alt="Next.js">
+          </div>
+          <div class="stack-card">
+            <i data-lucide="braces" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">Langage</span>
+              <span class="stack-name">TypeScript</span>
+            </div>
+            <img src="https://skillicons.dev/icons?i=ts" class="stack-brand" alt="TypeScript">
+          </div>
+          <div class="stack-card">
+            <i data-lucide="palette" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">UI</span>
+              <span class="stack-name">Tailwind v4 + shadcn</span>
+            </div>
+            <img src="https://skillicons.dev/icons?i=tailwind" class="stack-brand" alt="Tailwind">
+          </div>
+          <div class="stack-card">
+            <i data-lucide="sparkles" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">Animations</span>
+              <span class="stack-name">Framer Motion</span>
+            </div>
+            <img src="https://cdn.simpleicons.org/framer/0055FF" class="stack-brand" alt="Framer">
+          </div>
+
+          <!-- Backend -->
+          <div class="stack-card">
+            <i data-lucide="cable" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">API</span>
+              <span class="stack-name">tRPC + TanStack</span>
+            </div>
+            <img src="https://skillicons.dev/icons?i=trpc" class="stack-brand" alt="tRPC">
+          </div>
+          <div class="stack-card">
+            <i data-lucide="database" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">ORM</span>
+              <span class="stack-name">Prisma</span>
+            </div>
+            <img src="https://skillicons.dev/icons?i=prisma" class="stack-brand" alt="Prisma">
+          </div>
+          <div class="stack-card">
+            <i data-lucide="shield-check" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">Auth</span>
+              <span class="stack-name">BetterAuth + Google</span>
+            </div>
+            <i data-lucide="lock" class="stack-brand" style="color: var(--green-400);"></i>
+          </div>
+          <div class="stack-card">
+            <i data-lucide="credit-card" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">Paiement</span>
+              <span class="stack-name">Stripe Checkout</span>
+            </div>
+            <img src="https://cdn.simpleicons.org/stripe/635BFF" class="stack-brand" alt="Stripe">
+          </div>
+
+          <!-- Infra & DX -->
+          <div class="stack-card">
+            <i data-lucide="calendar-days" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">Calendrier</span>
+              <span class="stack-name">FullCalendar</span>
+            </div>
+            <i data-lucide="calendar-clock" class="stack-brand" style="color: var(--green-400);"></i>
+          </div>
+          <div class="stack-card">
+            <i data-lucide="mail" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">Email</span>
+              <span class="stack-name">React Email + Resend</span>
+            </div>
+            <i data-lucide="send" class="stack-brand" style="color: var(--green-400);"></i>
+          </div>
+          <div class="stack-card">
+            <i data-lucide="cloud" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">Hosting</span>
+              <span class="stack-name">Vercel + Neon</span>
+            </div>
+            <img src="https://skillicons.dev/icons?i=vercel" class="stack-brand" alt="Vercel">
+          </div>
+          <div class="stack-card">
+            <i data-lucide="container" class="stack-icon"></i>
+            <div class="stack-meta">
+              <span class="stack-cat">Dev local</span>
+              <span class="stack-name">Docker Compose</span>
+            </div>
+            <img src="https://skillicons.dev/icons?i=docker" class="stack-brand" alt="Docker">
+          </div>
+        </div>
+
+        <div class="stack-extras">
+          <strong>+ Quality & DX :</strong> Husky &middot; lint-staged &middot; ESLint &middot; commitlint &middot; Git Flow &middot; PostgreSQL &middot; Prisma Studio
+        </div>
+      </section>
+
+      <!-- 6 - ARCHITECTURE + USER FLOW -->
+      <section>
+        <span class="section-label">04 — Flow</span>
+        <h2>Architecture & <span class="grad">Parcours utilisateur</span></h2>
+        <div class="grid2">
+          <div>
+            <h3>Architecture</h3>
+            <div class="arch-block">
+              <span style="color: var(--gold-400);">Client (Browser)</span><br>
+              &nbsp;&nbsp;&nbsp;&darr;<br>
+              <span style="color: var(--green-400);">Vercel Edge</span> &mdash; Hosting & CDN<br>
+              &nbsp;&nbsp;&nbsp;&darr;<br>
+              <span style="color: var(--green-400);">Next.js App Router</span> &mdash; SSR / SSG<br>
+              &nbsp;&nbsp;&nbsp;&darr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+              <span style="color: var(--green-400);">tRPC</span>&nbsp;&nbsp;&nbsp;<span style="color: var(--gold-400);">BetterAuth</span>&nbsp;&nbsp;&nbsp;<span style="color: var(--gold-400);">Stripe</span><br>
+              &nbsp;&nbsp;&nbsp;&darr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+              <span style="color: var(--green-400);">Prisma ORM</span> &mdash; Type-safe queries<br>
+              &nbsp;&nbsp;&nbsp;&darr;<br>
+              <span style="color: var(--green-400);">PostgreSQL</span> (Neon prod / Docker dev)
+            </div>
+          </div>
+          <div>
+            <h3>Parcours de reservation</h3>
+            <div style="font-size: 0.5em; line-height: 1.8; color: var(--slate-300);">
+              <div class="flow-step">
+                <span style="color: var(--green-400);">1.</span> Le client visite <strong style="color: var(--gold-400);">/@nom-de-l-orga</strong>
+              </div>
+              <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
+              <div class="flow-step">
+                <span style="color: var(--green-400);">2.</span> Choisit un <strong>membre</strong> (professionnel)
+              </div>
+              <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
+              <div class="flow-step">
+                <span style="color: var(--green-400);">3.</span> Selectionne un <strong>service</strong> + <strong>creneau</strong>
+              </div>
+              <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
+              <div class="flow-step">
+                <span style="color: var(--green-400);">4.</span> Paiement via <strong style="color: var(--gold-400);">Stripe Checkout</strong>
+              </div>
+              <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
+              <div class="flow-step">
+                <span style="color: var(--green-400);">5.</span> Webhook confirme &rarr; <strong style="color: var(--green-400);">email de confirmation</strong>
+              </div>
+              <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
+              <div class="flow-step">
+                <span style="color: var(--green-400);">6.</span> RDV visible dans le <strong>dashboard client + membre</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 - DATABASE -->
+      <section>
+        <span class="section-label">05 — Data</span>
+        <h2>Schema <span class="grad-g">relationnel</span></h2>
+        <div style="font-size: 0.85em; line-height: 1.5; color: var(--slate-300); margin: 0.5em auto 0; max-width: 75%;">
+          <div class="db-table">
+            <h4>User</h4>
+            <p>id, email, name, phone, role, loyaltyPoints</p>
+          </div>
+          <div class="db-rel">&darr; 1:1 (Owner) &nbsp;&nbsp; &darr; 1:1 (Member)</div>
+          <div class="db-table">
+            <h4>Organization</h4>
+            <p>id, name, slug, address, phone, ownerId</p>
+          </div>
+          <div class="db-rel">&darr; 1:N</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em;">
+            <div class="db-table">
+              <h4>Member</h4>
+              <p>id, userId, orgId, specialties, bio</p>
+            </div>
+            <div class="db-table">
+              <h4>Service</h4>
+              <p>id, orgId, name, duration, price</p>
+            </div>
+          </div>
+          <div class="db-rel">&darr; 1:N &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &darr; 1:N</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5em;">
+            <div class="db-table">
+              <h4>TimeSlot</h4>
+              <p>id, memberId, date, startTime, endTime</p>
+            </div>
+            <div class="db-table">
+              <h4>Booking</h4>
+              <p>id, clientId, memberId, serviceId, timeSlotId, status, stripePaymentId</p>
+            </div>
+            <div class="db-table">
+              <h4>Review</h4>
+              <p>id, clientId, memberId, rating, comment</p>
+            </div>
+            <div class="db-table">
+              <h4>Reward</h4>
+              <p>id, clientId, type, status, expirationDate</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8 - RELATIONS & SCALABILITE -->
+      <section>
+        <span class="section-label">05 — Data</span>
+        <h2>Relations & <span class="grad-g">Scalabilite</span></h2>
+        <div class="grid2">
+          <div>
+            <h3>Relations cles</h3>
+            <table class="clean">
+              <tr><td>User &harr; Organization</td><td><strong>1:1</strong> (Owner)</td></tr>
+              <tr><td>User &harr; Member</td><td><strong>1:1</strong></td></tr>
+              <tr><td>Organization &harr; Member</td><td><strong>1:N</strong></td></tr>
+              <tr><td>Organization &harr; Service</td><td><strong>1:N</strong></td></tr>
+              <tr><td>Member &harr; TimeSlot</td><td><strong>1:N</strong></td></tr>
+              <tr><td>TimeSlot &harr; Booking</td><td><strong>1:1</strong></td></tr>
+              <tr><td>User &harr; Booking</td><td><strong>1:N</strong> (client)</td></tr>
+              <tr><td>User &harr; Review</td><td><strong>1:N</strong></td></tr>
+              <tr><td>User &harr; Reward</td><td><strong>1:N</strong></td></tr>
+            </table>
+          </div>
+          <div>
+            <h3>Scalabilite</h3>
+            <div class="tip" style="margin-top: 0.4em;">
+              <p><strong style="color: var(--gold-400);">Verticale</strong> : Neon scale automatiquement (compute auto-suspend, storage elastique). Suffisant pour le MVP.</p>
+            </div>
+            <div class="tip" style="margin-top: 0.4em;">
+              <p><strong style="color: var(--green-400);">Horizontale</strong> (futur) : le modele organisation permet un <strong>sharding par orga</strong>. Chaque orga independante, pas de requetes cross-orga.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8 - TIMELINE -->
+      <section>
+        <span class="section-label">06 — Quand</span>
+        <h2>Timeline <span class="grad-o">du projet</span></h2>
+        <div class="timeline-grid">
+          <div class="feature-card timeline-card">
+            <i data-lucide="rocket" class="feature-icon"></i>
+            <span class="feature-cat">S1 &middot; 5-11 mai</span>
+            <span class="feature-title">Fondations</span>
+            <span class="feature-desc">Setup Next.js + Docker + Prisma. BetterAuth. Husky + Git Flow. Deploy Vercel.</span>
+          </div>
+          <div class="feature-card timeline-card">
+            <i data-lucide="calendar-check" class="feature-icon"></i>
+            <span class="feature-cat">S2 &middot; 12-18 mai</span>
+            <span class="feature-title">Core Booking</span>
+            <span class="feature-desc">Reservation. FullCalendar. Dashboards. Emails Resend.</span>
+            <span class="timeline-badge">&rarr; Demo technique 15 mai</span>
+          </div>
+          <div class="feature-card timeline-card">
+            <i data-lucide="credit-card" class="feature-icon"></i>
+            <span class="feature-cat">S3 &middot; 19-25 mai</span>
+            <span class="feature-title">Features avancees</span>
+            <span class="feature-desc">Stripe. Fidelite + Rewards. Avis. Dashboard owner.</span>
+            <span class="timeline-badge">&rarr; Demo blanche 22 mai</span>
+          </div>
+          <div class="feature-card timeline-card">
+            <i data-lucide="party-popper" class="feature-icon"></i>
+            <span class="feature-cat">S4 &middot; 26-29 mai</span>
+            <span class="feature-title">Polish & Demo</span>
+            <span class="feature-desc">Responsive. SEO. Tests + bug fixes. Prep demo.</span>
+            <span class="timeline-badge demo-day">&rarr; DEMO DAY 29 MAI</span>
+          </div>
+        </div>
+        <div class="tip" style="margin-top: 0.5em; padding: 0.5em 0.8em;">
+          <p style="font-size: 0.5em; line-height: 1.5;"><strong>Repartition</strong> : Samy (lead fullstack + DevOps, mardi-vendredi) &middot; Adil (fullstack, full time). Workflow : Git Flow + PR reviews + daily standup.</p>
+        </div>
+      </section>
+
+      <!-- 9 - FUTURE FEATURES -->
+      <section>
+        <span class="section-label">07 — Roadmap</span>
+        <h2>Futures <span class="grad">Features</span></h2>
+        <p style="margin-bottom: 0.4em;">Hors scope demo day, prevu pour les prochaines versions.</p>
+
+        <h3 style="color: var(--green-400); margin-top: 0.4em;">V3 &mdash; Court terme</h3>
+        <div class="timeline-grid">
+          <div class="feature-card timeline-card">
+            <i data-lucide="message-square" class="feature-icon"></i>
+            <span class="feature-cat">Communication</span>
+            <span class="feature-title">Messagerie temps reel</span>
+            <span class="feature-desc">tRPC subscriptions ou Convex entre client et pro.</span>
+          </div>
+          <div class="feature-card timeline-card">
+            <i data-lucide="bell" class="feature-icon"></i>
+            <span class="feature-cat">Rappels</span>
+            <span class="feature-title">Notifications push</span>
+            <span class="feature-desc">Web Push API pour rappels de RDV.</span>
+          </div>
+          <div class="feature-card timeline-card">
+            <i data-lucide="wallet" class="feature-icon"></i>
+            <span class="feature-cat">Paiement</span>
+            <span class="feature-title">PayPal</span>
+            <span class="feature-desc">Option de paiement supplementaire en checkout.</span>
+          </div>
+          <div class="feature-card timeline-card">
+            <i data-lucide="bar-chart-3" class="feature-icon"></i>
+            <span class="feature-cat">Insights</span>
+            <span class="feature-title">Analytics owner</span>
+            <span class="feature-desc">Tableau de bord avance pour les proprietaires.</span>
+          </div>
+        </div>
+
+        <h3 style="color: var(--gold-400); margin-top: 0.5em;">V4 &mdash; Long terme</h3>
+        <div class="timeline-grid">
+          <div class="feature-card timeline-card">
+            <i data-lucide="smartphone" class="feature-icon"></i>
+            <span class="feature-cat">Mobile</span>
+            <span class="feature-title">App native</span>
+            <span class="feature-desc">React Native / Expo, sync avec la web app.</span>
+          </div>
+          <div class="feature-card timeline-card">
+            <i data-lucide="message-circle" class="feature-icon"></i>
+            <span class="feature-cat">SMS</span>
+            <span class="feature-title">Twilio rappels</span>
+            <span class="feature-desc">SMS automatiques pour les RDV importants.</span>
+          </div>
+          <div class="feature-card timeline-card">
+            <i data-lucide="globe" class="feature-icon"></i>
+            <span class="feature-cat">i18n</span>
+            <span class="feature-title">Multi-langue</span>
+            <span class="feature-desc">Adaptation au marche international (FR, EN, ES).</span>
+          </div>
+          <div class="feature-card timeline-card">
+            <i data-lucide="map-pin" class="feature-icon"></i>
+            <span class="feature-cat">Discovery</span>
+            <span class="feature-title">Marketplace</span>
+            <span class="feature-desc">Decouverte de pros par geolocalisation.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 - SUCCES, ECHECS & CONCLUSION -->
+      <section>
+        <span class="section-label">08 — Bilan</span>
+        <h2>Succes, Echecs & <span class="grad-g">Conclusion</span></h2>
+        <div class="feature-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 0.5em;">
+          <div class="feature-card">
+            <i data-lucide="trophy" class="feature-icon" style="color: var(--green-400);"></i>
+            <span class="feature-cat" style="color: var(--green-400);">Succes</span>
+            <span class="feature-title">Ce qu'on a livre</span>
+            <span class="feature-desc">Migration Python &rarr; TS. Deploye en prod. Stripe fonctionnel. Workflow d'equipe pro. BDD simple et scalable.</span>
+          </div>
+          <div class="feature-card gold">
+            <i data-lucide="alert-triangle" class="feature-icon"></i>
+            <span class="feature-cat">Echecs &amp; difficultes</span>
+            <span class="feature-title">Ce qui a coince</span>
+            <span class="feature-desc"><em style="color: var(--slate-500);">A remplir apres le dev :</em> challenges rencontres, retards, ce qu'on ferait differemment.</span>
+          </div>
+          <div class="feature-card olive">
+            <i data-lucide="graduation-cap" class="feature-icon"></i>
+            <span class="feature-cat">Lecons apprises</span>
+            <span class="feature-title">Ce qu'on retient</span>
+            <span class="feature-desc"><em style="color: var(--slate-500);">A remplir apres le dev :</em> learning objectives, competences acquises, progression.</span>
+          </div>
+        </div>
+        <div class="tip" style="margin-top: 0.5em; padding: 0.5em 0.8em;">
+          <p style="font-size: 0.5em; line-height: 1.5;"><strong>Conclusion</strong> : ne d'un projet scolaire basique, CutBook a evolue en plateforme deployee et utilisable en prod. La migration Python &rarr; Next.js a consolide nos competences fullstack.</p>
+        </div>
+      </section>
+
+      <!-- 11 - LIVE DEMO -->
+      <section class="centered" data-background-color="#0F1410" data-background-gradient="radial-gradient(circle at 30% 50%, rgba(72,155,110,0.18), transparent 55%), radial-gradient(circle at 70% 50%, rgba(197,165,110,0.12), transparent 55%)">
+        <p style="font-size: 0.65em; color: var(--green-400); font-weight: 600;">Et maintenant...</p>
+        <h1 class="grad" style="font-size: 3em;">Live Demo</h1>
+        <br>
+        <div>
+          <span class="tag tag-green">cutbook.vercel.app</span>
+        </div>
+        <br>
+        <p style="font-size: 0.6em; color: var(--slate-500);">github.com/MrSamy91/rdv_plateform</p>
+      </section>
+
+      <!-- 12 - MERCI -->
+      <section class="centered" data-background-color="#0F1410" data-background-gradient="radial-gradient(circle at 50% 50%, rgba(197,165,110,0.14), transparent 60%)">
+        <h1 class="grad">Merci !</h1>
+        <br>
+        <p style="font-size: 0.8em; color: var(--slate-400);">Des questions ?</p>
+        <br>
+        <div>
+          <span class="tag tag-green">Next.js</span>
+          <span class="tag tag-gold">Prisma</span>
+          <span class="tag tag-olive">tRPC</span>
+          <span class="tag tag-green">Stripe</span>
+          <span class="tag tag-gold">TypeScript</span>
+          <span class="tag tag-olive">Docker</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      width: 1280,
+      height: 800,
+      margin: 0.08,
+      minScale: 0.2,
+      maxScale: 1.5,
+      transition: 'slide',
+    });
+
+    // Render Lucide icons (categorie + fallback brand icons)
+    if (window.lucide) lucide.createIcons();
+  </script>
+</body>
+</html>

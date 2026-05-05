@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CutBook — Choix palette Sanzo Wada</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #fff; padding: 2rem 3rem; }
+
+    .page-title { font-family: 'DM Sans', sans-serif; font-size: 2.2rem; font-weight: 900; margin-bottom: 0.3rem; color: #fff; }
+    .page-sub { font-family: 'DM Sans', sans-serif; color: #555; font-size: 0.85rem; margin-bottom: 3rem; }
+
+    .section-title { font-family: 'DM Sans', sans-serif; font-size: 1.5rem; font-weight: 700; margin: 3.5rem 0 1.5rem; color: #ddd; }
+
+    /* Palette row */
+    .palette-row {
+      margin-bottom: 3rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .palette-row:hover { border-color: rgba(255,255,255,0.12); }
+
+    .palette-info {
+      display: flex; align-items: center; gap: 1.5rem;
+      padding: 1.2rem 1.5rem;
+      background: #111;
+    }
+    .palette-num { font-size: 1.4rem; font-weight: 900; color: #333; min-width: 30px; }
+    .palette-name { font-size: 1rem; font-weight: 700; }
+    .palette-desc { font-size: 0.75rem; color: #666; }
+    .palette-swatches { display: flex; gap: 6px; margin-left: auto; }
+    .palette-dot { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); }
+    .palette-hex { font-family: monospace; font-size: 0.6rem; color: #555; }
+
+    /* Side by side previews */
+    .previews { display: grid; grid-template-columns: 1fr 1fr; }
+
+    .preview {
+      padding: 2rem;
+      min-height: 300px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .preview h2 { font-size: 2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .preview .sub { font-size: 0.8rem; margin-bottom: 1.2rem; }
+    .preview .cards-row { display: flex; gap: 0.5rem; }
+    .preview .mini-card {
+      flex: 1; padding: 0.7rem 0.5rem; border-radius: 10px; text-align: center;
+    }
+    .preview .mc-label { font-size: 0.65rem; font-weight: 700; display: block; }
+    .preview .mc-sub { font-size: 0.5rem; display: block; margin-top: 0.15rem; }
+    .preview .mode-tag {
+      font-size: 0.55rem; font-weight: 600; letter-spacing: 0.05em;
+      text-transform: uppercase; margin-bottom: 1rem; opacity: 0.5;
+    }
+
+    /* Font section */
+    .fonts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1rem; }
+    .font-card {
+      background: #111; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .font-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.15); }
+    .font-dark, .font-light { padding: 1.5rem; text-align: center; }
+    .font-dark { background: #111; }
+    .font-light { background: #f5f5f0; }
+    .font-card .sample-big { font-size: 2.4rem; font-weight: 900; margin-bottom: 0.3rem; }
+    .font-card .sample-med { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .font-card .sample-small { font-size: 0.72rem; line-height: 1.5; margin-bottom: 0.5rem; }
+    .font-card .font-name {
+      font-family: monospace; font-size: 0.65rem; padding: 0.8rem 1.5rem;
+      background: #0a0a0a; color: #555; text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .credit { color: #333; font-size: 0.7rem; margin-top: 3rem; text-align: center; font-family: 'DM Sans', sans-serif; }
+  </style>
+</head>
+<body>
+
+  <div class="page-title">CutBook Palette Picker</div>
+  <p class="page-sub">Sanzo Wada — "A Dictionary of Color Combinations" (1933) — 3 couleurs max par palette</p>
+
+  <!-- ===================== PALETTE 1 ===================== -->
+  <div class="palette-row">
+    <div class="palette-info">
+      <div class="palette-num">1</div>
+      <div>
+        <div class="palette-name" style="color: #0093A5;">Deep Indigo + Cerulian Blue + Nile Blue</div>
+        <div class="palette-desc">Clean, tech, froid et professionnel</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="palette-dot" style="background: #051230;"></div>
+        <div class="palette-dot" style="background: #0093A5;"></div>
+        <div class="palette-dot" style="background: #BCE4E5;"></div>
+      </div>
+      <div class="palette-hex">#051230 &middot; #0093A5 &middot; #BCE4E5</div>
+    </div>
+    <div class="previews">
+      <div class="preview" style="background: #051230; font-family: 'Space Grotesk', sans-serif;">
+        <div class="mode-tag" style="color: #0093A5;">Dark mode</div>
+        <h2 style="color: #BCE4E5;">CutBook</h2>
+        <p class="sub" style="color: rgba(188,228,229,0.6);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(0,147,165,0.12); border: 1px solid rgba(0,147,165,0.25);">
+            <span class="mc-label" style="color: #0093A5;">Booking</span>
+            <span class="mc-sub" style="color: rgba(188,228,229,0.5);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(0,147,165,0.12); border: 1px solid rgba(0,147,165,0.25);">
+            <span class="mc-label" style="color: #0093A5;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(188,228,229,0.5);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(188,228,229,0.06); border: 1px solid rgba(188,228,229,0.15);">
+            <span class="mc-label" style="color: #BCE4E5;">Orga</span>
+            <span class="mc-sub" style="color: rgba(188,228,229,0.4);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+      <div class="preview" style="background: #f8fafa; font-family: 'Space Grotesk', sans-serif;">
+        <div class="mode-tag" style="color: #0093A5;">Light mode</div>
+        <h2 style="color: #051230;">CutBook</h2>
+        <p class="sub" style="color: rgba(5,18,48,0.5);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(0,147,165,0.08); border: 1px solid rgba(0,147,165,0.2);">
+            <span class="mc-label" style="color: #0093A5;">Booking</span>
+            <span class="mc-sub" style="color: rgba(5,18,48,0.4);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(0,147,165,0.08); border: 1px solid rgba(0,147,165,0.2);">
+            <span class="mc-label" style="color: #0093A5;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(5,18,48,0.4);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(5,18,48,0.04); border: 1px solid rgba(5,18,48,0.1);">
+            <span class="mc-label" style="color: #051230;">Orga</span>
+            <span class="mc-sub" style="color: rgba(5,18,48,0.4);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PALETTE 2 ===================== -->
+  <div class="palette-row">
+    <div class="palette-info">
+      <div class="palette-num">2</div>
+      <div>
+        <div class="palette-name" style="color: #62C6BF;">Slate + Venice Green + Laelia Pink</div>
+        <div class="palette-desc">Raffine, equilibre, japonisant</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="palette-dot" style="background: #34454C;"></div>
+        <div class="palette-dot" style="background: #62C6BF;"></div>
+        <div class="palette-dot" style="background: #CA92A8;"></div>
+      </div>
+      <div class="palette-hex">#34454C &middot; #62C6BF &middot; #CA92A8</div>
+    </div>
+    <div class="previews">
+      <div class="preview" style="background: #1a2428; font-family: 'Outfit', sans-serif;">
+        <div class="mode-tag" style="color: #62C6BF;">Dark mode</div>
+        <h2 style="color: #62C6BF;">CutBook</h2>
+        <p class="sub" style="color: rgba(202,146,168,0.6);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(98,198,191,0.1); border: 1px solid rgba(98,198,191,0.2);">
+            <span class="mc-label" style="color: #62C6BF;">Booking</span>
+            <span class="mc-sub" style="color: rgba(202,146,168,0.5);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(202,146,168,0.1); border: 1px solid rgba(202,146,168,0.2);">
+            <span class="mc-label" style="color: #CA92A8;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(98,198,191,0.5);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(98,198,191,0.1); border: 1px solid rgba(98,198,191,0.2);">
+            <span class="mc-label" style="color: #62C6BF;">Orga</span>
+            <span class="mc-sub" style="color: rgba(202,146,168,0.5);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+      <div class="preview" style="background: #f7f5f3; font-family: 'Outfit', sans-serif;">
+        <div class="mode-tag" style="color: #34454C;">Light mode</div>
+        <h2 style="color: #34454C;">CutBook</h2>
+        <p class="sub" style="color: rgba(52,69,76,0.5);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(98,198,191,0.1); border: 1px solid rgba(98,198,191,0.3);">
+            <span class="mc-label" style="color: #34454C;">Booking</span>
+            <span class="mc-sub" style="color: rgba(52,69,76,0.4);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(202,146,168,0.1); border: 1px solid rgba(202,146,168,0.3);">
+            <span class="mc-label" style="color: #CA92A8;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(52,69,76,0.4);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(98,198,191,0.1); border: 1px solid rgba(98,198,191,0.3);">
+            <span class="mc-label" style="color: #62C6BF;">Orga</span>
+            <span class="mc-sub" style="color: rgba(52,69,76,0.4);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PALETTE 3 ===================== -->
+  <div class="palette-row">
+    <div class="palette-info">
+      <div class="palette-num">3</div>
+      <div>
+        <div class="palette-name" style="color: #F37420;">Deep Indigo + Orange + Warm Gray</div>
+        <div class="palette-desc">Chaleureux, energique, startup vibe</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="palette-dot" style="background: #051230;"></div>
+        <div class="palette-dot" style="background: #F37420;"></div>
+        <div class="palette-dot" style="background: #A1A39A;"></div>
+      </div>
+      <div class="palette-hex">#051230 &middot; #F37420 &middot; #A1A39A</div>
+    </div>
+    <div class="previews">
+      <div class="preview" style="background: #051230; font-family: 'Sora', sans-serif;">
+        <div class="mode-tag" style="color: #F37420;">Dark mode</div>
+        <h2 style="color: #F37420;">CutBook</h2>
+        <p class="sub" style="color: rgba(161,163,154,0.7);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(243,116,32,0.1); border: 1px solid rgba(243,116,32,0.25);">
+            <span class="mc-label" style="color: #F37420;">Booking</span>
+            <span class="mc-sub" style="color: rgba(161,163,154,0.5);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(243,116,32,0.1); border: 1px solid rgba(243,116,32,0.25);">
+            <span class="mc-label" style="color: #F37420;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(161,163,154,0.5);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(161,163,154,0.06); border: 1px solid rgba(161,163,154,0.15);">
+            <span class="mc-label" style="color: #A1A39A;">Orga</span>
+            <span class="mc-sub" style="color: rgba(161,163,154,0.4);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+      <div class="preview" style="background: #faf8f5; font-family: 'Sora', sans-serif;">
+        <div class="mode-tag" style="color: #F37420;">Light mode</div>
+        <h2 style="color: #051230;">CutBook</h2>
+        <p class="sub" style="color: rgba(5,18,48,0.45);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(243,116,32,0.08); border: 1px solid rgba(243,116,32,0.2);">
+            <span class="mc-label" style="color: #F37420;">Booking</span>
+            <span class="mc-sub" style="color: rgba(5,18,48,0.4);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(243,116,32,0.08); border: 1px solid rgba(243,116,32,0.2);">
+            <span class="mc-label" style="color: #F37420;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(5,18,48,0.4);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(5,18,48,0.03); border: 1px solid rgba(5,18,48,0.08);">
+            <span class="mc-label" style="color: #051230;">Orga</span>
+            <span class="mc-sub" style="color: rgba(5,18,48,0.4);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PALETTE 4 ===================== -->
+  <div class="palette-row">
+    <div class="palette-info">
+      <div class="palette-num">4</div>
+      <div>
+        <div class="palette-name" style="color: #D96629;">Violet Black + Violet + English Red</div>
+        <div class="palette-desc">Premium, luxe, audacieux</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="palette-dot" style="background: #1E0E3F;"></div>
+        <div class="palette-dot" style="background: #4F4086;"></div>
+        <div class="palette-dot" style="background: #D96629;"></div>
+      </div>
+      <div class="palette-hex">#1E0E3F &middot; #4F4086 &middot; #D96629</div>
+    </div>
+    <div class="previews">
+      <div class="preview" style="background: #1E0E3F; font-family: 'DM Sans', sans-serif;">
+        <div class="mode-tag" style="color: #D96629;">Dark mode</div>
+        <h2 style="color: #D96629;">CutBook</h2>
+        <p class="sub" style="color: rgba(79,64,134,0.8);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(217,102,41,0.1); border: 1px solid rgba(217,102,41,0.25);">
+            <span class="mc-label" style="color: #D96629;">Booking</span>
+            <span class="mc-sub" style="color: rgba(79,64,134,0.6);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(79,64,134,0.15); border: 1px solid rgba(79,64,134,0.3);">
+            <span class="mc-label" style="color: #8a7cc8;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(217,102,41,0.5);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(217,102,41,0.1); border: 1px solid rgba(217,102,41,0.25);">
+            <span class="mc-label" style="color: #D96629;">Orga</span>
+            <span class="mc-sub" style="color: rgba(79,64,134,0.6);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+      <div class="preview" style="background: #faf7f5; font-family: 'DM Sans', sans-serif;">
+        <div class="mode-tag" style="color: #4F4086;">Light mode</div>
+        <h2 style="color: #1E0E3F;">CutBook</h2>
+        <p class="sub" style="color: rgba(30,14,63,0.4);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(79,64,134,0.06); border: 1px solid rgba(79,64,134,0.15);">
+            <span class="mc-label" style="color: #4F4086;">Booking</span>
+            <span class="mc-sub" style="color: rgba(30,14,63,0.4);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(217,102,41,0.06); border: 1px solid rgba(217,102,41,0.15);">
+            <span class="mc-label" style="color: #D96629;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(30,14,63,0.4);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(79,64,134,0.06); border: 1px solid rgba(79,64,134,0.15);">
+            <span class="mc-label" style="color: #4F4086;">Orga</span>
+            <span class="mc-sub" style="color: rgba(30,14,63,0.4);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PALETTE 5 ===================== -->
+  <div class="palette-row">
+    <div class="palette-info">
+      <div class="palette-num">5</div>
+      <div>
+        <div class="palette-name" style="color: #489B6E;">Deep Olive + Green + Isabella</div>
+        <div class="palette-desc">Nature, organique, chaleureux et sobre</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="palette-dot" style="background: #253122;"></div>
+        <div class="palette-dot" style="background: #489B6E;"></div>
+        <div class="palette-dot" style="background: #C5A56E;"></div>
+      </div>
+      <div class="palette-hex">#253122 &middot; #489B6E &middot; #C5A56E</div>
+    </div>
+    <div class="previews">
+      <div class="preview" style="background: #161e16; font-family: 'Manrope', sans-serif;">
+        <div class="mode-tag" style="color: #489B6E;">Dark mode</div>
+        <h2 style="color: #C5A56E;">CutBook</h2>
+        <p class="sub" style="color: rgba(72,155,110,0.6);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(72,155,110,0.1); border: 1px solid rgba(72,155,110,0.2);">
+            <span class="mc-label" style="color: #489B6E;">Booking</span>
+            <span class="mc-sub" style="color: rgba(197,165,110,0.5);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(197,165,110,0.08); border: 1px solid rgba(197,165,110,0.2);">
+            <span class="mc-label" style="color: #C5A56E;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(72,155,110,0.5);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(72,155,110,0.1); border: 1px solid rgba(72,155,110,0.2);">
+            <span class="mc-label" style="color: #489B6E;">Orga</span>
+            <span class="mc-sub" style="color: rgba(197,165,110,0.5);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+      <div class="preview" style="background: #f9f7f3; font-family: 'Manrope', sans-serif;">
+        <div class="mode-tag" style="color: #253122;">Light mode</div>
+        <h2 style="color: #253122;">CutBook</h2>
+        <p class="sub" style="color: rgba(37,49,34,0.45);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(72,155,110,0.08); border: 1px solid rgba(72,155,110,0.2);">
+            <span class="mc-label" style="color: #489B6E;">Booking</span>
+            <span class="mc-sub" style="color: rgba(37,49,34,0.4);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(197,165,110,0.1); border: 1px solid rgba(197,165,110,0.25);">
+            <span class="mc-label" style="color: #C5A56E;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(37,49,34,0.4);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(72,155,110,0.08); border: 1px solid rgba(72,155,110,0.2);">
+            <span class="mc-label" style="color: #489B6E;">Orga</span>
+            <span class="mc-sub" style="color: rgba(37,49,34,0.4);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PALETTE 6 ===================== -->
+  <div class="palette-row">
+    <div class="palette-info">
+      <div class="palette-num">6</div>
+      <div>
+        <div class="palette-name" style="color: #F6917E;">Tyrian Blue + Helvetia Blue + Fresh Color</div>
+        <div class="palette-desc">Doux, accessible, contraste coral / bleu</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="palette-dot" style="background: #12354E;"></div>
+        <div class="palette-dot" style="background: #005B8D;"></div>
+        <div class="palette-dot" style="background: #F6917E;"></div>
+      </div>
+      <div class="palette-hex">#12354E &middot; #005B8D &middot; #F6917E</div>
+    </div>
+    <div class="previews">
+      <div class="preview" style="background: #12354E; font-family: 'Inter', sans-serif;">
+        <div class="mode-tag" style="color: #F6917E;">Dark mode</div>
+        <h2 style="color: #F6917E;">CutBook</h2>
+        <p class="sub" style="color: rgba(0,91,141,0.8);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(246,145,126,0.1); border: 1px solid rgba(246,145,126,0.2);">
+            <span class="mc-label" style="color: #F6917E;">Booking</span>
+            <span class="mc-sub" style="color: rgba(0,91,141,0.6);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(0,91,141,0.15); border: 1px solid rgba(0,91,141,0.3);">
+            <span class="mc-label" style="color: #3a9ad9;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(246,145,126,0.5);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(246,145,126,0.1); border: 1px solid rgba(246,145,126,0.2);">
+            <span class="mc-label" style="color: #F6917E;">Orga</span>
+            <span class="mc-sub" style="color: rgba(0,91,141,0.6);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+      <div class="preview" style="background: #f8f6f5; font-family: 'Inter', sans-serif;">
+        <div class="mode-tag" style="color: #005B8D;">Light mode</div>
+        <h2 style="color: #12354E;">CutBook</h2>
+        <p class="sub" style="color: rgba(18,53,78,0.4);">La plateforme de reservation pour professionnels</p>
+        <div class="cards-row">
+          <div class="mini-card" style="background: rgba(0,91,141,0.06); border: 1px solid rgba(0,91,141,0.15);">
+            <span class="mc-label" style="color: #005B8D;">Booking</span>
+            <span class="mc-sub" style="color: rgba(18,53,78,0.4);">Temps reel</span>
+          </div>
+          <div class="mini-card" style="background: rgba(246,145,126,0.08); border: 1px solid rgba(246,145,126,0.2);">
+            <span class="mc-label" style="color: #F6917E;">Stripe</span>
+            <span class="mc-sub" style="color: rgba(18,53,78,0.4);">Paiement</span>
+          </div>
+          <div class="mini-card" style="background: rgba(0,91,141,0.06); border: 1px solid rgba(0,91,141,0.15);">
+            <span class="mc-label" style="color: #005B8D;">Orga</span>
+            <span class="mc-sub" style="color: rgba(18,53,78,0.4);">Multi-pro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== FONTS ===================== -->
+  <div class="section-title">Choix de police</div>
+
+  <div class="fonts">
+    <div class="font-card">
+      <div class="font-dark">
+        <div class="sample-big" style="font-family: 'Inter', sans-serif; color: #fff;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Inter', sans-serif; color: #aaa;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Inter', sans-serif; color: #666;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-light">
+        <div class="sample-big" style="font-family: 'Inter', sans-serif; color: #111;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Inter', sans-serif; color: #555;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Inter', sans-serif; color: #999;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-name">Inter — Geometric, clean, tech</div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-dark">
+        <div class="sample-big" style="font-family: 'Space Grotesk', sans-serif; color: #fff;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Space Grotesk', sans-serif; color: #aaa;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Space Grotesk', sans-serif; color: #666;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-light">
+        <div class="sample-big" style="font-family: 'Space Grotesk', sans-serif; color: #111;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Space Grotesk', sans-serif; color: #555;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Space Grotesk', sans-serif; color: #999;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-name">Space Grotesk — Techy, distinctif</div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-dark">
+        <div class="sample-big" style="font-family: 'Outfit', sans-serif; color: #fff;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Outfit', sans-serif; color: #aaa;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Outfit', sans-serif; color: #666;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-light">
+        <div class="sample-big" style="font-family: 'Outfit', sans-serif; color: #111;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Outfit', sans-serif; color: #555;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Outfit', sans-serif; color: #999;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-name">Outfit — Arrondi, friendly, moderne</div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-dark">
+        <div class="sample-big" style="font-family: 'Sora', sans-serif; color: #fff;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Sora', sans-serif; color: #aaa;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Sora', sans-serif; color: #666;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-light">
+        <div class="sample-big" style="font-family: 'Sora', sans-serif; color: #111;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Sora', sans-serif; color: #555;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Sora', sans-serif; color: #999;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-name">Sora — Geometric, bold, gros titres</div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-dark">
+        <div class="sample-big" style="font-family: 'DM Sans', sans-serif; color: #fff;">CutBook</div>
+        <div class="sample-med" style="font-family: 'DM Sans', sans-serif; color: #aaa;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'DM Sans', sans-serif; color: #666;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-light">
+        <div class="sample-big" style="font-family: 'DM Sans', sans-serif; color: #111;">CutBook</div>
+        <div class="sample-med" style="font-family: 'DM Sans', sans-serif; color: #555;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'DM Sans', sans-serif; color: #999;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-name">DM Sans — Elegant, equilibre</div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-dark">
+        <div class="sample-big" style="font-family: 'Manrope', sans-serif; color: #fff;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Manrope', sans-serif; color: #aaa;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Manrope', sans-serif; color: #666;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-light">
+        <div class="sample-big" style="font-family: 'Manrope', sans-serif; color: #111;">CutBook</div>
+        <div class="sample-med" style="font-family: 'Manrope', sans-serif; color: #555;">Reservation en ligne</div>
+        <div class="sample-small" style="font-family: 'Manrope', sans-serif; color: #999;">La plateforme pour les professionnels et leurs clients. 0123456789</div>
+      </div>
+      <div class="font-name">Manrope — Semi-arrondi, lisible, sobre</div>
+    </div>
+  </div>
+
+  <p class="credit">Sanzo Wada — "A Dictionary of Color Combinations" (1933) &middot; 3 couleurs par palette</p>
+
+</body>
+</html>
