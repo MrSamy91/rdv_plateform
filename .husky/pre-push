@@ -1,0 +1,10 @@
+echo "🔍 Type-check..."
+pnpm typecheck || exit 1
+
+echo "🧹 Lint complet..."
+pnpm lint || exit 1
+
+echo "🏗️  Build Next.js..."
+pnpm build || exit 1
+
+echo "✅ Pre-push OK, push autorise"

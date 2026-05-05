@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+build
+dist
+coverage
+pnpm-lock.yaml
+public
+*.min.js
+*.min.css
+.husky/_
+docs/presentation.html
+docs/charte-graphique.html
+docs/palettes.html
