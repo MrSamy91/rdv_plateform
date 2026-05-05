@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cutbook-db
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: cutbook
+      POSTGRES_PASSWORD: cutbook
+      POSTGRES_DB: cutbook
+    volumes:
+      - cutbook_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cutbook -d cutbook']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  cutbook_pgdata:
+    name: cutbook_pgdata
