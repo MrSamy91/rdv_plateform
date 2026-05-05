@@ -1,0 +1,65 @@
+Name,Status,Assignee,Sprint,Day,Branch,Description
+Init Next.js + TS + Tailwind + shadcn + Prisma + tRPC,Done,Samy,S1,J1,feat/init-project,"pnpm create next-app avec TS strict, no src/, App Router, Turbopack. shadcn init avec Radix. Prisma 7 + adapter pg. tRPC v11 + TanStack Query v5 + superjson."
+Repo GitHub + branches main/dev + .env.example + README,Done,Samy,S1,J1,setup-repo-and-workflow,"Repo MrSamy91/rdv_plateform reset. V1 archive sur legacy/v1-python-flask avec git filter-repo. Branches main/dev/setup-repo-and-workflow/legacy/v1-python-flask."
+Schema Prisma complet,Done,Samy,S1,J2,setup-repo-and-workflow,"8 modeles metier (User, Organization, Member, Service, TimeSlot, Booking, Review, Reward) + 3 BetterAuth (Session, Account, Verification) + 3 enums. Salon devient Organization, Coiffeur devient Member."
+Config Neon PostgreSQL + migration + seed,In Progress,Samy,S1,J2,-,"Docker local pret. Neon pas encore configure (compte + DATABASE_URL prod a faire). seed.ts placeholder."
+BetterAuth + Google OAuth + middleware,In Progress,Samy,S1,J3,setup-repo-and-workflow,"Module lib/auth/ complet. Email+password OK. Google OAuth dans config (besoin GOOGLE_CLIENT_ID/SECRET). Middleware Next.js PAS ENCORE."
+tRPC setup + routers de base,In Progress,Samy,S1,J4,setup-repo-and-workflow,"tRPC complet. Router organization seul fait. Manquent : service, booking, member, review, reward."
+Deploiement Vercel initial + env vars + domaine,Todo,Samy,S1,J5,feat/deploy,"Connecter le repo a Vercel, ajouter les env vars, eventuellement domaine custom."
+Layout global (navbar + sidebar + footer),Todo,Samy,S1,J6,feat/layout,"components/layout/navbar.tsx, sidebar.tsx, footer.tsx."
+OFF lundi (Samy travaille),OFF,Samy,S1,J7,-,Review PR Adil le soir si besoin.
+Onboarding Adil,Done,Adil,S1,J1,setup-repo-and-workflow,"docs/onboarding.md cree (25 min lecture pedagogique : stack, raison de chaque techno, workflow git, conventions kebab-case)."
+Pages auth UI : login + register,Todo,Adil,S1,J2,feat/auth-pages,"Formulaires React Hook Form + Zod + shadcn Form."
+Pages auth UI : forgot/verify/reset password,Todo,Adil,S1,J3,feat/auth-pages,Suite des pages auth.
+Landing page publique,Todo,Adil,S1,J4,feat/landing-page,"Hero, features, CTA. La page actuelle est encore le boilerplate Next.js."
+Dashboard client : layout + accueil,Todo,Adil,S1,J5,feat/client-dashboard,Layout protege + page d'accueil + navigation.
+Dashboard membre : layout + accueil,Todo,Adil,S1,J6,feat/coiffeur-dashboard,Layout protege + page d'accueil + navigation.
+Integration auth UI + BetterAuth,Todo,Adil,S1,J7,feat/auth-integration,Connecter les forms auth au backend BetterAuth.
+Husky 5 hooks stricts,Done,Samy,S1,Transverse,setup-repo-and-workflow,"pre-commit (no-main/dev + secretlint + lint-staged + vitest related), commit-msg (max 5 mots + commitlint), prepare-commit-msg (auto-prefix #ticket), pre-push (branch naming + typecheck + lint + test + build), post-merge (auto pnpm install)."
+Tooling qualite,Done,Samy,S1,Transverse,setup-repo-and-workflow,"Prettier + ESLint + commitlint + Vitest + Testing Library + cross-env + secretlint + jsdom + tsx + dotenv."
+GitHub Actions CI,Done,Samy,S1,Transverse,setup-repo-and-workflow,"Workflow validate (Setup pnpm + Node 20 + cache, install, prisma generate, secretlint, typecheck, lint, test, build:check) sur PR vers main/dev. Non-bypassable."
+lib/env.ts validation Zod,Done,Samy,S1,Transverse,setup-repo-and-workflow,"@t3-oss/env-nextjs separe server/client. Crash explicite au boot si var manquante/invalide."
+Migration repo + purge secrets V1,Done,Samy,S1,Transverse,legacy/v1-python-flask,"V1 deplacee sur legacy. Secrets purges de tout l'historique avec git filter-repo. ACTION REQUISE : revoquer le password Gmail expose."
+AGENTS.md + .claude/rules/ modulaires,Done,Samy,S1,Transverse,setup-repo-and-workflow,"10 fichiers : stack, naming, structure, auth-pattern, code-style, seo-performance, workflow-git, security, tests, design-system."
+Palette Sanzo Wada + Sora + SEO root,Done,Samy,S1,Transverse,setup-repo-and-workflow,"app/globals.css complet (slate/green/gold 50-950 + mapping shadcn + dark mode). app/layout.tsx : Sora via next/font + metadata complete."
+Pitch deck complet,Done,Samy + Adil,S1,Transverse,setup-repo-and-workflow,"docs/01-slide-deck.md, 02-planning-4-semaines.md, 03-architecture.md, charte-graphique.html, palettes.html, presentation.html (reveal.js)."
+Router tRPC booking,Todo,Samy,S2,J8,feat/booking-api,"Creer/annuler reservation, lister par client/coiffeur."
+Router tRPC timeslots,Todo,Samy,S2,J9,feat/timeslot-api,"CRUD creneaux + check disponibilite."
+Logique anti-double-booking,Todo,Samy,S2,J10,feat/booking-api,Transaction Prisma + check atomique.
+Router tRPC services,Todo,Samy,S2,J11,feat/service-api,CRUD services par salon.
+Emails Resend,Todo,Samy,S2,J12,feat/emails,"Confirmation + annulation + rappel via React Email."
+Integration booking flow front + back,Todo,Samy,S2,J13,feat/booking-integration,Connecter les composants front au backend tRPC.
+OFF lundi S2,OFF,Samy,S2,J14,-,Review + fix bugs.
+Flow booking client : choix salon + coiffeur,Todo,Adil,S2,J8,feat/booking-flow,Premiere etape du flow de reservation.
+Flow booking : choix service + creneaux,Todo,Adil,S2,J9,feat/booking-flow,Deuxieme etape.
+Flow booking : confirmation + recap,Todo,Adil,S2,J10,feat/booking-flow,Troisieme etape.
+Dashboard client : Mes RDV,Todo,Adil,S2,J11,feat/client-bookings,"Liste des RDV + statuts + annulation."
+Dashboard client : historique + details,Todo,Adil,S2,J12,feat/client-history,Page historique avec details RDV.
+Dashboard membre : calendrier FullCalendar,Todo,Adil,S2,J13,feat/coiffeur-calendar,Vue semaine interactive.
+Dashboard membre : gestion creneaux,Todo,Adil,S2,J14,feat/coiffeur-availability,Ajouter/supprimer dispos.
+Stripe Checkout : creation session paiement,Todo,Samy,S3,J15,feat/stripe,Stripe Checkout integre dans le flow booking.
+Stripe Webhooks : confirmation + maj booking,Todo,Samy,S3,J16,feat/stripe,Webhook handler avec signature verifiee.
+Multi-salon : adapter schema + routers,Todo,Samy,S3,J17,feat/multi-salon,Deja prevu via le modele Organization.
+Multi-salon : separation des donnees,Todo,Samy,S3,J18,feat/multi-salon,Verification que chaque orga ne voit que ses donnees.
+Programme fidelite + rewards,Todo,Samy,S3,J19,feat/loyalty,Points par RDV + rewards automatiques.
+Tests critiques : auth + booking + paiement,Todo,Samy,S3,J20,feat/tests,Tests unitaires + integration sur flows critiques.
+OFF lundi S3,OFF,Samy,S3,J21,-,Review + stabilisation.
+UI paiement : checkout + confirmation,Todo,Adil,S3,J15,feat/stripe-ui,Pages frontend Stripe.
+UI paiement : historique paiements client,Todo,Adil,S3,J16,feat/stripe-ui,Page historique des paiements.
+Pages multi-salon : liste + detail,Todo,Adil,S3,J17,feat/salon-pages,Liste des salons + page detail.
+Pages multi-salon : selection dans booking,Todo,Adil,S3,J18,feat/salon-pages,Etape selection orga dans le flow booking.
+Systeme d'avis : formulaire + affichage,Todo,Adil,S3,J19,feat/reviews,Reviews sur page coiffeur.
+Page fidelite client,Todo,Adil,S3,J20,feat/loyalty-ui,"Points + recompenses + historique."
+Bug fixes + polish UI S3,Todo,Adil,S3,J21,fix/polish-s3,Stabilisation avant demo blanche.
+Dashboard admin : gestion + stats,Todo,Samy,S4,J22,feat/admin,"Tableau de bord admin pour gestion salons + users + stats."
+Securite : rate limiting + headers + validation finale,Todo,Samy,S4,J23,feat/security,"CSP, X-Frame-Options, etc. dans next.config.ts."
+Performance : optimisation queries + loading states,Todo,Samy,S4,J24,feat/perf,Audit perf Lighthouse + optimisations.
+Bug fixes critiques,Todo,Samy,S4,J25,fix/final,Stabilisation finale.
+Deploiement final + verif prod,Todo,Samy,S4,J26,-,Deploy production + verif tout fonctionne.
+OFF dimanche S4,OFF,Samy,S4,J27,-,Preparation demo.
+UI admin : tableau de bord,Todo,Adil,S4,J22,feat/admin-ui,Composants admin frontend.
+Responsive mobile-first,Todo,Adil,S4,J23,feat/responsive,Toutes les pages mobile-friendly.
+SEO : metadata + OpenGraph + sitemap,Todo,Adil,S4,J24,feat/seo,"sitemap.ts + page-specific OG. Metadata root deja en place."
+Page 404/500 + polish animations,Todo,Adil,S4,J25,feat/polish,Pages d'erreur custom + Framer Motion polish.
+Preparation slides demo,Todo,Adil,S4,J26,-,"Pitch deck + scenario de demo. Slides reveal.js deja faites."
+Repetition finale,Todo,Adil,S4,J27,-,Repetition de la demo avant le 29 mai.
