@@ -61,7 +61,10 @@ jobs:
       - name: Build
         run: pnpm build
         env:
-          # Secrets factices pour que le build compile (ne sont jamais utilises)
-          BETTER_AUTH_SECRET: ci-build-fake-secret-not-real
-          BETTER_AUTH_URL: http://localhost:3000
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          # Pas de vraie env en CI : on skip la validation Zod de lib/env.ts.
+          # En runtime/prod, la validation s'execute normalement au boot.
+          SKIP_ENV_VALIDATION: 'true'
+          # Vars necessaires au build Next.js (metadataBase, BetterAuth, etc.)
+          # Valeurs factices, jamais utilisees en runtime sur la CI.
+          NEXT_PUBLIC_APP_URL: 'http://localhost:3000'
+          BETTER_AUTH_URL: 'http://localhost:3000'

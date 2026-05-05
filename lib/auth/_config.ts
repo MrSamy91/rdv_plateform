@@ -4,6 +4,7 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { db } from '@/lib/db'
+import { env } from '@/lib/env'
 
 export const authConfig = betterAuth({
   database: prismaAdapter(db, {
@@ -21,8 +22,8 @@ export const authConfig = betterAuth({
   // Auth Google OAuth
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+      clientId: env.GOOGLE_CLIENT_ID ?? '',
+      clientSecret: env.GOOGLE_CLIENT_SECRET ?? '',
     },
   },
 
@@ -44,7 +45,6 @@ export const authConfig = betterAuth({
     },
   },
 
-  // Secret obligatoire (genere via `openssl rand -base64 32`)
-  secret: process.env.BETTER_AUTH_SECRET ?? '',
-  baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
+  secret: env.BETTER_AUTH_SECRET,
+  baseURL: env.BETTER_AUTH_URL,
 })
