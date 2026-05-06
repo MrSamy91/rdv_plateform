@@ -1,7 +1,7 @@
 # Progress — CutBook V2
 
 > Suivi de l'avancement du projet ligne par ligne (vs `02-planning-4-semaines.md`).
-> Mis a jour : 5 mai 2026 (fin de J1 reel — vendredi soir).
+> Mis a jour : 6 mai 2026 (merge Prisma/Neon + CI Vercel).
 
 **Legende**
 
@@ -21,10 +21,10 @@
 | J1  | Init Next.js + TS + Tailwind + shadcn + Prisma + tRPC   | ✅     | `pnpm create next-app@latest` (TS strict, no `src/`, App Router, Turbopack). shadcn init avec Radix. Prisma 7 + adapter pg. tRPC v11 + TanStack Query v5 + superjson.                                                                                                                                                         |
 | J1  | Repo GitHub, branches main/dev, .env.example, README    | ✅     | Repo `MrSamy91/rdv_plateform` reset (V1 archive sur `legacy/v1-python-flask` avec `git filter-repo` pour purger les secrets). Branches `main` (vide), `dev`, `setup-repo-and-workflow` (active), `legacy/v1-python-flask`. README + LICENSE + .gitignore + .env.example crees.                                                |
 | J2  | Schema Prisma complet                                   | ✅     | 8 modeles metier (User, Organization, Member, Service, TimeSlot, Booking, Review, Reward) + 3 BetterAuth (Session, Account, Verification) + 3 enums (Role, BookingStatus, RewardStatus). Adapte vs planning : `Salon → Organization`, `Coiffeur → Member` pour ouvrir le modele a toute profession.                           |
-| J2  | Config Neon PostgreSQL + premiere migration + seed data | 🟡     | **Docker local pret** (`docker-compose.yml` + adapter pg). **Neon pas encore configure** (compte + DATABASE_URL prod a faire). `prisma/seed.ts` est un placeholder.                                                                                                                                                           |
+| J2  | Config Neon PostgreSQL + premiere migration + seed data | 🟡     | **Docker local pret** (`docker-compose.yml` + adapter pg). **Neon prod prepare** via `@prisma/adapter-neon` en production et `@prisma/adapter-pg` en local/test/dev. Client Prisma 7 genere dans `generated/prisma`. `prisma/seed.ts` reste un placeholder.                                                                   |
 | J3  | BetterAuth : email/password + Google OAuth + middleware | 🟡     | Module `lib/auth/` complet (`_config.ts`, `index.ts`, `client.ts`) + handler `app/api/auth/[...all]/route.ts`. Email+password configure, Google OAuth dans la config (besoin GOOGLE_CLIENT_ID/SECRET en env). **Middleware Next.js PAS ENCORE** (a faire pour proteger `(dashboard)/*`).                                      |
 | J4  | tRPC setup + routers de base (salon, service, booking)  | 🟡     | tRPC complet : `lib/trpc/init.ts` (context + procedures public/protected), `lib/trpc/routers/index.ts` (app router), `lib/trpc/client.tsx` (Provider), `app/api/trpc/[trpc]/route.ts` (handler). **Router `organization` seul fait** (`getBySlug` + `create`). Manquent : `service`, `booking`, `member`, `review`, `reward`. |
-| J5  | Deploiement Vercel initial + env vars + domaine         | 🔴     | Pas commence. A faire : connecter le repo a Vercel, ajouter les env vars (DATABASE_URL Neon, BETTER_AUTH_SECRET, etc.), eventuellement domaine custom.                                                                                                                                                                        |
+| J5  | Deploiement Vercel initial + env vars + domaine         | 🟡     | Vercel build/preview valide apres fix Prisma 7, adapter Neon et env dynamiques (`VERCEL_BRANCH_URL`, `VERCEL_URL`, `VERCEL_PROJECT_PRODUCTION_URL`). Domaine custom et verification prod finale restent a faire.                                                                                                              |
 | J6  | Layout global (navbar, sidebar responsive, footer)      | 🔴     | Pas commence. A faire : `components/layout/navbar.tsx`, `sidebar.tsx`, `footer.tsx`.                                                                                                                                                                                                                                          |
 | J7  | OFF (lundi)                                             | —      | —                                                                                                                                                                                                                                                                                                                             |
 
@@ -46,7 +46,7 @@
 | Husky 5 hooks stricts                     | Samy        | ✅     | pre-commit (no-main/dev + secretlint + lint-staged + vitest related), commit-msg (max 5 mots + commitlint), prepare-commit-msg (auto-prefix #ticket si nombre dans le nom de branche), pre-push (branch naming + typecheck + lint + test + build), post-merge (auto pnpm install).                              |
 | Tooling qualite                           | Samy        | ✅     | Prettier + ESLint + commitlint + Vitest + Testing Library + cross-env + secretlint + jsdom + tsx + dotenv. Scripts package.json : `dev`, `build`, `build:check`, `test`, `test:watch`, `test:ui`, `lint`, `lint:fix`, `typecheck`, `format`, `format:check`, `secretlint`, `db:*`.                              |
 | GitHub Actions CI                         | Samy        | ✅     | `.github/workflows/ci.yml` : job `validate` (Setup pnpm + Node 20 + cache, install, prisma generate, secretlint, typecheck, lint, test, build:check) sur `pull_request` vers main/dev. ~2-3 min. **A activer côté GitHub UI** : Settings > Branches > require status checks `Validate`.                         |
-| `lib/env.ts` validation Zod               | Samy        | ✅     | `@t3-oss/env-nextjs` separe server/client. Crash explicite au boot si var manquante/invalide. Migration des `process.env.X` vers `env.X` typed.                                                                                                                                                                 |
+| `lib/env.ts` validation Zod               | Samy        | ✅     | `@t3-oss/env-nextjs` separe server/client. Vars critiques assouplies pour ne pas bloquer les previews; garde-fous runtime cibles (`DATABASE_URL` requis hors build check). URLs app/auth deduites dynamiquement depuis Vercel ou fallback local.                                                                |
 | Migration repo + purge secrets            | Samy        | ✅     | V1 deplacee sur `legacy/v1-python-flask`. Secrets purges de tout l'historique avec `git filter-repo` (password Gmail `omdt leke zdgu ghwm` + `SECRET_KEY = 'admin'` + email rdvplateform@gmail.com). ⚠️ **Action manuelle requise** : revoquer le password Gmail sur https://myaccount.google.com/apppasswords. |
 | `AGENTS.md` + `.claude/rules/` modulaires | Samy        | ✅     | 10 fichiers : stack.md, naming.md, structure.md, auth-pattern.md, code-style.md, seo-performance.md, workflow-git.md, security.md, tests.md, design-system.md. AGENTS.md = sommaire.                                                                                                                            |
 | Palette Sanzo Wada + Sora + SEO           | Samy        | ✅     | `app/globals.css` complet (slate/green/gold 50-950 + mapping shadcn + dark mode). `app/layout.tsx` : Sora via `next/font` + metadata complete (title template, OG, Twitter, lang fr).                                                                                                                           |
@@ -161,7 +161,7 @@
 
 **Retard** :
 
-- Vercel deploy + Neon config (J5)
+- Domaine custom + verification prod finale Vercel (J5)
 - Middleware auth + 5 routers tRPC restants (a finir avant J8)
 - Tous les ecrans (landing, auth, dashboards) — gros chantier d'Adil
 - Layout global (navbar, sidebar, footer)
