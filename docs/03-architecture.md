@@ -296,7 +296,7 @@ services:
   db:
     image: postgres:16-alpine
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_USER: cutbook
       POSTGRES_PASSWORD: cutbook
@@ -310,10 +310,10 @@ volumes:
 
 ```env
 # .env (dev local)
-DATABASE_URL="postgresql://cutbook:cutbook@localhost:5432/cutbook"
+DATABASE_URL="<postgres-dev-url>"
 
 # .env (production — Neon)
-DATABASE_URL="postgresql://...@ep-xxx.neon.tech/cutbook?sslmode=require"
+DATABASE_URL="<postgres-neon-url>"
 ```
 
 ## Flux de reservation
@@ -355,6 +355,7 @@ commitlint config:
 ```
 
 ## Securite
+
 - Variables d'env pour tous les secrets (.env, jamais en dur)
 - BetterAuth avec rate limiting integre
 - Validation Zod sur tous les inputs tRPC
