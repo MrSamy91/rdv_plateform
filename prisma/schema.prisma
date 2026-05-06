@@ -2,7 +2,10 @@
 // Doc complete : voir docs/03-architecture.md
 
 generator client {
-  provider = "prisma-client-js"
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  engineType          = "client"
+  importFileExtension = "ts"
 }
 
 // Prisma 7 : l'url est dans prisma.config.ts (plus de `url` ici)

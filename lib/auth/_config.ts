@@ -4,7 +4,7 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { db } from '@/lib/db'
-import { env } from '@/lib/env'
+import { env, getServerAppUrl } from '@/lib/env'
 
 export const authConfig = betterAuth({
   database: prismaAdapter(db, {
@@ -45,6 +45,6 @@ export const authConfig = betterAuth({
     },
   },
 
-  secret: env.BETTER_AUTH_SECRET,
-  baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET ?? 'development-only-insecure-secret-change-me',
+  baseURL: getServerAppUrl(),
 })

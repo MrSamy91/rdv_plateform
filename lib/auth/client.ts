@@ -4,10 +4,10 @@
 // A importer dans : composants client (avec 'use client').
 // PAS dans des composants serveur → utiliser `@/lib/auth`.
 import { createAuthClient } from 'better-auth/react'
-import { env } from '@/lib/env'
+import { getClientAppUrl } from '@/lib/env'
 
 const authClient = createAuthClient({
-  baseURL: env.NEXT_PUBLIC_APP_URL,
+  baseURL: getClientAppUrl(),
 })
 
 export const { signIn, signUp, signOut, useSession } = authClient
