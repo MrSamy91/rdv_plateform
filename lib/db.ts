@@ -15,6 +15,10 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
+  if (!env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is required to initialize Prisma')
+  }
+
   const adapter =
     env.NODE_ENV === 'production'
       ? new PrismaNeon({ connectionString: env.DATABASE_URL })

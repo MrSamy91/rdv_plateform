@@ -45,6 +45,6 @@ export const authConfig = betterAuth({
     },
   },
 
-  secret: env.BETTER_AUTH_SECRET,
+  secret: env.BETTER_AUTH_SECRET ?? 'development-only-insecure-secret-change-me',
   baseURL: env.BETTER_AUTH_URL,
 })
