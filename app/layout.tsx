@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   keywords: ['reservation', 'rdv', 'booking', 'salon', 'pro', 'planning', 'agenda en ligne'],
   authors: [{ name: 'Samy & Adil' }],
   creator: 'CutBook Team',
-  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
+  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
