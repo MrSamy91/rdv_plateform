@@ -34,6 +34,10 @@ export const env = createEnv({
     EMAIL_FROM: z.string().min(1).optional(),
 
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
+    VERCEL_BRANCH_URL: z.string().optional(),
+    VERCEL_URL: z.string().optional(),
+    VERCEL_PROJECT_PRODUCTION_URL: z.string().optional(),
   },
 
   /**
@@ -60,6 +64,10 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     NODE_ENV: process.env.NODE_ENV,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    VERCEL_BRANCH_URL: process.env.VERCEL_BRANCH_URL,
+    VERCEL_URL: process.env.VERCEL_URL,
+    VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
@@ -78,16 +86,39 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
 })
 
-export function getAppUrl() {
-  const appUrl = env.NEXT_PUBLIC_APP_URL
-
-  if (!appUrl) {
-    return 'http://localhost:3000'
+function normalizeUrl(url: string | undefined) {
+  if (!url) {
+    return undefined
   }
+
+  const urlWithProtocol =
+    url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`
 
   try {
-    return new URL(appUrl).origin
+    return new URL(urlWithProtocol).origin
   } catch {
-    return 'http://localhost:3000'
+    return undefined
   }
+}
+
+export function getServerAppUrl() {
+  const vercelUrl =
+    env.VERCEL_ENV === 'production'
+      ? (env.VERCEL_PROJECT_PRODUCTION_URL ?? env.VERCEL_URL)
+      : (env.VERCEL_BRANCH_URL ?? env.VERCEL_URL)
+
+  return (
+    normalizeUrl(env.BETTER_AUTH_URL) ??
+    normalizeUrl(env.NEXT_PUBLIC_APP_URL) ??
+    normalizeUrl(vercelUrl) ??
+    'http://localhost:3000'
+  )
+}
+
+export function getClientAppUrl() {
+  if (typeof window !== 'undefined') {
+    return window.location.origin
+  }
+
+  return normalizeUrl(env.NEXT_PUBLIC_APP_URL) ?? 'http://localhost:3000'
 }
