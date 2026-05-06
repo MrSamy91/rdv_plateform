@@ -19,10 +19,10 @@ export const env = createEnv({
    * Tout import dans un composant client throw a la compilation.
    */
   server: {
-    DATABASE_URL: z.string().url().optional(),
+    DATABASE_URL: z.string().optional(),
 
     BETTER_AUTH_SECRET: z.string().min(32, 'min 32 chars (openssl rand -base64 32)').optional(),
-    BETTER_AUTH_URL: z.string().url().optional(),
+    BETTER_AUTH_URL: z.string().optional(),
 
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
@@ -42,7 +42,7 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_').optional(),
-    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+    NEXT_PUBLIC_APP_URL: z.string().optional(),
   },
 
   /**
@@ -77,3 +77,17 @@ export const env = createEnv({
    */
   emptyStringAsUndefined: true,
 })
+
+export function getAppUrl() {
+  const appUrl = env.NEXT_PUBLIC_APP_URL
+
+  if (!appUrl) {
+    return 'http://localhost:3000'
+  }
+
+  try {
+    return new URL(appUrl).origin
+  } catch {
+    return 'http://localhost:3000'
+  }
+}
