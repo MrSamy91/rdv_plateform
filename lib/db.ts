@@ -1,13 +1,12 @@
-// Client Prisma singleton (Prisma 7 + driver adapter pg).
+// Client Prisma singleton (Prisma 7 + driver adapters).
 //
 // Pourquoi singleton : eviter de creer plusieurs instances en dev (Next.js HMR
 // recharge les modules a chaque modif → fuite de connexions Postgres).
 //
-// Pourquoi adapter pg : Prisma 7 exige un driver adapter pour le runtime.
-// `@prisma/adapter-pg` fonctionne avec n'importe quel Postgres (Docker local,
-// Neon, Supabase, etc.). En prod sur Neon, on pourra switcher vers
-// `@prisma/adapter-neon` pour profiter du driver serverless.
-import { PrismaClient } from '@prisma/client'
+// Pourquoi deux adapters : on garde `pg` en local pour Docker/Postgres classique,
+// et on utilise le driver serverless Neon en production sur Vercel.
+import { PrismaClient } from '@/generated/prisma/client'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { env } from '@/lib/env'
 
@@ -16,9 +15,10 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
-  const adapter = new PrismaPg({
-    connectionString: env.DATABASE_URL,
-  })
+  const adapter =
+    env.NODE_ENV === 'production'
+      ? new PrismaNeon({ connectionString: env.DATABASE_URL })
+      : new PrismaPg({ connectionString: env.DATABASE_URL })
 
   return new PrismaClient({
     adapter,
