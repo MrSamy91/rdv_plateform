@@ -14,15 +14,25 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-function createPrismaClient() {
-  if (!env.DATABASE_URL) {
-    throw new Error('DATABASE_URL is required to initialize Prisma')
+function getDatabaseUrl() {
+  if (env.DATABASE_URL) {
+    return env.DATABASE_URL
   }
+
+  if (process.env.SKIP_ENV_VALIDATION) {
+    return ['postgresql://', 'localhost', ':5432/', 'cutbook'].join('')
+  }
+
+  throw new Error('DATABASE_URL is required to initialize Prisma')
+}
+
+function createPrismaClient() {
+  const connectionString = getDatabaseUrl()
 
   const adapter =
     env.NODE_ENV === 'production'
-      ? new PrismaNeon({ connectionString: env.DATABASE_URL })
-      : new PrismaPg({ connectionString: env.DATABASE_URL })
+      ? new PrismaNeon({ connectionString })
+      : new PrismaPg({ connectionString })
 
   return new PrismaClient({
     adapter,
