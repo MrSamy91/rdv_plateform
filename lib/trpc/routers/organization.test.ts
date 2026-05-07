@@ -2,24 +2,29 @@
 
 import 'dotenv/config'
 
-import { TRPCError } from '@trpc/server'
+import type { TRPCError } from '@trpc/server'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { db } from '@/lib/db'
 import { runSeed, seedOrganization, seedServices, seedUsers } from '@/prisma/seed'
-import { appRouter } from './index'
 
-describe('organizationRouter integration', () => {
+const hasDatabaseUrl = Boolean(process.env.DATABASE_URL)
+
+async function createAnonymousCaller() {
+  const [{ db }, { appRouter }] = await Promise.all([import('@/lib/db'), import('./index')])
+
+  return appRouter.createCaller({
+    db,
+    session: null,
+    user: null,
+  })
+}
+
+describe.skipIf(!hasDatabaseUrl)('organizationRouter integration', () => {
   beforeAll(async () => {
     await runSeed()
   })
 
   it('recupere une organisation publique par son slug avec ses services et membres', async () => {
-    const caller = appRouter.createCaller({
-      db,
-      session: null,
-      user: null,
-    })
-
+    const caller = await createAnonymousCaller()
     const organization = await caller.organization.getBySlug({ slug: seedOrganization.slug })
 
     expect(organization.id).toBe(seedOrganization.id)
@@ -36,11 +41,7 @@ describe('organizationRouter integration', () => {
   })
 
   it('retourne NOT_FOUND pour un slug inconnu', async () => {
-    const caller = appRouter.createCaller({
-      db,
-      session: null,
-      user: null,
-    })
+    const caller = await createAnonymousCaller()
 
     await expect(caller.organization.getBySlug({ slug: 'orga-inconnue' })).rejects.toMatchObject({
       code: 'NOT_FOUND' satisfies TRPCError['code'],
