@@ -11,7 +11,7 @@ OFF lundi (Samy travaille),OFF,Samy,S1,J7,-,Review PR Adil le soir si besoin.
 Onboarding Adil,Done,Adil,S1,J1,setup-repo-and-workflow,"docs/onboarding.md cree (25 min lecture pedagogique : stack, raison de chaque techno, workflow git, conventions kebab-case)."
 Pages auth UI : login + register,Todo,Adil,S1,J2,feat/auth-pages,"Formulaires React Hook Form + Zod + shadcn Form."
 Pages auth UI : forgot/verify/reset password,Todo,Adil,S1,J3,feat/auth-pages,Suite des pages auth.
-Landing page publique,Todo,Adil,S1,J4,feat/landing-page,"Hero, features, CTA. La page actuelle est encore le boilerplate Next.js."
+Landing page publique,In Progress,Adil,S1,J4,feat/landing-page,"Prototype CutBook en place dans app/page.tsx. Plus de boilerplate Next.js; contenu/CTA demo a finaliser."
 Dashboard client : layout + accueil,Todo,Adil,S1,J5,feat/client-dashboard,Layout protege + page d'accueil + navigation.
 Dashboard membre : layout + accueil,Todo,Adil,S1,J6,feat/coiffeur-dashboard,Layout protege + page d'accueil + navigation.
 Integration auth UI + BetterAuth,Todo,Adil,S1,J7,feat/auth-integration,Connecter les forms auth au backend BetterAuth.

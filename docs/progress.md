@@ -34,7 +34,7 @@
 | -------- | ------------------------------------------------------------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | J1 (lun) | Onboarding : cloner repo, setup env local, comprendre la structure             | ✅     | `docs/onboarding.md` cree (25 min de lecture, pedagogique : stack, raison de chaque techno, workflow git, conventions kebab-case). Adil pourra demarrer lundi 6 mai. |
 | J2-J3    | Pages auth UI : login, register, forgot password, verify email, reset password | 🔴     | Pas commence.                                                                                                                                                        |
-| J4       | Landing page publique                                                          | 🔴     | Pas commence. La page actuelle est encore le boilerplate Next.js.                                                                                                    |
+| J4       | Landing page publique                                                          | 🟡     | Prototype CutBook deja en place dans `app/page.tsx` (plus de boilerplate Next.js). Reste a finaliser le contenu/CTA selon la version demo.                           |
 | J5       | Dashboard client : layout + page d'accueil + navigation                        | 🔴     | Pas commence.                                                                                                                                                        |
 | J6       | Dashboard membre : layout + page d'accueil + navigation                        | 🔴     | Pas commence.                                                                                                                                                        |
 | J7       | Integration auth UI + BetterAuth                                               | 🔴     | Pas commence.                                                                                                                                                        |
@@ -163,7 +163,7 @@
 
 - Domaine custom + verification prod finale Vercel (J5)
 - Middleware auth + 5 routers tRPC restants (a finir avant J8)
-- Tous les ecrans (landing, auth, dashboards) — gros chantier d'Adil
+- Tous les ecrans auth + dashboards — gros chantier d'Adil. La landing a deja un prototype CutBook.
 - Layout global (navbar, sidebar, footer)
 
 **Risques** :
