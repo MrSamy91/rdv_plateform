@@ -54,9 +54,10 @@ components/booking/booking-form.test.tsx
 ## Scripts
 
 ```bash
-pnpm test         # Run unique (mode CI)
-pnpm test:watch   # Watch mode (dev)
-pnpm test:ui      # UI Vitest dans le navigateur
+pnpm test              # Unit/component tests, sans BDD obligatoire
+pnpm test:integration  # Integration tests avec vraie BDD (DATABASE_URL requis)
+pnpm test:watch        # Watch mode (dev)
+pnpm test:ui           # UI Vitest dans le navigateur
 ```
 
 ## Types de tests
@@ -95,6 +96,13 @@ Exemples booking :
 - utilise le prix du service en BDD, jamais un prix envoye par le client
 - marque le creneau indisponible apres reservation
 - refuse un service qui n'appartient pas a la meme organisation que le membre
+
+Convention :
+
+- nommer ces fichiers `*.integration.test.ts` ou `*.integration.test.tsx`
+- les lancer avec `pnpm test:integration`
+- `DATABASE_URL` est requis et doit pointer vers une BDD de test/dev, jamais prod
+- `pnpm test` ne doit jamais exiger `DATABASE_URL`
 
 ### E2E tests
 
