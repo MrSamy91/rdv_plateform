@@ -1,7 +1,7 @@
 # Progress — CutBook V2
 
 > Suivi de l'avancement du projet ligne par ligne (vs `02-planning-4-semaines.md`).
-> Mis a jour : 6 mai 2026 (merge Prisma/Neon + CI Vercel).
+> Mis a jour : 7 mai 2026 (auth-flow depuis dev).
 
 **Legende**
 
@@ -30,14 +30,14 @@
 
 ### Adil
 
-| J        | Tache                                                                          | Status | Comment                                                                                                                                                              |
-| -------- | ------------------------------------------------------------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| J1 (lun) | Onboarding : cloner repo, setup env local, comprendre la structure             | ✅     | `docs/onboarding.md` cree (25 min de lecture, pedagogique : stack, raison de chaque techno, workflow git, conventions kebab-case). Adil pourra demarrer lundi 6 mai. |
-| J2-J3    | Pages auth UI : login, register, forgot password, verify email, reset password | 🔴     | Pas commence.                                                                                                                                                        |
-| J4       | Landing page publique                                                          | 🟡     | Prototype CutBook deja en place dans `app/page.tsx` (plus de boilerplate Next.js). Reste a finaliser le contenu/CTA selon la version demo.                           |
-| J5       | Dashboard client : layout + page d'accueil + navigation                        | 🔴     | Pas commence.                                                                                                                                                        |
-| J6       | Dashboard membre : layout + page d'accueil + navigation                        | 🔴     | Pas commence.                                                                                                                                                        |
-| J7       | Integration auth UI + BetterAuth                                               | 🔴     | Pas commence.                                                                                                                                                        |
+| J        | Tache                                                                          | Status | Comment                                                                                                                                                                |
+| -------- | ------------------------------------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| J1 (lun) | Onboarding : cloner repo, setup env local, comprendre la structure             | ✅     | `docs/onboarding.md` cree (25 min de lecture, pedagogique : stack, raison de chaque techno, workflow git, conventions kebab-case). Adil pourra demarrer lundi 6 mai.   |
+| J2-J3    | Pages auth UI : login, register, forgot password, verify email, reset password | ✅     | Branche `auth-flow` : routes `app/(auth)/*`, shell auth partage, formulaires BetterAuth email/password + Google OAuth, tests de regression `AuthShell` et `LoginForm`. |
+| J4       | Landing page publique                                                          | 🟡     | Prototype CutBook deja en place dans `app/page.tsx` (plus de boilerplate Next.js). Reste a finaliser le contenu/CTA selon la version demo.                             |
+| J5       | Dashboard client : layout + page d'accueil + navigation                        | 🔴     | Pas commence.                                                                                                                                                          |
+| J6       | Dashboard membre : layout + page d'accueil + navigation                        | 🔴     | Pas commence.                                                                                                                                                          |
+| J7       | Integration auth UI + BetterAuth                                               | 🟡     | Login email/password branche via BetterAuth sans tRPC et redirige vers `/client`. `app/(protected)/client/page.tsx` minimal ajoute pour valider le flow.               |
 
 ### Taches transverses S1 (bonus)
 
@@ -55,7 +55,7 @@
 ### Livrable S1 (objectif)
 
 - 🔴 Projet deploye sur Vercel (meme basique)
-- 🟡 Auth fonctionnelle (backend pret, manque le middleware + UI)
+- 🟡 Auth fonctionnelle (backend + UI auth, protection layout `(protected)` minimale, reste roles/member/owner)
 - 🟡 Schema BDD complet (sur Neon : a faire / sur Docker local : ok)
 - 🔴 Layouts client + coiffeur en place
 
