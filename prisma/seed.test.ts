@@ -1,0 +1,85 @@
+import { BookingStatus, RewardStatus, Role } from '@/generated/prisma/client'
+import { describe, expect, it } from 'vitest'
+import {
+  buildSeedBookings,
+  buildSeedRewards,
+  buildSeedTimeSlots,
+  defaultSeedPassword,
+  seedMembers,
+  seedOrganization,
+  seedServices,
+  seedUsers,
+} from './seed'
+
+describe('seed fixtures', () => {
+  it('cree une organisation demo avec owner, members, clients et services coherents', () => {
+    expect(seedOrganization.slug).toBe('atelier-nova')
+    expect(seedUsers.owner.role).toBe(Role.OWNER)
+    expect(seedUsers.memberOne.role).toBe(Role.MEMBER)
+    expect(seedUsers.memberTwo.role).toBe(Role.MEMBER)
+    expect(seedUsers.clientOne.role).toBe(Role.CLIENT)
+    expect(seedUsers.clientTwo.role).toBe(Role.CLIENT)
+
+    expect(seedMembers.mila.userId).toBe(seedUsers.memberOne.id)
+    expect(seedMembers.leo.userId).toBe(seedUsers.memberTwo.id)
+    expect(Object.values(seedServices)).toHaveLength(3)
+  })
+
+  it('garde des identifiants seed uniques pour eviter les collisions idempotentes', () => {
+    const ids = [
+      ...Object.values(seedUsers).map((user) => user.id),
+      seedOrganization.id,
+      ...Object.values(seedMembers).map((member) => member.id),
+      ...Object.values(seedServices).map((service) => service.id),
+      ...buildSeedTimeSlots().map((slot) => slot.id),
+      ...buildSeedBookings().map((booking) => booking.id),
+      ...buildSeedRewards().map((reward) => reward.id),
+    ]
+
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('reserve uniquement des creneaux marques indisponibles', () => {
+    const slotsById = new Map(buildSeedTimeSlots().map((slot) => [slot.id, slot]))
+
+    for (const booking of buildSeedBookings()) {
+      const slot = slotsById.get(booking.timeSlotId)
+
+      expect(slot).toBeDefined()
+      expect(slot?.memberId).toBe(booking.memberId)
+      expect(slot?.isAvailable).toBe(false)
+    }
+  })
+
+  it('utilise les prix des services pour les bookings demo', () => {
+    const servicesById = new Map(
+      Object.values(seedServices).map((service) => [service.id, service]),
+    )
+
+    for (const booking of buildSeedBookings()) {
+      const service = servicesById.get(booking.serviceId)
+
+      expect(service).toBeDefined()
+      expect(booking.totalPrice).toBe(service?.price)
+    }
+  })
+
+  it('couvre les statuts utiles pour booking et fidelite', () => {
+    expect(buildSeedBookings().map((booking) => booking.status)).toEqual([
+      BookingStatus.CONFIRMED,
+      BookingStatus.COMPLETED,
+    ])
+    expect(buildSeedRewards().map((reward) => reward.status)).toEqual([
+      RewardStatus.AVAILABLE,
+      RewardStatus.USED,
+    ])
+  })
+
+  it('documente un mot de passe demo uniquement pour les comptes seed', () => {
+    expect(defaultSeedPassword).toHaveLength(15)
+    expect(defaultSeedPassword).toMatch(/[A-Z]/)
+    expect(defaultSeedPassword).toMatch(/[a-z]/)
+    expect(defaultSeedPassword).toMatch(/[0-9]/)
+    expect(defaultSeedPassword).toMatch(/[^A-Za-z0-9]/)
+  })
+})
