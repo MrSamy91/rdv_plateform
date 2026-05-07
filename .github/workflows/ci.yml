@@ -56,6 +56,16 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Integration tests
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL secret missing; skipping integration tests."
+            exit 0
+          fi
+          pnpm test:integration
+
       - name: Build
         # `build:check` lance next build avec SKIP_ENV_VALIDATION et des vars
         # factices (cross-env). Pas de vraie env requise. La validation Zod

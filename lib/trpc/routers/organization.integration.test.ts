@@ -6,7 +6,9 @@ import type { TRPCError } from '@trpc/server'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { runSeed, seedOrganization, seedServices, seedUsers } from '@/prisma/seed'
 
-const hasDatabaseUrl = Boolean(process.env.DATABASE_URL)
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is required to run integration tests')
+}
 
 async function createAnonymousCaller() {
   const [{ db }, { appRouter }] = await Promise.all([import('@/lib/db'), import('./index')])
@@ -18,7 +20,7 @@ async function createAnonymousCaller() {
   })
 }
 
-describe.skipIf(!hasDatabaseUrl)('organizationRouter integration', () => {
+describe('organizationRouter integration', () => {
   beforeAll(async () => {
     await runSeed()
   })
