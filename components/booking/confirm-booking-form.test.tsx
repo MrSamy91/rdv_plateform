@@ -4,20 +4,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const { routerReplace } = vi.hoisted(() => ({
   routerReplace: vi.fn(),
 }))
-let latestHookOptions:
-  | {
-      onSuccess?: () => void
-      onError?: (error: { data?: { code?: string }; message: string }) => void
-    }
-  | undefined
 
 vi.mock('@/lib/trpc/client', () => ({
   trpc: {
     booking: {
       confirmPublic: {
-        useMutation: (options: typeof latestHookOptions) => {
-          latestHookOptions = options
-
+        useMutation: (options: {
+          onSuccess?: () => void
+          onError?: (error: { data?: { code?: string }; message: string }) => void
+        }) => {
           return {
             mutate: () => {
               options?.onSuccess?.()
@@ -41,7 +36,6 @@ import { ConfirmBookingForm } from './confirm-booking-form'
 describe('ConfirmBookingForm', () => {
   beforeEach(() => {
     routerReplace.mockReset()
-    latestHookOptions = undefined
     vi.useFakeTimers()
     window.history.pushState(
       {},
