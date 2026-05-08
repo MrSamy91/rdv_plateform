@@ -19,10 +19,23 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>
 
-export function LoginForm() {
+interface LoginFormProps {
+  callbackUrl?: string
+}
+
+function normalizeCallbackUrl(callbackUrl?: string) {
+  if (!callbackUrl) {
+    return '/client'
+  }
+
+  return callbackUrl.startsWith('/') ? callbackUrl : '/client'
+}
+
+export function LoginForm({ callbackUrl }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const redirectUrl = normalizeCallbackUrl(callbackUrl)
 
   const {
     register,
@@ -49,7 +62,7 @@ export function LoginForm() {
         },
         onSuccess: () => {
           // Cookie garanti écrit — redirect safe
-          window.location.href = '/client'
+          window.location.href = redirectUrl
         },
         onError: () => {
           setServerError('Email ou mot de passe incorrect.')
@@ -153,7 +166,7 @@ export function LoginForm() {
         onClick={() =>
           signIn.social({
             provider: 'google',
-            callbackURL: '/client',
+            callbackURL: redirectUrl,
           })
         }
       >

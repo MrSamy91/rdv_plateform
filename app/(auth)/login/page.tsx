@@ -2,12 +2,26 @@ import type { Metadata } from 'next'
 import { AuthShell } from '@/components/auth/auth-shell'
 import { LoginForm } from '@/components/auth/login-form'
 
+interface Props {
+  searchParams: Promise<{ callbackUrl?: string }>
+}
+
 export const metadata: Metadata = {
   title: 'Connexion - CutBook',
   description: 'Connectez-vous a votre espace CutBook.',
 }
 
-export default function LoginPage() {
+function normalizeCallbackUrl(callbackUrl?: string) {
+  if (!callbackUrl) {
+    return '/client'
+  }
+
+  return callbackUrl.startsWith('/') ? callbackUrl : '/client'
+}
+
+export default async function LoginPage({ searchParams }: Props) {
+  const { callbackUrl } = await searchParams
+
   return (
     <AuthShell
       title="Bon retour"
@@ -16,7 +30,7 @@ export default function LoginPage() {
       brandHighlight="meme quand vous dormez."
       brandDescription="Reservation en ligne, paiement Stripe et fidelite automatique."
     >
-      <LoginForm />
+      <LoginForm callbackUrl={normalizeCallbackUrl(callbackUrl)} />
     </AuthShell>
   )
 }

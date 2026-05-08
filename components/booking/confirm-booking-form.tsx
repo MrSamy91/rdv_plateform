@@ -1,21 +1,14 @@
 'use client'
 
-import { useActionState, useOptimistic } from 'react'
-import type { ConfirmBookingActionState } from '@/lib/bookings/confirm-booking-action-state'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { trpc } from '@/lib/trpc/client'
 
 interface ConfirmBookingFormProps {
   orgSlug: string
-  serviceId?: string
-  memberId?: string
-  slotId?: string
-  action: (
-    previousState: ConfirmBookingActionState,
-    formData: FormData,
-  ) => Promise<ConfirmBookingActionState>
-}
-
-const initialState: ConfirmBookingActionState = {
-  status: 'idle',
+  serviceId: string
+  memberId: string
+  slotId: string
 }
 
 export function ConfirmBookingForm({
@@ -23,35 +16,71 @@ export function ConfirmBookingForm({
   serviceId,
   memberId,
   slotId,
-  action,
 }: ConfirmBookingFormProps) {
-  const [state, formAction, pending] = useActionState(action, initialState)
-  const [optimisticConfirming, setOptimisticConfirming] = useOptimistic(false)
-  const isLocked = pending || optimisticConfirming || state.status === 'success'
+  const [message, setMessage] = useState<string>()
+  const [isConfirmed, setIsConfirmed] = useState(false)
+  const [optimisticConfirming, setOptimisticConfirming] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isConfirmed) {
+      return undefined
+    }
+
+    const timeout = window.setTimeout(() => {
+      router.replace('/client')
+    }, 5000)
+
+    return () => window.clearTimeout(timeout)
+  }, [isConfirmed, router])
+
+  const confirmBooking = trpc.booking.confirmPublic.useMutation({
+    onSuccess() {
+      setOptimisticConfirming(false)
+      setIsConfirmed(true)
+      setMessage('Reservation confirmee.')
+    },
+    onError(error) {
+      setOptimisticConfirming(false)
+      if (error.data?.code === 'UNAUTHORIZED') {
+        const callbackUrl = `${window.location.pathname}${window.location.search}`
+        window.location.assign(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+        return
+      }
+      setMessage(error.message)
+    },
+  })
+  const isLocked = confirmBooking.isPending || optimisticConfirming || isConfirmed
 
   return (
     <form
-      action={(formData) => {
+      onSubmit={(event) => {
+        event.preventDefault()
+
+        if (isLocked) {
+          return
+        }
+
         setOptimisticConfirming(true)
-        formAction(formData)
+        confirmBooking.mutate({
+          orgSlug,
+          serviceId,
+          memberId,
+          slotId,
+        })
       }}
       className="space-y-3"
     >
-      <input type="hidden" name="orgSlug" value={orgSlug} />
-      <input type="hidden" name="serviceId" value={serviceId ?? ''} />
-      <input type="hidden" name="memberId" value={memberId ?? ''} />
-      <input type="hidden" name="slotId" value={slotId ?? ''} />
-
-      {state.message && (
+      {message && (
         <p
           role="status"
           className={
-            state.status === 'success'
+            isConfirmed
               ? 'rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700'
               : 'rounded-lg border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-medium text-slate-700'
           }
         >
-          {state.message}
+          {message}
         </p>
       )}
 
@@ -59,10 +88,10 @@ export function ConfirmBookingForm({
         id="confirm-booking-btn"
         type="submit"
         disabled={isLocked}
-        aria-busy={pending || optimisticConfirming}
+        aria-busy={confirmBooking.isPending || optimisticConfirming}
         className="bg-primary text-primary-foreground w-full rounded-lg px-6 py-3.5 text-sm font-bold transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:opacity-60"
       >
-        {state.status === 'success'
+        {isConfirmed
           ? 'Reservation confirmee'
           : isLocked
             ? 'Confirmation...'

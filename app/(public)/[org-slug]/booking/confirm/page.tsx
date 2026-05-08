@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation'
 import { ConfirmBookingForm } from '@/components/booking/confirm-booking-form'
 import { getPublicBookingConfirmationSummary } from '@/lib/organizations/public-organization'
 import { getPublicOrgBookingSlotHref } from '@/lib/routes/organization-public-route'
-import { confirmBookingAction } from './actions'
 
 interface Props {
   params: Promise<{ 'org-slug': string }>
@@ -31,11 +30,19 @@ export default async function PublicBookingConfirmPage({ params, searchParams }:
     notFound()
   }
 
+  if (!service || !member || !slot) {
+    notFound()
+  }
+
+  const serviceId = service
+  const memberId = member
+  const slotId = slot
+
   return (
     <main className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
       <div>
         <Link
-          href={getPublicOrgBookingSlotHref(orgSlug, { service, member })}
+          href={getPublicOrgBookingSlotHref(orgSlug, { service: serviceId, member: memberId })}
           className="mb-3 flex items-center gap-1 text-sm transition-opacity hover:opacity-70"
           style={{ color: 'rgba(37,49,34,0.5)' }}
         >
@@ -95,10 +102,9 @@ export default async function PublicBookingConfirmPage({ params, searchParams }:
 
       <ConfirmBookingForm
         orgSlug={orgSlug}
-        serviceId={service}
-        memberId={member}
-        slotId={slot}
-        action={confirmBookingAction}
+        serviceId={serviceId}
+        memberId={memberId}
+        slotId={slotId}
       />
     </main>
   )

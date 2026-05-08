@@ -3,12 +3,15 @@ import { BookingStatus } from '@/generated/prisma/enums'
 import { db } from '@/lib/db'
 import { normalizePublicOrgSlug } from '@/lib/routes/organization-public-route'
 
-const confirmPublicBookingSchema = z.object({
+export const confirmPublicBookingSelectionSchema = z.object({
   orgSlug: z.string().min(1),
-  clientId: z.string().min(1),
   serviceId: z.string().min(1),
   memberId: z.string().min(1),
   slotId: z.string().min(1),
+})
+
+const confirmPublicBookingSchema = confirmPublicBookingSelectionSchema.extend({
+  clientId: z.string().min(1),
 })
 
 const bookingAttempts = new Map<string, number[]>()
