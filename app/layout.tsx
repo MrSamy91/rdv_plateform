@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Sora } from 'next/font/google'
 import { getServerAppUrl } from '@/lib/env'
+import { TRPCProvider } from '@/lib/trpc/client'
 import './globals.css'
 
 // Police Sora (Google Fonts) — voir docs/charte-graphique.html
@@ -44,7 +45,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${sora.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <TRPCProvider>{children}</TRPCProvider>
+      </body>
     </html>
   )
 }

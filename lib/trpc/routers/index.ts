@@ -1,11 +1,12 @@
 // App router racine — combine tous les sous-routers.
 // Ajouter ici les nouveaux routers (booking, service, member, review, reward).
 import { router } from '../init'
+import { bookingRouter } from './booking'
 import { organizationRouter } from './organization'
 
 export const appRouter = router({
   organization: organizationRouter,
-  // booking: bookingRouter,    // TODO
+  booking: bookingRouter,
   // service: serviceRouter,    // TODO
   // member: memberRouter,      // TODO
   // review: reviewRouter,      // TODO
