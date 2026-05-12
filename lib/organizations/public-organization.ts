@@ -42,12 +42,20 @@ export async function getPublicOrganizationBySlug(orgSlug: string) {
   })
 }
 
-export async function listPublicOrganizationAvailableSlots(orgSlug: string) {
+interface PublicOrganizationSlotFilters {
+  memberId?: string
+}
+
+export async function listPublicOrganizationAvailableSlots(
+  orgSlug: string,
+  filters: PublicOrganizationSlotFilters = {},
+) {
   const slug = normalizePublicOrgSlug(orgSlug)
 
   return await db.timeSlot.findMany({
     where: {
       member: {
+        ...(filters.memberId ? { id: filters.memberId } : {}),
         organization: {
           slug,
         },
