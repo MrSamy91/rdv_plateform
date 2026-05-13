@@ -35,7 +35,7 @@ async function createUserCaller(userId: string) {
 describe('memberRouter integration', () => {
   beforeAll(async () => {
     await runSeed()
-  })
+  }, 30_000)
 
   it('recupere le profil professionnel du membre connecte', async () => {
     const caller = await createUserCaller(seedUsers.memberOne.id)
