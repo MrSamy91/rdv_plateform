@@ -3,7 +3,6 @@
 import { useState, useTransition } from 'react'
 import {
   Mail,
-  Lock,
   Phone,
   Trash2,
   Save,
@@ -14,6 +13,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { authClient } from '@/lib/auth/client'
+import { trpc } from '@/lib/trpc/client'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -138,7 +138,6 @@ function SubmitBtn({ pending, label = 'Enregistrer' }: { pending: boolean; label
 
 function EmailSection({ currentEmail }: { currentEmail: string }) {
   const [email, setEmail] = useState(currentEmail)
-  const [password, setPassword] = useState('')
   const [status, setStatus] = useState<Status>(null)
   const [pending, startTransition] = useTransition()
 
@@ -154,7 +153,6 @@ function EmailSection({ currentEmail }: { currentEmail: string }) {
         })
       } else {
         setStatus({ type: 'success', message: 'Un email de confirmation a été envoyé.' })
-        setPassword('')
       }
     })
   }
@@ -261,38 +259,59 @@ function PasswordSection() {
 
 // ── Phone section ──────────────────────────────────────────────────────────────
 
-function PhoneSection() {
-  const [phone, setPhone] = useState('')
+function PhoneForm({ initialPhone }: { initialPhone: string }) {
+  const utils = trpc.useUtils()
+  const [phone, setPhone] = useState(initialPhone)
   const [status, setStatus] = useState<Status>(null)
-  const [pending, startTransition] = useTransition()
+  const updatePhone = trpc.clientPortal.updatePhone.useMutation({
+    async onSuccess() {
+      await utils.clientPortal.profile.invalidate()
+      setStatus({ type: 'success', message: 'Numero enregistre.' })
+    },
+    onError(error) {
+      setStatus({ type: 'error', message: error.message })
+    },
+  })
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setStatus(null)
-    // TODO Samy S2 : tRPC user.updatePhone({ phone })
-    startTransition(async () => {
-      await new Promise((r) => setTimeout(r, 600)) // mock
-      setStatus({ type: 'success', message: 'Numéro enregistré (intégration tRPC en S2).' })
-    })
+    updatePhone.mutate({ phone })
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Field
         id="settings-phone"
-        label="Numéro de téléphone"
+        label="Numero de telephone"
         type="tel"
         value={phone}
         onChange={setPhone}
         placeholder="+33 6 12 34 56 78"
+        disabled={updatePhone.isPending}
         suffix={<Phone size={14} style={{ color: 'rgba(37,49,34,0.3)' }} />}
       />
       <Toast status={status} />
-      <SubmitBtn pending={pending} />
+      <SubmitBtn pending={updatePhone.isPending} />
     </form>
   )
 }
 
+function PhoneSection() {
+  const profile = trpc.clientPortal.profile.useQuery()
+
+  if (profile.isLoading) {
+    return <p className="text-muted-foreground text-sm">Chargement du telephone...</p>
+  }
+
+  if (profile.isError) {
+    return <p className="text-destructive text-sm">Impossible de charger le telephone.</p>
+  }
+
+  const initialPhone = profile.data?.phone ?? ''
+
+  return <PhoneForm key={initialPhone} initialPhone={initialPhone} />
+}
 // ── Delete account section ─────────────────────────────────────────────────────
 
 function DeleteSection() {
@@ -389,7 +408,7 @@ interface SettingsClientProps {
   currentEmail: string
 }
 
-export function SettingsClient({ currentEmail }: SettingsClientProps) {
+export function ClientSettingsView({ currentEmail }: SettingsClientProps) {
   return (
     <div className="w-full max-w-2xl space-y-6">
       <div>

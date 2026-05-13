@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { getSession } from '@/lib/auth'
-import { SettingsClient } from './settings-client'
+import { ClientSettingsView } from '@/components/dashboard/client-settings-view'
 
 export const metadata: Metadata = {
   title: 'Paramètres — CutBook',
@@ -12,5 +12,5 @@ export default async function ClientSettingsPage() {
   const session = await getSession()
   const email = session!.user.email
 
-  return <SettingsClient currentEmail={email} />
+  return <ClientSettingsView currentEmail={email} />
 }

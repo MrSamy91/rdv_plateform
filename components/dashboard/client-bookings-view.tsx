@@ -1,7 +1,9 @@
+'use client'
+
 import { CalendarDays, ChevronRight, Clock, Plus, X } from 'lucide-react'
 import Link from 'next/link'
-
-type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
+import type { BookingStatus } from '@/generated/prisma/enums'
+import { trpc } from '@/lib/trpc/client'
 
 interface ClientBooking {
   id: string
@@ -17,20 +19,18 @@ interface ClientBooking {
 const statusLabels: Record<BookingStatus, string> = {
   PENDING: 'En attente',
   CONFIRMED: 'Confirme',
+  COMPLETED: 'Termine',
   CANCELLED: 'Annule',
 }
 
 const statusStyles = {
   PENDING: { background: 'rgba(197,165,110,0.12)', color: '#C5A56E' },
   CONFIRMED: { background: 'rgba(72,155,110,0.12)', color: '#489B6E' },
+  COMPLETED: { background: 'rgba(72,155,110,0.1)', color: '#489B6E' },
   CANCELLED: { background: 'rgba(37,49,34,0.08)', color: 'rgba(37,49,34,0.4)' },
 } satisfies Record<BookingStatus, { background: string; color: string }>
 
-interface ClientBookingsViewProps {
-  bookings?: ClientBooking[]
-}
-
-export function ClientBookingsView({ bookings = [] }: ClientBookingsViewProps) {
+function ClientBookingsContent({ bookings }: { bookings: ClientBooking[] }) {
   const upcoming = bookings.filter((booking) => booking.status !== 'CANCELLED')
   const totalSpent = bookings
     .filter((booking) => booking.status === 'CONFIRMED')
@@ -176,4 +176,40 @@ export function ClientBookingsView({ bookings = [] }: ClientBookingsViewProps) {
       </div>
     </div>
   )
+}
+
+export function ClientBookingsView() {
+  const bookings = trpc.clientPortal.upcomingBookings.useQuery()
+
+  if (bookings.isLoading) {
+    return (
+      <div
+        className="rounded-2xl border p-8 text-sm"
+        style={{
+          borderColor: 'rgba(37,49,34,0.08)',
+          background: '#fff',
+          color: 'rgba(37,49,34,0.55)',
+        }}
+      >
+        Chargement des reservations...
+      </div>
+    )
+  }
+
+  if (bookings.isError) {
+    return (
+      <div
+        className="rounded-2xl border p-8 text-sm"
+        style={{
+          borderColor: 'rgba(220,38,38,0.18)',
+          background: 'rgba(220,38,38,0.04)',
+          color: '#dc2626',
+        }}
+      >
+        Impossible de charger vos reservations.
+      </div>
+    )
+  }
+
+  return <ClientBookingsContent bookings={bookings.data ?? []} />
 }

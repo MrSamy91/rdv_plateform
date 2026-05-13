@@ -1,5 +1,8 @@
+'use client'
+
 import { CalendarDays, ChevronRight, Clock, Gift, Search, Sparkles } from 'lucide-react'
 import Link from 'next/link'
+import { trpc } from '@/lib/trpc/client'
 
 const quickLinks = [
   {
@@ -26,6 +29,11 @@ const quickLinks = [
 ] as const
 
 export function ClientDashboardOverview() {
+  const summary = trpc.clientPortal.dashboardSummary.useQuery()
+  const nextBooking = summary.data?.nextBooking ?? null
+  const completedBookingsCount = summary.data?.completedBookingsCount ?? 0
+  const loyaltyPoints = summary.data?.loyaltyPoints ?? 0
+
   return (
     <div className="space-y-8">
       <section aria-labelledby="next-rdv-heading">
@@ -52,12 +60,29 @@ export function ClientDashboardOverview() {
               <CalendarDays size={20} style={{ color: '#489B6E' }} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold" style={{ color: '#253122' }}>
-                Aucun rendez-vous a venir
-              </p>
-              <p className="mt-0.5 text-sm" style={{ color: 'rgba(37,49,34,0.45)' }}>
-                Reservez des maintenant chez votre salon prefere
-              </p>
+              {summary.isLoading ? (
+                <p className="text-sm font-semibold" style={{ color: '#253122' }}>
+                  Chargement du prochain rendez-vous...
+                </p>
+              ) : nextBooking ? (
+                <>
+                  <p className="text-sm font-semibold" style={{ color: '#253122' }}>
+                    {nextBooking.service} chez {nextBooking.org}
+                  </p>
+                  <p className="mt-0.5 text-sm" style={{ color: 'rgba(37,49,34,0.45)' }}>
+                    {nextBooking.date} a {nextBooking.time} avec {nextBooking.member}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold" style={{ color: '#253122' }}>
+                    Aucun rendez-vous a venir
+                  </p>
+                  <p className="mt-0.5 text-sm" style={{ color: 'rgba(37,49,34,0.45)' }}>
+                    Reservez des maintenant chez votre salon prefere
+                  </p>
+                </>
+              )}
             </div>
             <Link
               id="client-book-next"
@@ -96,7 +121,7 @@ export function ClientDashboardOverview() {
                   </span>
                 </div>
                 <p className="mt-4 text-4xl font-black" style={{ color: '#253122' }}>
-                  0
+                  {summary.isLoading ? '...' : completedBookingsCount}
                 </p>
                 <p className="mt-1 text-xs font-medium" style={{ color: 'rgba(37,49,34,0.45)' }}>
                   RDV realises
@@ -120,7 +145,7 @@ export function ClientDashboardOverview() {
                   </span>
                 </div>
                 <p className="mt-4 text-4xl font-black" style={{ color: '#253122' }}>
-                  0
+                  {summary.isLoading ? '...' : loyaltyPoints}
                 </p>
                 <p className="mt-1 text-xs font-medium" style={{ color: 'rgba(37,49,34,0.45)' }}>
                   Points accumules

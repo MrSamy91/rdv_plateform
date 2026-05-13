@@ -1,6 +1,8 @@
-import { CalendarDays, Clock } from 'lucide-react'
+'use client'
 
-type HistoryStatus = 'COMPLETED' | 'CANCELLED'
+import { CalendarDays, Clock } from 'lucide-react'
+import type { BookingStatus } from '@/generated/prisma/enums'
+import { trpc } from '@/lib/trpc/client'
 
 interface ClientHistoryItem {
   id: string
@@ -10,19 +12,17 @@ interface ClientHistoryItem {
   date: string
   time: string
   price: number
-  status: HistoryStatus
+  status: BookingStatus
 }
 
 const statusStyles = {
+  PENDING: { background: 'rgba(197,165,110,0.12)', color: '#C5A56E', label: 'En attente' },
+  CONFIRMED: { background: 'rgba(72,155,110,0.12)', color: '#489B6E', label: 'Confirme' },
   COMPLETED: { background: 'rgba(72,155,110,0.1)', color: '#489B6E', label: 'Termine' },
   CANCELLED: { background: 'rgba(37,49,34,0.06)', color: 'rgba(37,49,34,0.4)', label: 'Annule' },
-} satisfies Record<HistoryStatus, { background: string; color: string; label: string }>
+} satisfies Record<BookingStatus, { background: string; color: string; label: string }>
 
-interface ClientHistoryViewProps {
-  history?: ClientHistoryItem[]
-}
-
-export function ClientHistoryView({ history = [] }: ClientHistoryViewProps) {
+function ClientHistoryContent({ history }: { history: ClientHistoryItem[] }) {
   const completed = history.filter((booking) => booking.status === 'COMPLETED')
   const totalSpent = completed.reduce((sum, booking) => sum + booking.price, 0)
   const cancelledCount = history.filter((booking) => booking.status === 'CANCELLED').length
@@ -138,4 +138,40 @@ export function ClientHistoryView({ history = [] }: ClientHistoryViewProps) {
       </div>
     </div>
   )
+}
+
+export function ClientHistoryView() {
+  const history = trpc.clientPortal.bookingHistory.useQuery()
+
+  if (history.isLoading) {
+    return (
+      <div
+        className="rounded-2xl border p-8 text-sm"
+        style={{
+          borderColor: 'rgba(37,49,34,0.08)',
+          background: '#fff',
+          color: 'rgba(37,49,34,0.55)',
+        }}
+      >
+        Chargement de l&apos;historique...
+      </div>
+    )
+  }
+
+  if (history.isError) {
+    return (
+      <div
+        className="rounded-2xl border p-8 text-sm"
+        style={{
+          borderColor: 'rgba(220,38,38,0.18)',
+          background: 'rgba(220,38,38,0.04)',
+          color: '#dc2626',
+        }}
+      >
+        Impossible de charger votre historique.
+      </div>
+    )
+  }
+
+  return <ClientHistoryContent history={history.data?.bookings ?? []} />
 }
