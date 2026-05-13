@@ -19,6 +19,15 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
           queries: {
             staleTime: 60 * 1000, // 1 min — refetch auto apres
             refetchOnWindowFocus: false,
+            retry(failureCount, error) {
+              const status = (error as { data?: { httpStatus?: number } }).data?.httpStatus
+
+              if (status === 401 || status === 403) {
+                return false
+              }
+
+              return failureCount < 2
+            },
           },
         },
       }),
