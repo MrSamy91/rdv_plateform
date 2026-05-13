@@ -3,14 +3,15 @@
 import { router } from '../init'
 import { bookingRouter } from './booking'
 import { clientRouter } from './client'
+import { memberRouter } from './member'
 import { organizationRouter } from './organization'
 
 export const appRouter = router({
   organization: organizationRouter,
   booking: bookingRouter,
   clientPortal: clientRouter,
+  memberPortal: memberRouter,
   // service: serviceRouter,    // TODO
-  // member: memberRouter,      // TODO
   // review: reviewRouter,      // TODO
   // reward: rewardRouter,      // TODO
 })
