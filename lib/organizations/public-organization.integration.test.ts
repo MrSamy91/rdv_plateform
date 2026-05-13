@@ -83,6 +83,16 @@ describe('public organization data', () => {
     )
   })
 
+  it('filtre les creneaux par membre selectionne', async () => {
+    const slots = await listPublicOrganizationAvailableSlots(seedOrganization.slug, {
+      memberId: seedMembers.mila.id,
+    })
+
+    expect(slots).not.toHaveLength(0)
+    expect(slots.every((slot) => slot.memberId === seedMembers.mila.id)).toBe(true)
+    expect(slots.map((slot) => slot.id)).not.toContain('seed-slot-leo-2')
+  })
+
   it('retourne une liste vide pour les creneaux d une organisation inconnue', async () => {
     await expect(listPublicOrganizationAvailableSlots('orga-inconnue')).resolves.toEqual([])
   })

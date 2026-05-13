@@ -28,7 +28,7 @@ export function ConfirmBookingForm({
     }
 
     const timeout = window.setTimeout(() => {
-      router.replace('/client')
+      router.replace('/client/bookings')
     }, 5000)
 
     return () => window.clearTimeout(timeout)

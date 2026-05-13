@@ -44,7 +44,7 @@ describe('ConfirmBookingForm', () => {
     )
   })
 
-  it('redirige vers le client cinq secondes apres confirmation', async () => {
+  it('redirige vers les reservations client cinq secondes apres confirmation', async () => {
     render(
       <ConfirmBookingForm orgSlug="atelier-nova" serviceId="s1" memberId="m1" slotId="slot-1" />,
     )
@@ -53,6 +53,6 @@ describe('ConfirmBookingForm', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Reservation confirmee.')
 
     await vi.advanceTimersByTimeAsync(5000)
-    expect(routerReplace).toHaveBeenCalledWith('/client')
+    expect(routerReplace).toHaveBeenCalledWith('/client/bookings')
   })
 })
