@@ -4,6 +4,7 @@ import { CtaSection } from '@/components/layout/cta-section'
 import { FeaturesSection } from '@/components/layout/features-section'
 import { HeroSection } from '@/components/layout/hero-section'
 import { HowItWorksSection } from '@/components/layout/how-it-works-section'
+import { PublicFooter } from '@/components/layout/public-footer'
 import { PublicNavbar } from '@/components/layout/public-navbar'
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ export default function LandingPage() {
         <HowItWorksSection />
         <CtaSection />
       </main>
+      <PublicFooter />
     </div>
   )
 }
