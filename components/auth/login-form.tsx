@@ -59,6 +59,10 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
             setServerError('Trop de tentatives. Réessaie dans quelques secondes.')
             setIsLoading(false)
           }
+          if (ctx.response.status === 403) {
+            setServerError('Vérifie ton email avant de te connecter.')
+            setIsLoading(false)
+          }
         },
         onSuccess: () => {
           // Cookie garanti écrit — redirect safe
