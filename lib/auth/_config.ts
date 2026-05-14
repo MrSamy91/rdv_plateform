@@ -4,6 +4,7 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { db } from '@/lib/db'
+import { sendEmail, VerifyEmailTemplate } from '@/lib/email'
 import { env, getServerAppUrl } from '@/lib/env'
 
 export const authConfig = betterAuth({
@@ -14,9 +15,30 @@ export const authConfig = betterAuth({
   // Auth email + password
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // a activer en prod
+    requireEmailVerification: true,
     minPasswordLength: 8,
     maxPasswordLength: 128,
+  },
+
+  emailVerification: {
+    sendOnSignUp: true,
+    sendOnSignIn: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 60 * 60,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: 'Confirme ton email CutBook',
+        react: VerifyEmailTemplate({ name: user.name, verificationUrl: url }),
+        text: `Confirme ton adresse email CutBook : ${url}`,
+        tags: [
+          {
+            name: 'type',
+            value: 'email-verification',
+          },
+        ],
+      })
+    },
   },
 
   // Auth Google OAuth
