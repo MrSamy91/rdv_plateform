@@ -24,6 +24,20 @@ jobs:
     name: Validate
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: cutbook
+          POSTGRES_PASSWORD: cutbook
+          POSTGRES_DB: cutbook_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U cutbook -d cutbook_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout
@@ -58,12 +72,12 @@ jobs:
 
       - name: Integration tests
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_USER: cutbook
+          POSTGRES_PASSWORD: cutbook
+          POSTGRES_DB: cutbook_test
         run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "DATABASE_URL secret missing; skipping integration tests."
-            exit 0
-          fi
+          export DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB"
+          pnpm prisma db push
           pnpm test:integration
 
       - name: Build
