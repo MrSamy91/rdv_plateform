@@ -55,4 +55,22 @@ describe('LoginForm', () => {
       value: originalLocation,
     })
   })
+
+  it("affiche un message quand l'email n'est pas verifie", async () => {
+    const user = userEvent.setup()
+
+    authMocks.signInEmail.mockImplementation(async ({ fetchOptions }) => {
+      fetchOptions.onResponse({ response: { status: 403 } })
+    })
+
+    render(<LoginForm />)
+
+    await user.type(screen.getByLabelText('Adresse email'), 'client@example.com')
+    await user.type(screen.getByLabelText('Mot de passe'), 'password-123')
+    await user.click(screen.getByRole('button', { name: 'Se connecter' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Vérifie ton email avant de te connecter.',
+    )
+  })
 })
