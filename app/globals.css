@@ -294,40 +294,4 @@
   }
 }
 
-/* ================================================================
-   CUTBOOK — Animations globales
-   ================================================================ */
-
-/* Lévitation douce — icône 404 */
-@keyframes cutbook-float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-10px); }
-}
-
-/* Secousse — icône erreur */
-@keyframes cutbook-shake {
-  0%, 100% { transform: translateX(0); }
-  20%       { transform: translateX(-6px); }
-  40%       { transform: translateX(6px); }
-  60%       { transform: translateX(-4px); }
-  80%       { transform: translateX(4px); }
-}
-
-/* Apparition progressive — pages & modales */
-@keyframes cutbook-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Montée douce — cartes de dashboard */
-@keyframes cutbook-slide-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Classes utilitaires */
-.animate-cutbook-float    { animation: cutbook-float    3s ease-in-out infinite; }
-.animate-cutbook-shake    { animation: cutbook-shake    0.5s ease-in-out; }
-.animate-cutbook-fade-in  { animation: cutbook-fade-in  0.4s ease-out both; }
-.animate-cutbook-slide-up { animation: cutbook-slide-up 0.4s ease-out both; }
 

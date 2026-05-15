@@ -20,6 +20,15 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
       className="flex min-h-svh flex-col items-center justify-center px-6 py-20"
       style={{ background: '#f9f7f3' }}
     >
+      <style>{`
+        @keyframes cutbook-shake {
+          0%, 100% { transform: translateX(0); }
+          20%       { transform: translateX(-6px); }
+          40%       { transform: translateX(6px); }
+          60%       { transform: translateX(-4px); }
+          80%       { transform: translateX(4px); }
+        }
+      `}</style>
       <div className="w-full max-w-md text-center">
         {/* Icône erreur animée */}
         <div className="mb-8 flex justify-center">
