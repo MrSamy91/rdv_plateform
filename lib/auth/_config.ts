@@ -7,6 +7,21 @@ import { db } from '@/lib/db'
 import { sendEmail, VerifyEmailTemplate } from '@/lib/email'
 import { env, getServerAppUrl } from '@/lib/env'
 
+function getVerificationSuccessUrl(url: string) {
+  try {
+    const verificationUrl = new URL(url)
+    const callbackUrl = verificationUrl.searchParams.get('callbackURL')
+
+    if (!callbackUrl || callbackUrl === '/') {
+      verificationUrl.searchParams.set('callbackURL', `${getServerAppUrl()}/verify-email/success`)
+    }
+
+    return verificationUrl.toString()
+  } catch {
+    return url
+  }
+}
+
 export const authConfig = betterAuth({
   database: prismaAdapter(db, {
     provider: 'postgresql',
@@ -26,11 +41,13 @@ export const authConfig = betterAuth({
     autoSignInAfterVerification: true,
     expiresIn: 60 * 60,
     sendVerificationEmail: async ({ user, url }) => {
+      const verificationUrl = getVerificationSuccessUrl(url)
+
       await sendEmail({
         to: user.email,
         subject: 'Confirme ton email CutBook',
-        react: VerifyEmailTemplate({ name: user.name, verificationUrl: url }),
-        text: `Confirme ton adresse email CutBook : ${url}`,
+        react: VerifyEmailTemplate({ name: user.name, verificationUrl }),
+        text: `Confirme ton adresse email CutBook : ${verificationUrl}`,
         tags: [
           {
             name: 'type',

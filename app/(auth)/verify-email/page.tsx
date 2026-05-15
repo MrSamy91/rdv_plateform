@@ -1,7 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { Mail } from 'lucide-react'
+import { getSession } from '@/lib/auth'
 import { AuthShell } from '@/components/auth/auth-shell'
+import { ResendVerificationEmailButton } from '@/components/auth/resend-verification-email-button'
+
+interface Props {
+  searchParams: Promise<{ email?: string }>
+}
 
 export const metadata: Metadata = {
   title: 'Verification email',
@@ -9,7 +16,15 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
-export default function VerifyEmailPage() {
+export default async function VerifyEmailPage({ searchParams }: Props) {
+  const session = await getSession()
+
+  if (session?.user.emailVerified) {
+    redirect('/client')
+  }
+
+  const { email } = await searchParams
+
   return (
     <AuthShell
       title="Verifiez votre email"
@@ -41,6 +56,8 @@ export default function VerifyEmailPage() {
             </Link>
           </span>
         </p>
+
+        <ResendVerificationEmailButton email={email} />
       </div>
 
       <p className="text-muted-foreground mt-8 text-center text-sm">
