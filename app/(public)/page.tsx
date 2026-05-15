@@ -4,7 +4,6 @@ import { CtaSection } from '@/components/layout/cta-section'
 import { FeaturesSection } from '@/components/layout/features-section'
 import { HeroSection } from '@/components/layout/hero-section'
 import { HowItWorksSection } from '@/components/layout/how-it-works-section'
-import { PublicNavbar } from '@/components/layout/public-navbar'
 
 export const metadata: Metadata = {
   title: 'CutBook - Réservation en ligne pour professionnels',
@@ -20,14 +19,11 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-svh flex-col" style={{ background: '#f9f7f3' }}>
-      <PublicNavbar />
-      <main>
-        <HeroSection />
-        <FeaturesSection />
-        <HowItWorksSection />
-        <CtaSection />
-      </main>
-    </div>
+    <>
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+      <CtaSection />
+    </>
   )
 }

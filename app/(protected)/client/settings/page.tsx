@@ -1,16 +1,21 @@
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
-import { ClientSettingsView } from '@/components/dashboard/client-settings-view'
+import { SettingsClient } from '@/components/dashboard/client-settings-view'
 
 export const metadata: Metadata = {
   title: 'Paramètres — CutBook',
-  description: 'Gérez vos informations personnelles et la sécurité de votre compte.',
+  description: 'Gérez votre compte, mot de passe et préférences.',
 }
 
-export default async function ClientSettingsPage() {
-  // getSession() est cachée (React.cache) — 0 requête supplémentaire vs le layout
+export default async function SettingsPage() {
   const session = await getSession()
-  const email = session!.user.email
+  if (!session?.user) redirect('/login')
 
-  return <ClientSettingsView currentEmail={email} />
+  return (
+    <SettingsClient
+      currentEmail={session.user.email}
+      name={session.user.name ?? 'Utilisateur'}
+    />
+  )
 }
