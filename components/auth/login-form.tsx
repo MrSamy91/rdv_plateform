@@ -60,8 +60,7 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
             setIsLoading(false)
           }
           if (ctx.response.status === 403) {
-            setServerError('Vérifie ton email avant de te connecter.')
-            setIsLoading(false)
+            window.location.href = `/verify-email?email=${encodeURIComponent(values.email)}`
           }
         },
         onSuccess: () => {

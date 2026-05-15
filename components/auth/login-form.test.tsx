@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LoginForm } from './login-form'
 
 const authMocks = vi.hoisted(() => ({
@@ -16,6 +16,11 @@ vi.mock('@/lib/auth/client', () => ({
 }))
 
 describe('LoginForm', () => {
+  beforeEach(() => {
+    authMocks.signInEmail.mockReset()
+    authMocks.signInSocial.mockReset()
+  })
+
   it('connecte avec BetterAuth email et redirige vers /client en succes', async () => {
     const user = userEvent.setup()
     const originalLocation = window.location
@@ -56,11 +61,17 @@ describe('LoginForm', () => {
     })
   })
 
-  it("affiche un message quand l'email n'est pas verifie", async () => {
+  it("redirige vers la verification email quand l'email n'est pas verifie", async () => {
     const user = userEvent.setup()
+    const originalLocation = window.location
 
     authMocks.signInEmail.mockImplementation(async ({ fetchOptions }) => {
       fetchOptions.onResponse({ response: { status: 403 } })
+    })
+
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { href: '' },
     })
 
     render(<LoginForm />)
@@ -69,8 +80,13 @@ describe('LoginForm', () => {
     await user.type(screen.getByLabelText('Mot de passe'), 'password-123')
     await user.click(screen.getByRole('button', { name: 'Se connecter' }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Vérifie ton email avant de te connecter.',
-    )
+    await waitFor(() => {
+      expect(window.location.href).toBe('/verify-email?email=client%40example.com')
+    })
+
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    })
   })
 })

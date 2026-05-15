@@ -61,7 +61,7 @@ export function RegisterForm() {
         },
         onSuccess: () => {
           // Redirect vers page de vérification email
-          window.location.href = '/verify-email'
+          window.location.href = `/verify-email?email=${encodeURIComponent(values.email)}`
         },
         onError: () => {
           setServerError('Une erreur est survenue. Réessaie.')
