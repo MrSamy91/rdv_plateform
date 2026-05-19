@@ -1,13 +1,12 @@
 import type { ReactNode } from 'react'
-import { Suspense } from 'react'
+import React from 'react'
 import { redirect } from 'next/navigation'
-import { DashboardBreadcrumb } from '@/components/dashboard/dashboard-breadcrumb'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { MemberSidebar } from '@/components/dashboard/member-sidebar'
+import { SiteHeader } from '@/components/site-header'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
 
-// Shell partagé pour toutes les pages /member/* : /member, /member/calendar, /member/availability...
-// (dashboard)/layout.tsx gère la protection session.
 export default async function MemberLayout({ children }: { children: ReactNode }) {
   const session = await getSession()
 
@@ -25,35 +24,26 @@ export default async function MemberLayout({ children }: { children: ReactNode }
   }
 
   return (
-    <div className="flex" style={{ minHeight: '100svh', background: '#f9f7f3' }}>
-      {/* Suspense évite l'hydration mismatch de usePathname() dans MemberSidebar */}
-      <Suspense
-        fallback={
-          <aside
-            className="flex w-64 shrink-0 flex-col"
-            style={{ background: '#253122' }}
-            aria-hidden
-          />
-        }
-      >
-        <MemberSidebar />
-      </Suspense>
-
-      <main
-        style={{
-          flex: 1,
-          minWidth: 0,
-          overflow: 'auto',
-          padding: '2rem 2.5rem',
-          width: '100%',
-          boxSizing: 'border-box',
+    <SidebarProvider
+      style={
+        {
+          '--sidebar-width': 'calc(var(--spacing) * 72)',
+          '--header-height': 'calc(var(--spacing) * 12)',
+        } as React.CSSProperties
+      }
+    >
+      <MemberSidebar
+        variant="inset"
+        user={{
+          name: session.user.name,
+          email: session.user.email,
+          avatar: session.user.image ?? '',
         }}
-      >
-        <Suspense fallback={null}>
-          <DashboardBreadcrumb base="member" />
-        </Suspense>
-        {children}
-      </main>
-    </div>
+      />
+      <SidebarInset>
+        <SiteHeader title="Espace professionnel" />
+        <div className="flex flex-1 flex-col">{children}</div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

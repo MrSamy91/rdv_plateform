@@ -1,97 +1,65 @@
 'use client'
 
+import * as React from 'react'
+import { LayoutDashboard, CalendarDays, Clock, User, Settings2Icon, Scissors } from 'lucide-react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { LayoutDashboard, CalendarDays, Clock, User, LogOut, Scissors } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { signOut } from '@/lib/auth/client'
+import { NavMain } from '@/components/nav-main'
+import { NavSecondary } from '@/components/nav-secondary'
+import { NavUser } from '@/components/nav-user'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar'
 
-const navItems = [
-  { href: '/member', label: 'Tableau de bord', icon: LayoutDashboard, exact: true },
-  { href: '/member/calendar', label: 'Mon calendrier', icon: CalendarDays, exact: false },
-  { href: '/member/availability', label: 'Mes créneaux', icon: Clock, exact: false },
-  { href: '/member/profile', label: 'Mon profil', icon: User, exact: false },
-] as const
+const navMain = [
+  { title: 'Tableau de bord', url: '/member', icon: <LayoutDashboard /> },
+  { title: 'Mon calendrier', url: '/member/calendar', icon: <CalendarDays /> },
+  { title: 'Mes créneaux', url: '/member/availability', icon: <Clock /> },
+  { title: 'Mon profil', url: '/member/profile', icon: <User /> },
+]
 
-export function MemberSidebar() {
-  const pathname = usePathname()
+const navSecondary = [{ title: 'Paramètres', url: '/member/profile', icon: <Settings2Icon /> }]
 
+interface MemberSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: { name: string; email: string; avatar: string }
+}
+
+export function MemberSidebar({ user, ...props }: MemberSidebarProps) {
   return (
-    <aside
-      className="flex w-64 shrink-0 flex-col"
-      style={{ background: '#253122' }}
-      aria-label="Navigation professionnel"
-    >
-      {/* Brand */}
-      <div
-        className="flex h-16 items-center gap-2.5 border-b px-5"
-        style={{ borderColor: 'rgba(255,255,255,0.08)' }}
-      >
-        <div
-          className="flex size-7 items-center justify-center rounded-lg"
-          style={{ background: '#489B6E' }}
-        >
-          <Scissors size={13} className="rotate-90 text-white" />
-        </div>
-        <span className="text-base font-bold tracking-tight text-white">CutBook</span>
-        <span
-          className="ml-auto rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase"
-          style={{ background: 'rgba(72,155,110,0.25)', color: '#489B6E' }}
-        >
-          Pro
-        </span>
-      </div>
+    <Sidebar collapsible="offcanvas" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
+              <Link href="/member" className="flex items-center gap-2">
+                <span
+                  className="flex size-6 items-center justify-center rounded-md"
+                  style={{ background: '#489B6E' }}
+                >
+                  <Scissors size={13} className="rotate-90 text-white" />
+                </span>
+                <span className="text-base font-bold" style={{ color: '#253122' }}>
+                  CutBook <span className="text-xs font-normal opacity-50">Pro</span>
+                </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-      {/* Nav */}
-      <nav className="flex flex-1 flex-col gap-0.5 p-3" aria-label="Navigation professionnel">
-        <p
-          className="mb-2 px-3 text-xs font-semibold tracking-widest uppercase"
-          style={{ color: 'rgba(255,255,255,0.3)' }}
-        >
-          Menu
-        </p>
-        {navItems.map((item) => {
-          const Icon = item.icon
-          const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
-                isActive ? 'text-white' : 'text-white/50 hover:text-white/80',
-              )}
-              style={isActive ? { background: 'rgba(72,155,110,0.2)' } : {}}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <Icon size={16} style={{ color: isActive ? '#489B6E' : undefined }} />
-              {item.label}
-              {isActive && (
-                <span className="ml-auto size-1.5 rounded-full" style={{ background: '#489B6E' }} />
-              )}
-            </Link>
-          )
-        })}
-      </nav>
+      <SidebarContent>
+        <NavMain items={navMain} />
+        <NavSecondary items={navSecondary} className="mt-auto" />
+      </SidebarContent>
 
-      {/* Logout */}
-      <div className="border-t p-3" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-        <button
-          id="member-sidebar-logout"
-          type="button"
-          onClick={async () => {
-            await signOut()
-            window.location.href = '/login'
-          }}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all"
-          style={{ color: 'rgba(255,255,255,0.4)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
-        >
-          <LogOut size={16} />
-          Se déconnecter
-        </button>
-      </div>
-    </aside>
+      <SidebarFooter>
+        <NavUser user={user} />
+      </SidebarFooter>
+    </Sidebar>
   )
 }
