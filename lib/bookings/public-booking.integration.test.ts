@@ -26,6 +26,7 @@ describe('confirmPublicBooking', () => {
       serviceId: seedServices.cut.id,
       memberId: seedMembers.mila.id,
       slotId: 'seed-slot-mila-2',
+      time: '10:30',
     })
 
     expect(result).toEqual({ ok: true, bookingId: expect.any(String) })
@@ -56,6 +57,7 @@ describe('confirmPublicBooking', () => {
         serviceId: seedServices.beard.id,
         memberId: seedMembers.leo.id,
         slotId: 'seed-slot-leo-1',
+        time: '11:00',
       }),
     ).resolves.toEqual({
       ok: false,
@@ -73,6 +75,7 @@ describe('confirmPublicBooking', () => {
       serviceId: seedServices.cut.id,
       memberId: seedMembers.mila.id,
       slotId: 'seed-slot-mila-1',
+      time: '09:00',
     }
 
     await confirmPublicBooking(input)
@@ -82,7 +85,7 @@ describe('confirmPublicBooking', () => {
     await expect(confirmPublicBooking(input)).resolves.toEqual({
       ok: false,
       code: 'RATE_LIMITED',
-      message: 'Trop de tentatives. Reessayez dans une minute.',
+      message: 'Trop de tentatives. Réessayez dans une minute.',
     })
   })
 })

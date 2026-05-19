@@ -88,7 +88,7 @@ export function PublicSlotPicker({
             {selectedSlots.map((slot) =>
               slot.isAvailable ? (
                 <Link
-                  key={slot.id}
+                  key={`${slot.id}-${slot.startTime}`}
                   href={getPublicOrgBookingConfirmHref(orgSlug, {
                     service: serviceId,
                     member: memberId,
@@ -102,7 +102,7 @@ export function PublicSlotPicker({
                 </Link>
               ) : (
                 <div
-                  key={slot.id}
+                  key={`${slot.id}-${slot.startTime}`}
                   className="cursor-not-allowed rounded-lg border-2 border-slate-200 bg-slate-200 px-3 py-2.5 text-center text-sm text-slate-400 line-through opacity-60"
                   title="Creneau indisponible"
                   aria-disabled="true"

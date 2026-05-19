@@ -46,17 +46,34 @@ export const organizationRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Verifier que le slug n'est pas deja pris
-      const existing = await ctx.db.organization.findUnique({ where: { slug: input.slug } })
-      if (existing) {
-        throw new TRPCError({ code: 'CONFLICT', message: 'Slug deja utilise' })
+      // L'utilisateur est-il déjà membre d'une organisation ?
+      const existingMember = await ctx.db.member.findUnique({
+        where: { userId: ctx.user.id },
+      })
+      if (existingMember) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'Vous avez déjà un profil professionnel.',
+        })
       }
 
-      return await ctx.db.organization.create({
-        data: {
-          ...input,
-          ownerId: ctx.user.id,
-        },
+      // Vérifier que le slug n'est pas déjà pris
+      const existingSlug = await ctx.db.organization.findUnique({ where: { slug: input.slug } })
+      if (existingSlug) {
+        throw new TRPCError({ code: 'CONFLICT', message: 'Ce slug est déjà utilisé.' })
+      }
+
+      // Transaction atomique : crée l'organisation + le record Member
+      return await ctx.db.$transaction(async (tx) => {
+        const org = await tx.organization.create({
+          data: { ...input, ownerId: ctx.user.id },
+        })
+
+        await tx.member.create({
+          data: { userId: ctx.user.id, orgId: org.id },
+        })
+
+        return org
       })
     }),
 })

@@ -46,7 +46,13 @@ describe('ConfirmBookingForm', () => {
 
   it('redirige vers les reservations client cinq secondes apres confirmation', async () => {
     render(
-      <ConfirmBookingForm orgSlug="atelier-nova" serviceId="s1" memberId="m1" slotId="slot-1" />,
+      <ConfirmBookingForm
+        orgSlug="atelier-nova"
+        serviceId="s1"
+        memberId="m1"
+        slotId="slot-1"
+        time="09:00"
+      />,
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Confirmer la reservation' }))

@@ -41,6 +41,7 @@ describe('bookingRouter', () => {
       serviceId: seedServices.beard.id,
       memberId: seedMembers.leo.id,
       slotId: 'seed-slot-leo-2',
+      time: '09:30',
     })
 
     expect(result).toEqual({ bookingId: expect.any(String) })

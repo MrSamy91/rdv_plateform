@@ -9,6 +9,7 @@ interface ConfirmBookingFormProps {
   serviceId: string
   memberId: string
   slotId: string
+  time: string
 }
 
 export function ConfirmBookingForm({
@@ -16,6 +17,7 @@ export function ConfirmBookingForm({
   serviceId,
   memberId,
   slotId,
+  time,
 }: ConfirmBookingFormProps) {
   const [message, setMessage] = useState<string>()
   const [isConfirmed, setIsConfirmed] = useState(false)
@@ -67,6 +69,7 @@ export function ConfirmBookingForm({
           serviceId,
           memberId,
           slotId,
+          time,
         })
       }}
       className="space-y-3"

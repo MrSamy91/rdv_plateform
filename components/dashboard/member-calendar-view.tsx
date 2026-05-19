@@ -99,7 +99,9 @@ export function MemberCalendarView() {
 
   // États pour le menu déroulant
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null)
-  const [selectedSlot, setSelectedSlot] = useState<Record<string, unknown> | null>(null)
+  const [selectedSlot, setSelectedSlot] = useState<
+    ({ id: string } & Record<string, unknown>) | null
+  >(null)
 
   // Formatage des événements pour FullCalendar avec mise en cache
   const calendarEvents = useMemo(() => {
