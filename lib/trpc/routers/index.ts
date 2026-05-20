@@ -5,13 +5,16 @@ import { bookingRouter } from './booking'
 import { clientRouter } from './client'
 import { memberRouter } from './member'
 import { organizationRouter } from './organization'
+import { serviceRouter } from './service'
+import { timeSlotRouter } from './time-slot'
 
 export const appRouter = router({
   organization: organizationRouter,
   booking: bookingRouter,
+  service: serviceRouter,
+  timeSlot: timeSlotRouter,
   clientPortal: clientRouter,
   memberPortal: memberRouter,
-  // service: serviceRouter,    // TODO
   // review: reviewRouter,      // TODO
   // reward: rewardRouter,      // TODO
 })
