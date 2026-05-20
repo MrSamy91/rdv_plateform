@@ -11,10 +11,8 @@ const C = {
   border: 'rgba(37,49,34,0.10)',
   borderMd: 'rgba(37,49,34,0.18)',
   card: '#ffffff',
-  bg: '#f9f7f3',
   green: '#489B6E',
   greenBg: 'rgba(72,155,110,0.10)',
-  greenDark: '#2d6b4a',
   red: '#dc2626',
   redBg: 'rgba(220,38,38,0.08)',
 }

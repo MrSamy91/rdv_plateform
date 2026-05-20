@@ -7,12 +7,12 @@ export const createServiceSchema = z.object({
   name: z.string().min(2, 'Minimum 2 caractères').max(60, 'Maximum 60 caractères'),
   description: z.string().max(200, 'Maximum 200 caractères').optional(),
   duration: z
-    .number({ invalid_type_error: 'Durée requise' })
+    .number({ error: 'Durée requise' })
     .int()
     .min(5, 'Minimum 5 minutes')
     .max(480, 'Maximum 8 heures'),
   price: z
-    .number({ invalid_type_error: 'Prix requis' })
+    .number({ error: 'Prix requis' })
     .min(0, 'Le prix doit être positif')
     .max(9999, 'Prix trop élevé'),
 })
