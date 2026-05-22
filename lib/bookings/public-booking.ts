@@ -78,6 +78,11 @@ export async function confirmPublicBooking(
           organization: {
             slug,
           },
+          members: {
+            some: {
+              memberId,
+            },
+          },
         },
         select: {
           id: true,

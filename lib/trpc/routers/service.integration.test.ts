@@ -4,7 +4,7 @@ import 'dotenv/config'
 
 import type { TRPCError } from '@trpc/server'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { runSeed, seedOrganization, seedServices, seedUsers } from '@/prisma/seed'
+import { runSeed, seedMembers, seedOrganization, seedServices, seedUsers } from '@/prisma/seed'
 import { db } from '@/lib/db'
 import { appRouter } from '.'
 
@@ -61,6 +61,7 @@ describe('serviceRouter integration', () => {
       description: 'Soin cheveux test integration',
       duration: 30,
       price: 35,
+      memberIds: [seedMembers.mila.id],
     })
 
     expect(created).toMatchObject({
@@ -68,6 +69,13 @@ describe('serviceRouter integration', () => {
       name: 'Soin profond',
       price: 35,
     })
+    expect(created.members).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          memberId: seedMembers.mila.id,
+        }),
+      ]),
+    )
 
     const updated = await caller.service.update({
       serviceId: created.id,
@@ -99,5 +107,29 @@ describe('serviceRouter integration', () => {
     ).rejects.toMatchObject({
       code: 'FORBIDDEN' satisfies TRPCError['code'],
     })
+  })
+
+  it('permet au membre de choisir les services qu il propose', async () => {
+    const caller = await createUserCaller(seedUsers.memberOne.id)
+
+    const result = await caller.service.setMemberServices({
+      memberId: seedMembers.mila.id,
+      serviceIds: [seedServices.cut.id, seedServices.color.id],
+    })
+
+    expect(result).toEqual({
+      memberId: seedMembers.mila.id,
+      serviceIds: [seedServices.cut.id, seedServices.color.id],
+    })
+
+    const memberServices = await db.memberService.findMany({
+      where: { memberId: seedMembers.mila.id },
+      orderBy: { serviceId: 'asc' },
+    })
+
+    expect(memberServices.map((memberService) => memberService.serviceId).sort()).toEqual([
+      seedServices.color.id,
+      seedServices.cut.id,
+    ])
   })
 })

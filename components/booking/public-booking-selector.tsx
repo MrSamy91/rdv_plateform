@@ -17,6 +17,9 @@ interface PublicBookingSelectorProps {
   members: Array<{
     id: string
     specialties: string | null
+    services?: Array<{
+      serviceId: string
+    }>
     user: {
       name: string
     }
@@ -27,6 +30,32 @@ export function PublicBookingSelector({ orgSlug, services, members }: PublicBook
   const [serviceId, setServiceId] = useState('')
   const [memberId, setMemberId] = useState('')
   const canContinue = serviceId.length > 0 && memberId.length > 0
+  const availableMembers = useMemo(() => {
+    if (!serviceId) {
+      return members
+    }
+
+    return members.filter((member) =>
+      (member.services ?? []).some((service) => service.serviceId === serviceId),
+    )
+  }, [members, serviceId])
+
+  function handleServiceChange(nextServiceId: string) {
+    setServiceId(nextServiceId)
+
+    if (!memberId) {
+      return
+    }
+
+    const selectedMember = members.find((member) => member.id === memberId)
+    const selectedMemberCanDoService = selectedMember?.services?.some(
+      (service) => service.serviceId === nextServiceId,
+    )
+
+    if (!selectedMemberCanDoService) {
+      setMemberId('')
+    }
+  }
 
   const slotHref = useMemo(() => {
     if (!canContinue) {
@@ -59,7 +88,7 @@ export function PublicBookingSelector({ orgSlug, services, members }: PublicBook
                 name="service"
                 value={service.id}
                 checked={serviceId === service.id}
-                onChange={() => setServiceId(service.id)}
+                onChange={() => handleServiceChange(service.id)}
                 className="mt-0.5 accent-green-500"
               />
               <span className="flex-1">
@@ -81,7 +110,7 @@ export function PublicBookingSelector({ orgSlug, services, members }: PublicBook
           Choisissez un professionnel
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          {members.map((member) => (
+          {availableMembers.map((member) => (
             <label
               key={member.id}
               className="border-border bg-card flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-slate-50"
@@ -107,6 +136,11 @@ export function PublicBookingSelector({ orgSlug, services, members }: PublicBook
               </span>
             </label>
           ))}
+          {serviceId && availableMembers.length === 0 && (
+            <p className="text-sm text-slate-500">
+              Aucun professionnel ne propose encore ce service.
+            </p>
+          )}
         </div>
       </section>
 

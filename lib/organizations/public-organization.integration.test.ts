@@ -93,6 +93,16 @@ describe('public organization data', () => {
     expect(slots.map((slot) => slot.id)).not.toContain('seed-slot-leo-2')
   })
 
+  it('filtre les creneaux par service selectionne', async () => {
+    const slots = await listPublicOrganizationAvailableSlots(seedOrganization.slug, {
+      serviceId: seedServices.beard.id,
+    })
+
+    expect(slots).not.toHaveLength(0)
+    expect(slots.every((slot) => slot.memberId === seedMembers.leo.id)).toBe(true)
+    expect(slots.map((slot) => slot.id)).not.toContain('seed-slot-mila-2')
+  })
+
   it('retourne une liste vide pour les creneaux d une organisation inconnue', async () => {
     await expect(listPublicOrganizationAvailableSlots('orga-inconnue')).resolves.toEqual([])
   })
@@ -122,6 +132,14 @@ describe('public organization data', () => {
       getPublicBookingConfirmationSummary(seedOrganization.slug, {
         serviceId: seedServices.cut.id,
         memberId: seedMembers.mila.id,
+      }),
+    ).resolves.toBeNull()
+
+    await expect(
+      getPublicBookingConfirmationSummary(seedOrganization.slug, {
+        serviceId: seedServices.cut.id,
+        memberId: seedMembers.leo.id,
+        slotId: 'seed-slot-leo-2',
       }),
     ).resolves.toBeNull()
 

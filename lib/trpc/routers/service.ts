@@ -9,10 +9,11 @@ const serviceInputSchema = z.object({
   description: z.string().max(500).nullable().optional(),
   duration: z.number().int().min(5).max(480),
   price: z.number().min(0).max(10_000),
+  memberIds: z.array(z.string().min(1)).optional(),
 })
 
 const updateServiceSchema = serviceInputSchema
-  .omit({ orgId: true })
+  .omit({ orgId: true, memberIds: true })
   .partial()
   .extend({
     serviceId: z.string().min(1),
@@ -110,6 +111,86 @@ async function getServiceForOwner(
   return service
 }
 
+async function ensureMembersBelongToOrg(
+  ctx: { db: typeof import('@/lib/db').db },
+  input: { orgId: string; memberIds: string[] },
+) {
+  if (input.memberIds.length === 0) {
+    return
+  }
+
+  const uniqueMemberIds = [...new Set(input.memberIds)]
+  const membersCount = await ctx.db.member.count({
+    where: {
+      id: { in: uniqueMemberIds },
+      orgId: input.orgId,
+    },
+  })
+
+  if (membersCount !== uniqueMemberIds.length) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Tous les professionnels doivent appartenir au salon.',
+    })
+  }
+}
+
+async function getMemberForServiceUpdate(
+  ctx: { db: typeof import('@/lib/db').db; user: { id: string } },
+  memberId: string,
+) {
+  const member = await ctx.db.member.findUnique({
+    where: { id: memberId },
+    select: {
+      id: true,
+      orgId: true,
+      userId: true,
+      organization: {
+        select: {
+          ownerId: true,
+        },
+      },
+    },
+  })
+
+  if (!member) {
+    throw new TRPCError({ code: 'NOT_FOUND', message: 'Professionnel introuvable.' })
+  }
+
+  if (member.userId !== ctx.user.id && member.organization.ownerId !== ctx.user.id) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Vous ne pouvez pas modifier les services de ce professionnel.',
+    })
+  }
+
+  return member
+}
+
+async function ensureServicesBelongToOrg(
+  ctx: { db: typeof import('@/lib/db').db },
+  input: { orgId: string; serviceIds: string[] },
+) {
+  if (input.serviceIds.length === 0) {
+    return
+  }
+
+  const uniqueServiceIds = [...new Set(input.serviceIds)]
+  const servicesCount = await ctx.db.service.count({
+    where: {
+      id: { in: uniqueServiceIds },
+      orgId: input.orgId,
+    },
+  })
+
+  if (servicesCount !== uniqueServiceIds.length) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'Tous les services doivent appartenir au salon.',
+    })
+  }
+}
+
 export const serviceRouter = router({
   listByOrganization: protectedProcedure
     .input(z.object({ orgId: z.string().min(1) }))
@@ -118,12 +199,32 @@ export const serviceRouter = router({
 
       return await ctx.db.service.findMany({
         where: { orgId: input.orgId },
+        include: {
+          members: {
+            select: {
+              memberId: true,
+              member: {
+                select: {
+                  user: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
         orderBy: [{ name: 'asc' }],
       })
     }),
 
   create: protectedProcedure.input(serviceInputSchema).mutation(async ({ ctx, input }) => {
     await ensureOrgOwner(ctx, input.orgId)
+    await ensureMembersBelongToOrg(ctx, {
+      orgId: input.orgId,
+      memberIds: input.memberIds ?? [],
+    })
 
     return await ctx.db.service.create({
       data: {
@@ -132,6 +233,16 @@ export const serviceRouter = router({
         description: input.description ?? null,
         duration: input.duration,
         price: input.price,
+        members: input.memberIds?.length
+          ? {
+              createMany: {
+                data: [...new Set(input.memberIds)].map((memberId) => ({ memberId })),
+              },
+            }
+          : undefined,
+      },
+      include: {
+        members: true,
       },
     })
   }),
@@ -169,5 +280,42 @@ export const serviceRouter = router({
       await ctx.db.service.delete({ where: { id: service.id } })
 
       return { serviceId: service.id }
+    }),
+
+  setMemberServices: protectedProcedure
+    .input(
+      z.object({
+        memberId: z.string().min(1),
+        serviceIds: z.array(z.string().min(1)),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const member = await getMemberForServiceUpdate(ctx, input.memberId)
+      const serviceIds = [...new Set(input.serviceIds)]
+
+      await ensureServicesBelongToOrg(ctx, {
+        orgId: member.orgId,
+        serviceIds,
+      })
+
+      await ctx.db.$transaction(async (tx) => {
+        await tx.memberService.deleteMany({
+          where: { memberId: member.id },
+        })
+
+        if (serviceIds.length > 0) {
+          await tx.memberService.createMany({
+            data: serviceIds.map((serviceId) => ({
+              memberId: member.id,
+              serviceId,
+            })),
+          })
+        }
+      })
+
+      return {
+        memberId: member.id,
+        serviceIds,
+      }
     }),
 })

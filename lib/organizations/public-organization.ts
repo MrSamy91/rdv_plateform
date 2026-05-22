@@ -29,6 +29,11 @@ export async function getPublicOrganizationBySlug(orgSlug: string) {
       services: { orderBy: { price: 'asc' } },
       members: {
         include: {
+          services: {
+            select: {
+              serviceId: true,
+            },
+          },
           user: {
             select: {
               id: true,
@@ -44,6 +49,7 @@ export async function getPublicOrganizationBySlug(orgSlug: string) {
 
 interface PublicOrganizationSlotFilters {
   memberId?: string
+  serviceId?: string
 }
 
 export async function listPublicOrganizationAvailableSlots(
@@ -56,6 +62,15 @@ export async function listPublicOrganizationAvailableSlots(
     where: {
       member: {
         ...(filters.memberId ? { id: filters.memberId } : {}),
+        ...(filters.serviceId
+          ? {
+              services: {
+                some: {
+                  serviceId: filters.serviceId,
+                },
+              },
+            }
+          : {}),
         organization: {
           slug,
         },
@@ -108,7 +123,14 @@ export async function getPublicBookingConfirmationSummary(
       slug: true,
       name: true,
       services: {
-        where: { id: input.serviceId },
+        where: {
+          id: input.serviceId,
+          members: {
+            some: {
+              memberId: input.memberId,
+            },
+          },
+        },
         select: {
           id: true,
           name: true,
@@ -117,7 +139,14 @@ export async function getPublicBookingConfirmationSummary(
         },
       },
       members: {
-        where: { id: input.memberId },
+        where: {
+          id: input.memberId,
+          services: {
+            some: {
+              serviceId: input.serviceId,
+            },
+          },
+        },
         select: {
           id: true,
           user: {

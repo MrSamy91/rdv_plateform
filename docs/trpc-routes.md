@@ -33,6 +33,7 @@ Regles :
 
 - utilisateur connecte obligatoire ;
 - le service doit appartenir au salon ;
+- le service doit etre propose par le professionnel choisi ;
 - le creneau doit appartenir au coiffeur choisi ;
 - le creneau doit encore etre disponible au moment de la transaction ;
 - le creneau est verrouille avec `isAvailable: false` ;
@@ -109,6 +110,7 @@ await trpc.service.create.mutate({
   description: 'Coupe et finitions',
   duration: 45,
   price: 35,
+  memberIds: ['member-id'],
 })
 ```
 
@@ -122,6 +124,7 @@ Contraintes :
 - `description` : optionnelle, 500 caracteres max ;
 - `duration` : 5 a 480 minutes ;
 - `price` : 0 a 10 000.
+- `memberIds` : optionnel, associe directement le service aux professionnels capables de le faire.
 
 ### `service.update`
 
@@ -164,6 +167,37 @@ Retour :
 ```ts
 {
   serviceId: string
+}
+```
+
+### `service.setMemberServices`
+
+Definit les services qu'un professionnel peut proposer.
+
+```ts
+await trpc.service.setMemberServices.mutate({
+  memberId: 'member-id',
+  serviceIds: ['service-cut', 'service-color'],
+})
+```
+
+Acces :
+
+- owner du salon ;
+- professionnel concerne.
+
+Regles :
+
+- tous les services doivent appartenir au meme salon que le professionnel ;
+- la liste remplace les associations existantes du professionnel ;
+- une liste vide signifie que le professionnel ne propose aucun service.
+
+Retour :
+
+```ts
+{
+  memberId: string
+  serviceIds: string[]
 }
 ```
 
