@@ -85,7 +85,15 @@ export async function confirmPublicBooking(
     return await db.$transaction(async (tx) => {
       // 1. Vérifier le service
       const service = await tx.service.findFirst({
-        where: { id: serviceId, organization: { slug } },
+        where: {
+          id: serviceId,
+          organization: { slug },
+          members: {
+            some: {
+              memberId,
+            },
+          },
+        },
         select: { id: true, price: true, duration: true },
       })
       if (!service) throw new Error('SLOT_UNAVAILABLE')

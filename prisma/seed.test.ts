@@ -2,6 +2,7 @@ import { BookingStatus, RewardStatus, Role } from '@/generated/prisma/client'
 import { describe, expect, it } from 'vitest'
 import {
   buildSeedBookings,
+  buildSeedMemberServices,
   buildSeedRewards,
   buildSeedTimeSlots,
   defaultSeedPassword,
@@ -39,6 +40,7 @@ describe('seed fixtures', () => {
       seedOrganization.id,
       ...Object.values(seedMembers).map((member) => member.id),
       ...Object.values(seedServices).map((service) => service.id),
+      ...buildSeedMemberServices().map(({ memberId, serviceId }) => `${memberId}:${serviceId}`),
       ...buildSeedTimeSlots().map((slot) => slot.id),
       ...buildSeedBookings().map((booking) => booking.id),
       ...buildSeedRewards().map((reward) => reward.id),
@@ -69,6 +71,16 @@ describe('seed fixtures', () => {
 
       expect(service).toBeDefined()
       expect(booking.totalPrice).toBe(service?.price)
+    }
+  })
+
+  it('associe chaque booking demo a un service propose par le membre', () => {
+    const memberServiceKeys = new Set(
+      buildSeedMemberServices().map(({ memberId, serviceId }) => `${memberId}:${serviceId}`),
+    )
+
+    for (const booking of buildSeedBookings()) {
+      expect(memberServiceKeys.has(`${booking.memberId}:${booking.serviceId}`)).toBe(true)
     }
   })
 
