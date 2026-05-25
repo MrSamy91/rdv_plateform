@@ -184,6 +184,23 @@ export function buildSeedBookings() {
   ]
 }
 
+export function buildSeedMemberServices() {
+  return [
+    {
+      memberId: seedMembers.mila.id,
+      serviceId: seedServices.cut.id,
+    },
+    {
+      memberId: seedMembers.mila.id,
+      serviceId: seedServices.color.id,
+    },
+    {
+      memberId: seedMembers.leo.id,
+      serviceId: seedServices.beard.id,
+    },
+  ]
+}
+
 export function buildSeedReviews() {
   return [
     {
@@ -255,6 +272,11 @@ async function clearSeedData(prisma: PrismaClient) {
     },
   })
   await prisma.reward.deleteMany({ where: { clientId: { in: userIds } } })
+  await prisma.memberService.deleteMany({
+    where: {
+      OR: [{ memberId: { in: memberIds } }, { serviceId: { in: serviceIds } }],
+    },
+  })
   await prisma.timeSlot.deleteMany({ where: { memberId: { in: memberIds } } })
   await prisma.service.deleteMany({ where: { id: { in: serviceIds } } })
   await prisma.member.deleteMany({ where: { id: { in: memberIds } } })
@@ -330,6 +352,7 @@ export async function runSeed() {
     })
 
     await prisma.timeSlot.createMany({ data: buildSeedTimeSlots() })
+    await prisma.memberService.createMany({ data: buildSeedMemberServices() })
     await prisma.booking.createMany({ data: buildSeedBookings() })
     await prisma.review.createMany({ data: buildSeedReviews() })
     await prisma.reward.createMany({ data: buildSeedRewards() })

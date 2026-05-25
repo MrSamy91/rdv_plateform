@@ -20,7 +20,10 @@ export const metadata: Metadata = {
 export default async function PublicBookingSlotPage({ params, searchParams }: Props) {
   const { 'org-slug': orgSlug } = await params
   const { service, member } = await searchParams
-  const slots = await listPublicOrganizationAvailableSlots(orgSlug, { memberId: member })
+  const slots = await listPublicOrganizationAvailableSlots(orgSlug, {
+    memberId: member,
+    serviceId: service,
+  })
   const slotDates = listPublicSlotDates(slots)
   const publicSlots = slots.map((slot) => ({
     id: slot.id,

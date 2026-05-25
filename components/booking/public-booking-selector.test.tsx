@@ -17,8 +17,17 @@ const members = [
   {
     id: 'member-mila',
     specialties: 'Coupe femme',
+    services: [{ serviceId: 'service-cut' }],
     user: {
       name: 'Mila Laurent',
+    },
+  },
+  {
+    id: 'member-leo',
+    specialties: 'Barbe',
+    services: [{ serviceId: 'service-beard' }],
+    user: {
+      name: 'Leo Martin',
     },
   },
 ]
@@ -35,6 +44,7 @@ describe('PublicBookingSelector', () => {
     await user.click(screen.getByRole('radio', { name: /Coupe simple/ }))
     expect(nextLink).toHaveAttribute('aria-disabled', 'true')
     expect(nextLink).not.toHaveAttribute('href')
+    expect(screen.queryByLabelText(/Leo Martin/)).not.toBeInTheDocument()
 
     await user.click(screen.getByLabelText(/Mila Laurent/))
     const enabledNextLink = screen.getByRole('link', { name: 'Choisir un creneau' })
