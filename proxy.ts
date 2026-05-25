@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { getSessionCookie } from 'better-auth/cookies'
 
-// ── Routes protégées par session BetterAuth ────────────────────────────────────
-const protectedRoutes = ['/client', '/member']
+// Proxy = garde UX optimiste uniquement. Les vraies autorisations (rôles) restent
+// cote serveur : requireAdmin() / requireSession() dans les layouts protégés.
+// Ici on ne décide QUE "a un cookie de session -> laisse passer, sinon -> /login".
+const protectedRoutes = ['/admin', '/client', '/member']
 const authRoutes = ['/login', '/register']
-
-// ── Token admin (même valeur que ADMIN_SESSION_TOKEN dans .env) ────────────────
-const ADMIN_TOKEN = process.env.ADMIN_SESSION_TOKEN ?? ''
 
 function isRoute(pathname: string, routes: string[]) {
   return routes.some((route) => pathname === route || pathname.startsWith(`${route}/`))
 }
 
-function hasSessionCookie(request: NextRequest) {
-  return Boolean(
-    request.cookies.get('better-auth.session_token')?.value ||
-    request.cookies.get('__Secure-better-auth.session_token')?.value,
-  )
+// callbackUrl vient du client -> jamais de confiance.
+// On exige un chemin interne : un seul '/' en tête, jamais '//' ni '/\'.
+// Sinon `new URL('//evil.com', origin)` résout vers un domaine externe = open redirect.
+function safeInternalPath(path: string | null, fallback: string) {
+  return path && /^\/(?![/\\])/.test(path) ? path : fallback
 }
 
 function redirectToLogin(request: NextRequest) {
@@ -27,38 +27,32 @@ function redirectToLogin(request: NextRequest) {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  // ── Guard admin : cookie de session ───────────────────────────────────────
-  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-    // /admin-login est accessible sans cookie (c'est la porte d'entrée)
-    if (pathname.startsWith('/admin-login')) return NextResponse.next()
-
-    // Fail-closed : si le token n'est pas configuré → personne ne passe
-    if (!ADMIN_TOKEN) return NextResponse.redirect(new URL('/admin-login', request.url))
-
-    const cookie = request.cookies.get('cutbook_admin_session')?.value
-    if (!cookie || cookie !== ADMIN_TOKEN) {
-      return NextResponse.redirect(new URL('/admin-login', request.url))
-    }
-
-    // ✅ Cookie valide — le layout vérifie aussi l'email (2ème couche)
-    return NextResponse.next()
-  }
-
-  // ── Guard session sur /client et /member ───────────────────────────────────
-  const isAuthenticated = hasSessionCookie(request)
+  // getSessionCookie gère le cookiePrefix + le prefix __Secure- tout seul (pas de noms
+  // hardcodés à maintenir). Vérifie la présence du cookie, pas sa validité -> suffisant
+  // pour un redirect optimiste, l'authz réelle se fait côté serveur.
+  const isAuthenticated = Boolean(getSessionCookie(request))
 
   if (isRoute(pathname, protectedRoutes) && !isAuthenticated) {
     return redirectToLogin(request)
   }
 
   if (isRoute(pathname, authRoutes) && isAuthenticated) {
-    return NextResponse.redirect(new URL('/client', request.url))
+    const callbackUrl = safeInternalPath(request.nextUrl.searchParams.get('callbackUrl'), '/client')
+    return NextResponse.redirect(new URL(callbackUrl, request.url))
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/admin', '/admin/:path*', '/client/:path*', '/member/:path*', '/login', '/register'],
+  matcher: [
+    '/admin',
+    '/admin/:path*',
+    '/client',
+    '/client/:path*',
+    '/member',
+    '/member/:path*',
+    '/login',
+    '/register',
+  ],
 }
