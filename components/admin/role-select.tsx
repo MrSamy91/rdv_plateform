@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { CheckIcon, ChevronDownIcon, LoaderCircleIcon } from 'lucide-react'
 import {
   DropdownMenu,
@@ -8,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { updateUserRole } from './actions'
+import { trpc } from '@/lib/trpc/client'
 import { Role } from '@/generated/prisma/enums'
 
 // ── Config des rôles ───────────────────────────────────────────────────────────
@@ -43,16 +44,19 @@ function getRoleConfig(role: Role) {
 // ── Composant ──────────────────────────────────────────────────────────────────
 
 export function RoleSelect({ userId, currentRole }: { userId: string; currentRole: Role }) {
+  const router = useRouter()
   const [role, setRole] = React.useState<Role>(currentRole)
-  const [pending, startTransition] = React.useTransition()
+  const updateRole = trpc.admin.updateUserRole.useMutation({
+    onSuccess: () => router.refresh(),
+    onError: () => setRole(currentRole), // rollback de l'optimistic update
+  })
+  const pending = updateRole.isPending
   const config = getRoleConfig(role)
 
   function handleSelect(next: Role) {
     if (next === role) return
     setRole(next) // optimistic update
-    startTransition(async () => {
-      await updateUserRole(userId, next)
-    })
+    updateRole.mutate({ userId, role: next })
   }
 
   return (

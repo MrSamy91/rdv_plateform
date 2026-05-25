@@ -17,6 +17,14 @@ const ADMIN_EMAILS = (env.ADMIN_EMAILS ?? '')
   .filter(Boolean)
 
 /**
+ * Bootstrap admin : un email present dans ADMIN_EMAILS est admin meme sans
+ * role ADMIN en BDD (utile pour promouvoir le premier compte).
+ */
+export function isAdminEmail(email: string) {
+  return ADMIN_EMAILS.includes(email.toLowerCase())
+}
+
+/**
  * Recupere la session de l'utilisateur cote serveur.
  * Retourne `null` si pas connecte.
  *
@@ -66,9 +74,7 @@ export async function requireAdmin() {
     redirect('/login?callbackUrl=/admin')
   }
 
-  const isBootstrapAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase())
-
-  if (user.role !== Role.ADMIN && !isBootstrapAdmin) {
+  if (user.role !== Role.ADMIN && !isAdminEmail(user.email)) {
     redirect('/')
   }
 

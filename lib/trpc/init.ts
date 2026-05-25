@@ -3,7 +3,8 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
-import { getSession } from '@/lib/auth'
+import { Role } from '@/generated/prisma/enums'
+import { getSession, isAdminEmail } from '@/lib/auth'
 import { db } from '@/lib/db'
 
 /**
@@ -61,4 +62,23 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
       user: ctx.user,
     },
   })
+})
+
+/**
+ * Procedure admin : requiert un user connecte ET admin.
+ * On relit le role FRAIS en BDD (pas le role du cookie de session, qui peut
+ * etre cache jusqu'a 5 min) pour ne pas laisser passer un admin retrograde.
+ * Bootstrap ADMIN_EMAILS supporte, comme requireAdmin().
+ */
+export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const dbUser = await ctx.db.user.findUnique({
+    where: { id: ctx.user.id },
+    select: { role: true, email: true },
+  })
+
+  if (!dbUser || (dbUser.role !== Role.ADMIN && !isAdminEmail(dbUser.email))) {
+    throw new TRPCError({ code: 'FORBIDDEN' })
+  }
+
+  return next({ ctx })
 })

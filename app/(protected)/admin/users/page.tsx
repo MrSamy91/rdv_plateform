@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { CalendarCheck, Phone, Mail, Users } from 'lucide-react'
-import { RoleSelect } from './role-select'
+import { RoleSelect } from '../../../../components/admin/role-select'
 
 export const metadata = { title: 'Utilisateurs — Admin CutBook' }
 
