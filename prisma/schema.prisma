@@ -45,10 +45,14 @@ model User {
   @@map("user")
 }
 
+// Role = identite PLATEFORME uniquement (global, 1 valeur par user).
+// Les "casquettes" orga (owner / member) sont des RELATIONS, pas des roles :
+//   - member d'une orga  -> une ligne Member (userId, orgId)
+//   - owner d'une orga    -> Organization.ownerId pointe sur le user
+// Un user peut donc cumuler : ADMIN/CLIENT (plateforme) + owner + member.
 enum Role {
+  ADMIN
   CLIENT
-  OWNER
-  MEMBER
 }
 
 // =============================================================

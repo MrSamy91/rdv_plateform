@@ -21,25 +21,18 @@ const roles: {
   hover: string
 }[] = [
   {
+    value: 'ADMIN',
+    label: 'Admin',
+    dot: 'bg-amber-400',
+    pill: 'bg-amber-50 text-amber-600 ring-amber-200',
+    hover: 'hover:bg-amber-50/60',
+  },
+  {
     value: 'CLIENT',
     label: 'Client',
     dot: 'bg-slate-400',
     pill: 'bg-slate-100 text-slate-600 ring-slate-200',
     hover: 'hover:bg-slate-50',
-  },
-  {
-    value: 'MEMBER',
-    label: 'Membre',
-    dot: 'bg-[#489B6E]',
-    pill: 'bg-[#489B6E]/10 text-[#489B6E] ring-[#489B6E]/25',
-    hover: 'hover:bg-[#489B6E]/5',
-  },
-  {
-    value: 'OWNER',
-    label: 'Owner',
-    dot: 'bg-rose-400',
-    pill: 'bg-rose-50 text-rose-500 ring-rose-200',
-    hover: 'hover:bg-rose-50/60',
   },
 ]
 

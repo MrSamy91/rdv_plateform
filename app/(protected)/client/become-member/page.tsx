@@ -1,17 +1,11 @@
 import { redirect } from 'next/navigation'
-import { getSession } from '@/lib/auth'
+import { requireSession } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { BecomeMemberForm } from '@/components/dashboard/become-member-form'
 
 export default async function BecomeMemberPage() {
-  const session = await getSession()
+  const session = await requireSession('/client/become-member')
 
-  // Sécurité supplémentaire (le layout (protected) gère déjà ça)
-  if (!session) {
-    redirect('/login?callbackUrl=/become-member')
-  }
-
-  // Si déjà membre → rediriger vers le dashboard membre
   const existingMember = await db.member.findUnique({
     where: { userId: session.user.id },
     select: { id: true },

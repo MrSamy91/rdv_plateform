@@ -2,7 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarDays, Gift, History, Home, LogOut, Scissors, Settings } from 'lucide-react'
+import {
+  CalendarDays,
+  Gift,
+  History,
+  Home,
+  LogOut,
+  Scissors,
+  Settings,
+  UserRoundPlus,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { signOut } from '@/lib/auth/client'
 
@@ -14,8 +23,9 @@ const navItems = [
   { href: '/client/settings', label: 'Paramètres', icon: Settings, exact: false },
 ] as const
 
-export function ClientSidebar() {
+export function ClientSidebar({ hasMembership }: { hasMembership: boolean }) {
   const pathname = usePathname()
+  const showBecomeMember = !hasMembership
 
   return (
     <aside
@@ -68,6 +78,20 @@ export function ClientSidebar() {
           )
         })}
       </nav>
+
+      {showBecomeMember && (
+        <div className="border-t p-3" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <Link
+            id="client-sidebar-become-member"
+            href="/client/become-member"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
+            style={{ background: '#489B6E' }}
+          >
+            <UserRoundPlus size={16} />
+            Devenir membre
+          </Link>
+        </div>
+      )}
 
       {/* Logout */}
       <div className="border-t p-3" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>

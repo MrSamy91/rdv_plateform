@@ -12,6 +12,7 @@ import {
   FileText,
 } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
+import { createOrganizationSchema } from '@/lib/organizations/schema'
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 const C = {
@@ -160,26 +161,38 @@ export function BecomeMemberForm({ userName }: BecomeMemberFormProps) {
   }
 
   function validate() {
+    const result = createOrganizationSchema.safeParse({
+      name,
+      slug,
+      address,
+      phone,
+      description,
+    })
+
+    if (result.success) {
+      setFieldErrors({})
+      return result.data
+    }
+
     const errors: Record<string, string> = {}
-    if (name.trim().length < 2) errors.name = 'Minimum 2 caractères.'
-    if (slug.trim().length < 2) errors.slug = 'Minimum 2 caractères.'
-    if (!/^[a-z0-9-]+$/.test(slug)) errors.slug = 'Minuscules, chiffres et tirets uniquement.'
-    if (address.trim().length < 5) errors.address = 'Adresse trop courte.'
-    if (phone.trim().length < 8) errors.phone = 'Numéro invalide.'
+    const fieldErrors = result.error.flatten().fieldErrors
+
+    for (const [field, messages] of Object.entries(fieldErrors)) {
+      const message = messages?.[0]
+      if (message) {
+        errors[field] = message
+      }
+    }
+
     setFieldErrors(errors)
-    return Object.keys(errors).length === 0
+    return null
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!validate()) return
-    create.mutate({
-      name: name.trim(),
-      slug: slug.trim(),
-      address: address.trim(),
-      phone: phone.trim(),
-      description: description.trim() || undefined,
-    })
+    const values = validate()
+    if (!values) return
+    create.mutate(values)
   }
 
   const isConflict = create.error?.data?.code === 'CONFLICT'
@@ -224,6 +237,7 @@ export function BecomeMemberForm({ userName }: BecomeMemberFormProps) {
             onChange={handleNameChange}
             placeholder="Mon Salon, Studio Lumière…"
             maxLength={50}
+            disabled={create.isPending || create.isSuccess}
           />
         </FieldGroup>
 
@@ -241,6 +255,7 @@ export function BecomeMemberForm({ userName }: BecomeMemberFormProps) {
             prefix="cutbook.fr/"
             placeholder="mon-salon"
             maxLength={30}
+            disabled={create.isPending || create.isSuccess}
           />
         </FieldGroup>
 
@@ -257,6 +272,8 @@ export function BecomeMemberForm({ userName }: BecomeMemberFormProps) {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="12 rue de la Paix, 75001 Paris"
+              maxLength={120}
+              disabled={create.isPending || create.isSuccess}
               className="w-full rounded-xl border py-2.5 pr-3 pl-8 text-sm transition-colors outline-none focus:border-[#489B6E]"
               style={{ borderColor: C.borderMd, color: C.text, background: C.card }}
             />
@@ -277,6 +294,8 @@ export function BecomeMemberForm({ userName }: BecomeMemberFormProps) {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+33 6 12 34 56 78"
+              maxLength={20}
+              disabled={create.isPending || create.isSuccess}
               className="w-full rounded-xl border py-2.5 pr-3 pl-8 text-sm transition-colors outline-none focus:border-[#489B6E]"
               style={{ borderColor: C.borderMd, color: C.text, background: C.card }}
             />
@@ -302,6 +321,7 @@ export function BecomeMemberForm({ userName }: BecomeMemberFormProps) {
               placeholder="Salon de coiffure spécialisé en colorations végétales…"
               rows={3}
               maxLength={300}
+              disabled={create.isPending || create.isSuccess}
               className="w-full resize-none rounded-xl border py-2.5 pr-3 pl-8 text-sm transition-colors outline-none focus:border-[#489B6E]"
               style={{ borderColor: C.borderMd, color: C.text, background: C.card }}
             />
