@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CutBook — Pitch</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     :root {
@@ -20,7 +22,7 @@
       --slate-300: #C9D3C5;
       --slate-200: #DFE3DA;
       --slate-100: #EFF1ED;
-      --slate-50:  #F8F9F7;
+      --slate-50: #F8F9F7;
 
       --green-300: #8DD5B8;
       --green-400: #67C7A0;
@@ -36,204 +38,584 @@
     }
 
     /* Base reveal overrides */
-    .reveal-viewport, .reveal { background: var(--slate-950); }
-    .reveal { font-family: 'Sora', sans-serif; color: var(--slate-200); }
-    .reveal .slides { text-align: left; }
+    .reveal-viewport,
+    .reveal {
+      background: var(--slate-950);
+    }
+
+    .reveal {
+      font-family: 'Sora', sans-serif;
+      color: var(--slate-200);
+    }
+
+    .reveal .slides {
+      text-align: left;
+    }
 
     /* Hierarchie typo conforme a la charte (Sora) */
-    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
-      text-transform: none; color: var(--slate-50);
+    .reveal h1,
+    .reveal h2,
+    .reveal h3,
+    .reveal h4 {
+      text-transform: none;
+      color: var(--slate-50);
     }
-    .reveal h1 { font-size: 2.6em; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
-    .reveal h2 { font-size: 1.6em; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 0.35em; margin-top: 0; }
-    .reveal h3 { font-size: 0.95em; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; color: var(--slate-100); margin-bottom: 0.3em; }
-    .reveal h4 { font-size: 0.7em; font-weight: 600; line-height: 1.4; color: var(--slate-100); }
-    .reveal p, .reveal li { font-size: 0.68em; font-weight: 400; line-height: 1.6; color: var(--slate-300); }
-    .reveal strong { color: var(--slate-50); font-weight: 600; }
-    .reveal ul { list-style: none; padding-left: 0; margin: 0; }
-    .reveal ul li::before { content: "\2192 "; color: var(--green-500); font-weight: 700; }
-    .reveal ul li { margin-bottom: 0.35em; }
+
+    .reveal h1 {
+      font-size: 2.6em;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+
+    .reveal h2 {
+      font-size: 1.6em;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 0.35em;
+      margin-top: 0;
+    }
+
+    .reveal h3 {
+      font-size: 0.95em;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      color: var(--slate-100);
+      margin-bottom: 0.3em;
+    }
+
+    .reveal h4 {
+      font-size: 0.7em;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--slate-100);
+    }
+
+    .reveal p,
+    .reveal li {
+      font-size: 0.68em;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--slate-300);
+    }
+
+    .reveal strong {
+      color: var(--slate-50);
+      font-weight: 600;
+    }
+
+    .reveal ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+
+    .reveal ul li::before {
+      content: "\2192 ";
+      color: var(--green-500);
+      font-weight: 700;
+    }
+
+    .reveal ul li {
+      margin-bottom: 0.35em;
+    }
 
     /* Section label = pattern d'accent de la charte (gold-400 uppercase 0.08em) */
     .section-label {
-      font-size: 0.42em; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--gold-400); margin-bottom: 0.2em;
-      display: block; line-height: 1;
+      font-size: 0.42em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold-400);
+      margin-bottom: 0.2em;
+      display: block;
+      line-height: 1;
     }
 
     /* Gradients (palette 60-30-10) */
-    .grad   { background: linear-gradient(135deg, var(--green-400), var(--gold-400)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .grad-g { background: linear-gradient(135deg, var(--green-500), var(--green-300)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .grad-o { background: linear-gradient(135deg, var(--gold-500), var(--gold-300)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .grad {
+      background: linear-gradient(135deg, var(--green-400), var(--gold-400));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .grad-g {
+      background: linear-gradient(135deg, var(--green-500), var(--green-300));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .grad-o {
+      background: linear-gradient(135deg, var(--gold-500), var(--gold-300));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
     /* Color helpers */
-    .c-green { color: var(--green-400); }
-    .c-gold  { color: var(--gold-400); }
-    .c-slate { color: var(--slate-300); }
+    .c-green {
+      color: var(--green-400);
+    }
 
-    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6em; margin-top: 0.7em; }
-    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8em; margin-top: 0.7em; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; margin-top: 0.7em; }
+    .c-gold {
+      color: var(--gold-400);
+    }
+
+    .c-slate {
+      color: var(--slate-300);
+    }
+
+    .grid4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6em;
+      margin-top: 0.7em;
+    }
+
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8em;
+      margin-top: 0.7em;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2em;
+      margin-top: 0.7em;
+    }
 
     .card {
       background: rgba(72, 155, 110, 0.06);
       border: 1px solid rgba(72, 155, 110, 0.22);
-      border-radius: 12px; padding: 0.7em 0.9em; text-align: center;
+      border-radius: 12px;
+      padding: 0.7em 0.9em;
+      text-align: center;
     }
-    .card.gold  { border-color: rgba(197, 165, 110, 0.28); background: rgba(197, 165, 110, 0.06); }
-    .card.olive { border-color: rgba(159, 179, 154, 0.22); background: rgba(63, 82, 72, 0.18); }
-    .card .icon { font-size: 1.5em; display: block; margin-bottom: 0.15em; }
-    .card .num { font-size: 1.6em; font-weight: 800; display: block; color: var(--slate-50); letter-spacing: -0.02em; }
+
+    .card.gold {
+      border-color: rgba(197, 165, 110, 0.28);
+      background: rgba(197, 165, 110, 0.06);
+    }
+
+    .card.olive {
+      border-color: rgba(159, 179, 154, 0.22);
+      background: rgba(63, 82, 72, 0.18);
+    }
+
+    .card .icon {
+      font-size: 1.5em;
+      display: block;
+      margin-bottom: 0.15em;
+    }
+
+    .card .num {
+      font-size: 1.6em;
+      font-weight: 800;
+      display: block;
+      color: var(--slate-50);
+      letter-spacing: -0.02em;
+    }
+
     /* .lbl = caption charte : weight 500, line-height 1.4 */
-    .card .lbl { font-size: 0.5em; font-weight: 500; color: var(--slate-400); line-height: 1.4; }
+    .card .lbl {
+      font-size: 0.5em;
+      font-weight: 500;
+      color: var(--slate-400);
+      line-height: 1.4;
+    }
 
     .tip {
       background: rgba(197, 165, 110, 0.08);
       border: 1px solid rgba(197, 165, 110, 0.2);
-      border-radius: 10px; padding: 0.6em 1em; margin-top: 0.6em;
+      border-radius: 10px;
+      padding: 0.6em 1em;
+      margin-top: 0.6em;
     }
-    .tip p { font-size: 0.6em; margin: 0; color: var(--slate-200); }
+
+    .tip p {
+      font-size: 0.6em;
+      margin: 0;
+      color: var(--slate-200);
+    }
 
     .tag {
-      display: inline-block; font-size: 0.48em; padding: 0.2em 0.7em; border-radius: 20px;
-      margin: 0 0.2em; font-weight: 600;
+      display: inline-block;
+      font-size: 0.48em;
+      padding: 0.2em 0.7em;
+      border-radius: 20px;
+      margin: 0 0.2em;
+      font-weight: 600;
     }
-    .tag-green { background: rgba(72, 155, 110, 0.18); color: var(--green-400); border: 1px solid rgba(72, 155, 110, 0.4); }
-    .tag-gold  { background: rgba(197, 165, 110, 0.18); color: var(--gold-400); border: 1px solid rgba(197, 165, 110, 0.4); }
-    .tag-olive { background: rgba(159, 179, 154, 0.12); color: var(--slate-300); border: 1px solid rgba(159, 179, 154, 0.3); }
 
-    .centered { text-align: center !important; }
+    .tag-green {
+      background: rgba(72, 155, 110, 0.18);
+      color: var(--green-400);
+      border: 1px solid rgba(72, 155, 110, 0.4);
+    }
+
+    .tag-gold {
+      background: rgba(197, 165, 110, 0.18);
+      color: var(--gold-400);
+      border: 1px solid rgba(197, 165, 110, 0.4);
+    }
+
+    .tag-olive {
+      background: rgba(159, 179, 154, 0.12);
+      color: var(--slate-300);
+      border: 1px solid rgba(159, 179, 154, 0.3);
+    }
+
+    .centered {
+      text-align: center !important;
+    }
 
     /* Sommaire */
-    .sommaire-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3em 2em; margin-top: 0.5em; }
-    .sommaire-item { display: flex; align-items: center; gap: 0.6em; padding: 0.3em 0; border-bottom: 1px solid rgba(159, 179, 154, 0.08); }
-    .sommaire-num {
-      font-size: 0.65em; font-weight: 800; min-width: 26px; height: 26px;
-      display: flex; align-items: center; justify-content: center; border-radius: 8px;
+    .sommaire-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.3em 2em;
+      margin-top: 0.5em;
     }
-    .sommaire-num.n-green { background: rgba(72, 155, 110, 0.15); color: var(--green-400); }
-    .sommaire-num.n-gold  { background: rgba(197, 165, 110, 0.15); color: var(--gold-400); }
-    .sommaire-num.n-olive { background: rgba(159, 179, 154, 0.12); color: var(--slate-300); }
-    .sommaire-text { font-size: 0.6em; color: var(--slate-300); }
+
+    .sommaire-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6em;
+      padding: 0.3em 0;
+      border-bottom: 1px solid rgba(159, 179, 154, 0.08);
+    }
+
+    .sommaire-num {
+      font-size: 0.65em;
+      font-weight: 800;
+      min-width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+
+    .sommaire-num.n-green {
+      background: rgba(72, 155, 110, 0.15);
+      color: var(--green-400);
+    }
+
+    .sommaire-num.n-gold {
+      background: rgba(197, 165, 110, 0.15);
+      color: var(--gold-400);
+    }
+
+    .sommaire-num.n-olive {
+      background: rgba(159, 179, 154, 0.12);
+      color: var(--slate-300);
+    }
+
+    .sommaire-text {
+      font-size: 0.6em;
+      color: var(--slate-300);
+    }
 
     /* Flow */
-    .flow-step { display: flex; align-items: center; gap: 0.4em; }
-    .flow-arrow { color: var(--green-500); font-size: 0.7em; font-weight: 800; }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+    }
+
+    .flow-arrow {
+      color: var(--green-500);
+      font-size: 0.7em;
+      font-weight: 800;
+    }
 
     /* Database (compacte pour tenir dans la slide) */
     .db-table {
       background: rgba(72, 155, 110, 0.05);
       border: 1px solid rgba(72, 155, 110, 0.18);
-      border-radius: 8px; padding: 0.3em 0.55em; margin-bottom: 0.2em;
+      border-radius: 8px;
+      padding: 0.3em 0.55em;
+      margin-bottom: 0.2em;
     }
-    .db-table h4 { font-size: 0.55em; margin: 0 0 0.1em; color: var(--gold-400); font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
-    .db-table p  { font-size: 0.42em; margin: 0; font-weight: 400; color: var(--slate-400); line-height: 1.3; }
-    .db-rel { font-size: 0.42em; color: var(--green-400); font-weight: 600; text-align: center; margin: 0.05em 0; line-height: 1; }
+
+    .db-table h4 {
+      font-size: 0.55em;
+      margin: 0 0 0.1em;
+      color: var(--gold-400);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .db-table p {
+      font-size: 0.42em;
+      margin: 0;
+      font-weight: 400;
+      color: var(--slate-400);
+      line-height: 1.3;
+    }
+
+    .db-rel {
+      font-size: 0.42em;
+      color: var(--green-400);
+      font-weight: 600;
+      text-align: center;
+      margin: 0.05em 0;
+      line-height: 1;
+    }
 
     /* Reveal chrome */
-    .reveal .progress span { background: linear-gradient(90deg, var(--green-500), var(--gold-500)); }
-    .reveal .slide-number { font-size: 0.45em; color: var(--slate-600); background: transparent; }
-    .reveal .controls { color: var(--green-500); }
+    .reveal .progress span {
+      background: linear-gradient(90deg, var(--green-500), var(--gold-500));
+    }
+
+    .reveal .slide-number {
+      font-size: 0.45em;
+      color: var(--slate-600);
+      background: transparent;
+    }
+
+    .reveal .controls {
+      color: var(--green-500);
+    }
 
     /* Tables */
-    table.clean { width: 100%; border-collapse: collapse; margin-top: 0.5em; }
-    table.clean th {
-      font-size: 0.5em; color: var(--green-400); text-align: left; padding: 0.4em 0.6em;
-      border-bottom: 1px solid rgba(72, 155, 110, 0.25); font-weight: 700;
+    table.clean {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5em;
     }
-    table.clean td { font-size: 0.5em; color: var(--slate-300); padding: 0.35em 0.6em; border-bottom: 1px solid rgba(159, 179, 154, 0.06); }
-    table.clean td:first-child { color: var(--slate-100); font-weight: 600; }
+
+    table.clean th {
+      font-size: 0.5em;
+      color: var(--green-400);
+      text-align: left;
+      padding: 0.4em 0.6em;
+      border-bottom: 1px solid rgba(72, 155, 110, 0.25);
+      font-weight: 700;
+    }
+
+    table.clean td {
+      font-size: 0.5em;
+      color: var(--slate-300);
+      padding: 0.35em 0.6em;
+      border-bottom: 1px solid rgba(159, 179, 154, 0.06);
+    }
+
+    table.clean td:first-child {
+      color: var(--slate-100);
+      font-weight: 600;
+    }
 
     /* Stack hybride : icone Lucide (categorie) + logo marque + nom */
     .stack-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 0.5em; margin-top: 0.4em;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5em;
+      margin-top: 0.4em;
     }
+
     .stack-card {
-      display: flex; align-items: center; gap: 0.5em;
-      padding: 0.55em 0.65em; border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      padding: 0.55em 0.65em;
+      border-radius: 10px;
       background: rgba(72, 155, 110, 0.05);
       border: 1px solid rgba(72, 155, 110, 0.18);
     }
-    .stack-icon { width: 22px; height: 22px; color: var(--gold-400); flex-shrink: 0; stroke-width: 2; }
-    .stack-meta { display: flex; flex-direction: column; gap: 0.05em; flex: 1; min-width: 0; }
+
+    .stack-icon {
+      width: 22px;
+      height: 22px;
+      color: var(--gold-400);
+      flex-shrink: 0;
+      stroke-width: 2;
+    }
+
+    .stack-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05em;
+      flex: 1;
+      min-width: 0;
+    }
+
     .stack-cat {
-      font-size: 0.32em; font-weight: 600; color: var(--gold-400);
-      text-transform: uppercase; letter-spacing: 0.08em; line-height: 1;
+      font-size: 0.32em;
+      font-weight: 600;
+      color: var(--gold-400);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      line-height: 1;
     }
+
     .stack-name {
-      font-size: 0.46em; color: var(--slate-100); font-weight: 500;
-      line-height: 1.2; letter-spacing: -0.01em;
+      font-size: 0.46em;
+      color: var(--slate-100);
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
     }
-    .stack-brand { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; }
+
+    .stack-brand {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+
     .stack-extras {
-      font-size: 0.48em; color: var(--slate-400); margin-top: 0.5em; line-height: 1.6;
-      padding: 0.4em 0.7em; border-left: 2px solid var(--gold-500);
+      font-size: 0.48em;
+      color: var(--slate-400);
+      margin-top: 0.5em;
+      line-height: 1.6;
+      padding: 0.4em 0.7em;
+      border-left: 2px solid var(--gold-500);
     }
-    .stack-extras strong { color: var(--gold-400); font-weight: 600; }
+
+    .stack-extras strong {
+      color: var(--gold-400);
+      font-weight: 600;
+    }
 
     /* Feature cards (slide Solution) — meme densite visuelle que Stack */
-    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5em; margin-top: 0.5em; }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5em;
+      margin-top: 0.5em;
+    }
+
     .feature-card {
-      display: flex; flex-direction: column; gap: 0.25em;
-      padding: 0.7em 0.8em; border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25em;
+      padding: 0.7em 0.8em;
+      border-radius: 10px;
       background: rgba(72, 155, 110, 0.05);
       border: 1px solid rgba(72, 155, 110, 0.18);
     }
-    .feature-card.gold  { background: rgba(197, 165, 110, 0.06); border-color: rgba(197, 165, 110, 0.22); }
-    .feature-card.olive { background: rgba(63, 82, 72, 0.18); border-color: rgba(159, 179, 154, 0.22); }
-    .feature-icon { width: 26px; height: 26px; color: var(--gold-400); stroke-width: 2; margin-bottom: 0.15em; }
-    .feature-card.olive .feature-icon { color: var(--slate-300); }
+
+    .feature-card.gold {
+      background: rgba(197, 165, 110, 0.06);
+      border-color: rgba(197, 165, 110, 0.22);
+    }
+
+    .feature-card.olive {
+      background: rgba(63, 82, 72, 0.18);
+      border-color: rgba(159, 179, 154, 0.22);
+    }
+
+    .feature-icon {
+      width: 26px;
+      height: 26px;
+      color: var(--gold-400);
+      stroke-width: 2;
+      margin-bottom: 0.15em;
+    }
+
+    .feature-card.olive .feature-icon {
+      color: var(--slate-300);
+    }
+
     .feature-cat {
-      font-size: 0.32em; font-weight: 600; color: var(--gold-400);
-      text-transform: uppercase; letter-spacing: 0.08em; line-height: 1;
+      font-size: 0.32em;
+      font-weight: 600;
+      color: var(--gold-400);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      line-height: 1;
     }
-    .feature-card.olive .feature-cat { color: var(--slate-300); }
+
+    .feature-card.olive .feature-cat {
+      color: var(--slate-300);
+    }
+
     .feature-title {
-      font-size: 0.52em; font-weight: 600; color: var(--slate-50);
-      letter-spacing: -0.01em; line-height: 1.25;
+      font-size: 0.52em;
+      font-weight: 600;
+      color: var(--slate-50);
+      letter-spacing: -0.01em;
+      line-height: 1.25;
     }
+
     .feature-desc {
-      font-size: 0.4em; color: var(--slate-400); font-weight: 400;
+      font-size: 0.4em;
+      color: var(--slate-400);
+      font-weight: 400;
       line-height: 1.45;
     }
 
     /* Timeline (4 cards forcees sur la meme ligne) */
     .timeline-grid {
-      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.5em; margin-top: 0.5em;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.5em;
+      margin-top: 0.5em;
     }
-    .timeline-card { padding: 0.6em 0.65em; }
-    .timeline-card .feature-desc { font-size: 0.38em; line-height: 1.4; }
+
+    .timeline-card {
+      padding: 0.6em 0.65em;
+    }
+
+    .timeline-card .feature-desc {
+      font-size: 0.38em;
+      line-height: 1.4;
+    }
+
     .timeline-badge {
-      font-size: 0.36em; color: var(--gold-400); font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3em;
-      padding-top: 0.3em; border-top: 1px solid rgba(197, 165, 110, 0.2);
+      font-size: 0.36em;
+      color: var(--gold-400);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 0.3em;
+      padding-top: 0.3em;
+      border-top: 1px solid rgba(197, 165, 110, 0.2);
     }
-    .timeline-badge.demo-day { color: var(--gold-300); font-weight: 700; }
+
+    .timeline-badge.demo-day {
+      color: var(--gold-300);
+      font-weight: 700;
+    }
 
     /* Architecture mono block */
     .arch-block {
-      font-size: 0.48em; color: var(--slate-300); font-family: 'JetBrains Mono', monospace; line-height: 1.7;
+      font-size: 0.48em;
+      color: var(--slate-300);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.7;
       background: rgba(72, 155, 110, 0.04);
       border: 1px solid rgba(72, 155, 110, 0.15);
-      border-radius: 10px; padding: 0.8em;
+      border-radius: 10px;
+      padding: 0.8em;
     }
   </style>
 </head>
+
 <body>
   <div class="reveal">
     <div class="slides">
 
       <!-- 1 - INTRODUCTION -->
-      <section class="centered" data-background-color="#0F1410" data-background-gradient="radial-gradient(circle at 30% 50%, rgba(72,155,110,0.18), transparent 55%), radial-gradient(circle at 70% 50%, rgba(197,165,110,0.12), transparent 55%)">
+      <section class="centered" data-background-color="#0F1410"
+        data-background-gradient="radial-gradient(circle at 30% 50%, rgba(72,155,110,0.18), transparent 55%), radial-gradient(circle at 70% 50%, rgba(197,165,110,0.12), transparent 55%)">
         <h1 class="grad" style="font-size: 2.4em; margin-bottom: 0.15em;">CutBook</h1>
-        <p style="font-size: 0.78em; color: var(--slate-400); margin-bottom: 1em;">La plateforme de reservation en ligne pour professionnels</p>
+        <p style="font-size: 0.78em; color: var(--slate-400); margin-bottom: 1em;">La plateforme de reservation en ligne
+          pour professionnels</p>
         <div style="margin-bottom: 1em;">
           <span class="tag tag-green">Samy</span>
           <span class="tag tag-gold">Adil</span>
         </div>
-        <p style="font-size: 0.5em; color: var(--slate-600);">Holberton School &mdash; Webstack Portfolio Project 2026</p>
+        <p style="font-size: 0.5em; color: var(--slate-600);">Holberton School &mdash; Webstack Portfolio Project 2026
+        </p>
       </section>
 
       <!-- 2 - SOMMAIRE -->
@@ -283,11 +665,13 @@
         <ul style="margin-top: 0.4em;">
           <li>Projet de 2e annee avec Adil : plateforme de RDV en <strong>Python/Flask</strong></li>
           <li>Fonctionnel en local mais <strong>jamais deploye</strong>, UI basique, code monolithique</li>
-          <li><strong>Objectif V2</strong> : reprendre le projet, le migrer vers une stack moderne et le mettre en production</li>
+          <li><strong>Objectif V2</strong> : reprendre le projet, le migrer vers une stack moderne et le mettre en
+            production</li>
           <li>Apprendre un workflow d'equipe pro : Git Flow, code review, CI/CD, deploiement cloud</li>
         </ul>
         <div class="tip">
-          <p>Migration <strong>Python/Flask &rarr; Next.js + TypeScript</strong> : meme idee, stack plus moderne, plus scalable, avec un vrai workflow de developpement professionnel.</p>
+          <p>Migration <strong>Python/Flask &rarr; Next.js + TypeScript</strong> : meme idee, stack plus moderne, plus
+            scalable, avec un vrai workflow de developpement professionnel.</p>
         </div>
       </section>
 
@@ -296,13 +680,179 @@
         <span class="section-label">01 — Probleme</span>
         <h2>Le <span class="grad-o">probleme</span></h2>
         <ul style="margin-top: 0.4em;">
-          <li>Les professionnels (coiffeurs, coachs, estheticiennes...) gerent leurs RDV par <strong>telephone ou papier</strong></li>
+          <li>Les professionnels (coiffeurs, coachs, estheticiennes...) gerent leurs RDV par <strong>telephone ou
+              papier</strong></li>
           <li>Les clients veulent reserver <strong>en ligne, 24/7</strong></li>
           <li>Les solutions existantes (Planity, Doctolib) sont <strong>couteuses ou trop generiques</strong></li>
           <li>Les independants n'ont pas d'outil <strong>adapte ET abordable</strong></li>
         </ul>
         <div class="tip">
-          <p>En France, <strong>87% des consommateurs</strong> preferent reserver en ligne plutot que par telephone. Pourtant, la majorite des petites structures n'ont toujours pas d'outil de reservation.</p>
+          <p>En France, <strong>87% des consommateurs</strong> preferent reserver en ligne plutot que par telephone.
+            Pourtant, la majorite des petites structures n'ont toujours pas d'outil de reservation.</p>
+        </div>
+      </section>
+
+      <!-- 4.5 - MIGRATION : AVANT / APRES -->
+      <section>
+        <span class="section-label">02 — Migration</span>
+        <h2>V1 &rarr; V2 : <span class="grad">Avant / Apres</span></h2>
+
+        <div class="grid2" style="margin-top: 0.5em; gap: 3em; position: relative; align-items: stretch;">
+
+          <!-- Middle Arrow Label -->
+          <div
+            style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 0.5em; z-index: 10;">
+            <i data-lucide="arrow-right-circle" style="color: var(--gold-400); width: 32px; height: 32px;"></i>
+            <span
+              style="font-size: 0.35em; font-weight: 700; color: var(--gold-400); letter-spacing: 0.1em; text-transform: uppercase; transform: rotate(-90deg); margin-top: 1.5em;">Migration</span>
+          </div>
+
+          <!-- V1 CARD -->
+          <div class="feature-card"
+            style="background: rgba(30, 25, 20, 0.4); border-color: rgba(200, 150, 100, 0.15); justify-content: flex-start; padding: 0.9em;">
+            <div style="display: flex; align-items: center; gap: 0.6em; margin-bottom: 0.5em;">
+              <i data-lucide="package" style="color: var(--gold-300); width: 24px; height: 24px; margin: 0;"></i>
+              <div>
+                <div
+                  style="font-size: 0.4em; color: var(--gold-400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">
+                  V1 — 2024</div>
+                <h3 style="margin: 0.1em 0 0 0; color: var(--slate-100); font-size: 0.7em;">Python / Flask
+                  &quot;RdVous&quot;</h3>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4em; margin-bottom: 0.8em;">
+              <span
+                style="font-size: 0.38em; padding: 0.3em 0.8em; border-radius: 20px; background: rgba(200, 100, 100, 0.15); color: var(--gold-300); border: 1px solid rgba(200, 100, 100, 0.3);">49
+                fichiers</span>
+              <span
+                style="font-size: 0.38em; padding: 0.3em 0.8em; border-radius: 20px; background: rgba(200, 100, 100, 0.15); color: var(--gold-300); border: 1px solid rgba(200, 100, 100, 0.3);">SQLite
+                local</span>
+              <span
+                style="font-size: 0.38em; padding: 0.3em 0.8em; border-radius: 20px; background: rgba(200, 100, 100, 0.15); color: var(--gold-300); border: 1px solid rgba(200, 100, 100, 0.3);">Jamais
+                deploye</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5em; font-size: 0.42em; color: var(--slate-300);">
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Stack :</strong> Python 3, Flask 3, Jinja2, SQLAlchemy, Flask-WTF, Flask-Login</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>DB :</strong> SQLite (fichier local <code style="color: var(--slate-400);">site.db</code>),
+                  migrations Alembic</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Auth :</strong> Flask-Login + hash Werkzeug, token maison, pas d'OAuth</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>UI :</strong> Jinja2 templates HTML/CSS statiques, FontAwesome 5, aucun composant
+                  reutilisable</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>API :</strong> Routes monolithiques (<code
+                    style="color: var(--slate-400);">routes.py</code> : 1 312 lignes)</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Paiement :</strong> Aucun &mdash; pas de checkout integre</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Email :</strong> Flask-Mail + Gmail SMTP, configuration en clair dans le code</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Deploy :</strong> Local uniquement, SECRET_KEY = 'admin' hardcode</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Tests / CI :</strong> Aucun &mdash; zero couverture automatique</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Type-safety :</strong> Inexistante, erreurs runtime non detectees</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="x"
+                  style="color: #c46060; width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Scope :</strong> 1 seul salon (&laquo;Coiffeur&raquo; hard-code), non multi-tenant</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- V2 CARD -->
+          <div class="feature-card"
+            style="background: rgba(46, 105, 69, 0.1); border-color: rgba(72, 155, 110, 0.3); justify-content: flex-start; padding: 0.9em;">
+            <div style="display: flex; align-items: center; gap: 0.6em; margin-bottom: 0.5em;">
+              <i data-lucide="zap" style="color: var(--green-400); width: 24px; height: 24px; margin: 0;"></i>
+              <div>
+                <div
+                  style="font-size: 0.4em; color: var(--green-400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">
+                  V2 &mdash; 2026</div>
+                <h3 style="margin: 0.1em 0 0 0; color: var(--slate-100); font-size: 0.7em;">Next.js 16
+                  &quot;CutBook&quot;</h3>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4em; margin-bottom: 0.8em;">
+              <span
+                style="font-size: 0.38em; padding: 0.3em 0.8em; border-radius: 20px; background: rgba(72, 155, 110, 0.15); color: var(--green-400); border: 1px solid rgba(72, 155, 110, 0.3);">181
+                fichiers</span>
+              <span
+                style="font-size: 0.38em; padding: 0.3em 0.8em; border-radius: 20px; background: rgba(72, 155, 110, 0.15); color: var(--green-400); border: 1px solid rgba(72, 155, 110, 0.3);">PostgreSQL
+                Neon</span>
+              <span
+                style="font-size: 0.38em; padding: 0.3em 0.8em; border-radius: 20px; background: rgba(72, 155, 110, 0.15); color: var(--green-400); border: 1px solid rgba(72, 155, 110, 0.3);">Deploye
+                Vercel</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5em; font-size: 0.42em; color: var(--slate-300);">
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Stack :</strong> Next.js 16 App Router, TypeScript strict, React 19</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>DB :</strong> PostgreSQL (Neon prod / Docker dev), Prisma ORM type-safe</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Auth :</strong> BetterAuth &mdash; email verifie, Google OAuth, sessions securisees</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>UI :</strong> Tailwind v4 + shadcn/ui + Framer Motion, composants reutilisables</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>API :</strong> tRPC end-to-end type-safe + TanStack Query v5</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Paiement :</strong> Stripe Checkout + Webhooks automatises</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Email :</strong> React Email + Resend, templates types, env vars securisees</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Deploy :</strong> Vercel (prod) + CI GitHub Actions, secrets externalises</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Tests / CI :</strong> Vitest + Testing Library, Husky, ESLint, commitlint</div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 0.4em; line-height: 1.3;"><i data-lucide="check"
+                  style="color: var(--green-400); width: 14px; height: 14px; margin-top: 0.05em; flex-shrink: 0;"></i>
+                <div><strong>Type-safety :</strong> TypeScript strict de bout en bout (DB &rarr; API &rarr; UI)</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -461,7 +1011,8 @@
         </div>
 
         <div class="stack-extras">
-          <strong>+ Quality & DX :</strong> Husky &middot; lint-staged &middot; ESLint &middot; commitlint &middot; Git Flow &middot; PostgreSQL &middot; Prisma Studio
+          <strong>+ Quality & DX :</strong> Husky &middot; lint-staged &middot; ESLint &middot; commitlint &middot; Git
+          Flow &middot; PostgreSQL &middot; Prisma Studio
         </div>
       </section>
 
@@ -479,7 +1030,9 @@
               &nbsp;&nbsp;&nbsp;&darr;<br>
               <span style="color: var(--green-400);">Next.js App Router</span> &mdash; SSR / SSG<br>
               &nbsp;&nbsp;&nbsp;&darr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
-              <span style="color: var(--green-400);">tRPC</span>&nbsp;&nbsp;&nbsp;<span style="color: var(--gold-400);">BetterAuth</span>&nbsp;&nbsp;&nbsp;<span style="color: var(--gold-400);">Stripe</span><br>
+              <span style="color: var(--green-400);">tRPC</span>&nbsp;&nbsp;&nbsp;<span
+                style="color: var(--gold-400);">BetterAuth</span>&nbsp;&nbsp;&nbsp;<span
+                style="color: var(--gold-400);">Stripe</span><br>
               &nbsp;&nbsp;&nbsp;&darr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
               <span style="color: var(--green-400);">Prisma ORM</span> &mdash; Type-safe queries<br>
               &nbsp;&nbsp;&nbsp;&darr;<br>
@@ -490,7 +1043,8 @@
             <h3>Parcours de reservation</h3>
             <div style="font-size: 0.5em; line-height: 1.8; color: var(--slate-300);">
               <div class="flow-step">
-                <span style="color: var(--green-400);">1.</span> Le client visite <strong style="color: var(--gold-400);">/@nom-de-l-orga</strong>
+                <span style="color: var(--green-400);">1.</span> Le client visite <strong
+                  style="color: var(--gold-400);">/@nom-de-l-orga</strong>
               </div>
               <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
               <div class="flow-step">
@@ -498,19 +1052,23 @@
               </div>
               <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
               <div class="flow-step">
-                <span style="color: var(--green-400);">3.</span> Selectionne un <strong>service</strong> + <strong>creneau</strong>
+                <span style="color: var(--green-400);">3.</span> Selectionne un <strong>service</strong> +
+                <strong>creneau</strong>
               </div>
               <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
               <div class="flow-step">
-                <span style="color: var(--green-400);">4.</span> Paiement via <strong style="color: var(--gold-400);">Stripe Checkout</strong>
+                <span style="color: var(--green-400);">4.</span> Paiement via <strong
+                  style="color: var(--gold-400);">Stripe Checkout</strong>
               </div>
               <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
               <div class="flow-step">
-                <span style="color: var(--green-400);">5.</span> Webhook confirme &rarr; <strong style="color: var(--green-400);">email de confirmation</strong>
+                <span style="color: var(--green-400);">5.</span> Webhook confirme &rarr; <strong
+                  style="color: var(--green-400);">email de confirmation</strong>
               </div>
               <div class="flow-step"><span class="flow-arrow">&darr;</span></div>
               <div class="flow-step">
-                <span style="color: var(--green-400);">6.</span> RDV visible dans le <strong>dashboard client + membre</strong>
+                <span style="color: var(--green-400);">6.</span> RDV visible dans le <strong>dashboard client +
+                  membre</strong>
               </div>
             </div>
           </div>
@@ -521,7 +1079,8 @@
       <section>
         <span class="section-label">05 — Data</span>
         <h2>Schema <span class="grad-g">relationnel</span></h2>
-        <div style="font-size: 0.85em; line-height: 1.5; color: var(--slate-300); margin: 0.5em auto 0; max-width: 75%;">
+        <div
+          style="font-size: 0.85em; line-height: 1.5; color: var(--slate-300); margin: 0.5em auto 0; max-width: 75%;">
           <div class="db-table">
             <h4>User</h4>
             <p>id, email, name, phone, role, loyaltyPoints</p>
@@ -542,7 +1101,8 @@
               <p>id, orgId, name, duration, price</p>
             </div>
           </div>
-          <div class="db-rel">&darr; 1:N &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &darr; 1:N</div>
+          <div class="db-rel">&darr; 1:N
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &darr; 1:N</div>
           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5em;">
             <div class="db-table">
               <h4>TimeSlot</h4>
@@ -572,24 +1132,53 @@
           <div>
             <h3>Relations cles</h3>
             <table class="clean">
-              <tr><td>User &harr; Organization</td><td><strong>1:1</strong> (Owner)</td></tr>
-              <tr><td>User &harr; Member</td><td><strong>1:1</strong></td></tr>
-              <tr><td>Organization &harr; Member</td><td><strong>1:N</strong></td></tr>
-              <tr><td>Organization &harr; Service</td><td><strong>1:N</strong></td></tr>
-              <tr><td>Member &harr; TimeSlot</td><td><strong>1:N</strong></td></tr>
-              <tr><td>TimeSlot &harr; Booking</td><td><strong>1:1</strong></td></tr>
-              <tr><td>User &harr; Booking</td><td><strong>1:N</strong> (client)</td></tr>
-              <tr><td>User &harr; Review</td><td><strong>1:N</strong></td></tr>
-              <tr><td>User &harr; Reward</td><td><strong>1:N</strong></td></tr>
+              <tr>
+                <td>User &harr; Organization</td>
+                <td><strong>1:1</strong> (Owner)</td>
+              </tr>
+              <tr>
+                <td>User &harr; Member</td>
+                <td><strong>1:1</strong></td>
+              </tr>
+              <tr>
+                <td>Organization &harr; Member</td>
+                <td><strong>1:N</strong></td>
+              </tr>
+              <tr>
+                <td>Organization &harr; Service</td>
+                <td><strong>1:N</strong></td>
+              </tr>
+              <tr>
+                <td>Member &harr; TimeSlot</td>
+                <td><strong>1:N</strong></td>
+              </tr>
+              <tr>
+                <td>TimeSlot &harr; Booking</td>
+                <td><strong>1:1</strong></td>
+              </tr>
+              <tr>
+                <td>User &harr; Booking</td>
+                <td><strong>1:N</strong> (client)</td>
+              </tr>
+              <tr>
+                <td>User &harr; Review</td>
+                <td><strong>1:N</strong></td>
+              </tr>
+              <tr>
+                <td>User &harr; Reward</td>
+                <td><strong>1:N</strong></td>
+              </tr>
             </table>
           </div>
           <div>
             <h3>Scalabilite</h3>
             <div class="tip" style="margin-top: 0.4em;">
-              <p><strong style="color: var(--gold-400);">Verticale</strong> : Neon scale automatiquement (compute auto-suspend, storage elastique). Suffisant pour le MVP.</p>
+              <p><strong style="color: var(--gold-400);">Verticale</strong> : Neon scale automatiquement (compute
+                auto-suspend, storage elastique). Suffisant pour le MVP.</p>
             </div>
             <div class="tip" style="margin-top: 0.4em;">
-              <p><strong style="color: var(--green-400);">Horizontale</strong> (futur) : le modele organisation permet un <strong>sharding par orga</strong>. Chaque orga independante, pas de requetes cross-orga.</p>
+              <p><strong style="color: var(--green-400);">Horizontale</strong> (futur) : le modele organisation permet
+                un <strong>sharding par orga</strong>. Chaque orga independante, pas de requetes cross-orga.</p>
             </div>
           </div>
         </div>
@@ -604,7 +1193,8 @@
             <i data-lucide="rocket" class="feature-icon"></i>
             <span class="feature-cat">S1 &middot; 5-11 mai</span>
             <span class="feature-title">Fondations</span>
-            <span class="feature-desc">Setup Next.js + Docker + Prisma. BetterAuth. Husky + Git Flow. Deploy Vercel.</span>
+            <span class="feature-desc">Setup Next.js + Docker + Prisma. BetterAuth. Husky + Git Flow. Deploy
+              Vercel.</span>
           </div>
           <div class="feature-card timeline-card">
             <i data-lucide="calendar-check" class="feature-icon"></i>
@@ -618,7 +1208,7 @@
             <span class="feature-cat">S3 &middot; 19-25 mai</span>
             <span class="feature-title">Features avancees</span>
             <span class="feature-desc">Stripe. Fidelite + Rewards. Avis. Dashboard owner.</span>
-            <span class="timeline-badge">&rarr; Demo blanche 22 mai</span>
+            <span class="timeline-badge">&rarr; Demo blanc 26 mai</span>
           </div>
           <div class="feature-card timeline-card">
             <i data-lucide="party-popper" class="feature-icon"></i>
@@ -629,7 +1219,8 @@
           </div>
         </div>
         <div class="tip" style="margin-top: 0.5em; padding: 0.5em 0.8em;">
-          <p style="font-size: 0.5em; line-height: 1.5;"><strong>Repartition</strong> : Samy (lead fullstack + DevOps, mardi-vendredi) &middot; Adil (fullstack, full time). Workflow : Git Flow + PR reviews + daily standup.</p>
+          <p style="font-size: 0.5em; line-height: 1.5;"><strong>Repartition</strong> : Samy (lead fullstack + DevOps,
+            mardi-vendredi) &middot; Adil (fullstack, full time). Workflow : Git Flow + PR reviews + daily standup.</p>
         </div>
       </section>
 
@@ -705,28 +1296,34 @@
             <i data-lucide="trophy" class="feature-icon" style="color: var(--green-400);"></i>
             <span class="feature-cat" style="color: var(--green-400);">Succes</span>
             <span class="feature-title">Ce qu'on a livre</span>
-            <span class="feature-desc">Migration Python &rarr; TS. Deploye en prod. Stripe fonctionnel. Workflow d'equipe pro. BDD simple et scalable.</span>
+            <span class="feature-desc">Migration Python &rarr; TS. Deploye en prod. Stripe fonctionnel. Workflow
+              d'equipe pro. BDD simple et scalable.</span>
           </div>
           <div class="feature-card gold">
             <i data-lucide="alert-triangle" class="feature-icon"></i>
             <span class="feature-cat">Echecs &amp; difficultes</span>
             <span class="feature-title">Ce qui a coince</span>
-            <span class="feature-desc"><em style="color: var(--slate-500);">A remplir apres le dev :</em> challenges rencontres, retards, ce qu'on ferait differemment.</span>
+            <span class="feature-desc"><em style="color: var(--slate-500);">A remplir apres le dev :</em> challenges
+              rencontres, retards, ce qu'on ferait differemment.</span>
           </div>
           <div class="feature-card olive">
             <i data-lucide="graduation-cap" class="feature-icon"></i>
             <span class="feature-cat">Lecons apprises</span>
             <span class="feature-title">Ce qu'on retient</span>
-            <span class="feature-desc"><em style="color: var(--slate-500);">A remplir apres le dev :</em> learning objectives, competences acquises, progression.</span>
+            <span class="feature-desc"><em style="color: var(--slate-500);">A remplir apres le dev :</em> learning
+              objectives, competences acquises, progression.</span>
           </div>
         </div>
         <div class="tip" style="margin-top: 0.5em; padding: 0.5em 0.8em;">
-          <p style="font-size: 0.5em; line-height: 1.5;"><strong>Conclusion</strong> : ne d'un projet scolaire basique, CutBook a evolue en plateforme deployee et utilisable en prod. La migration Python &rarr; Next.js a consolide nos competences fullstack.</p>
+          <p style="font-size: 0.5em; line-height: 1.5;"><strong>Conclusion</strong> : ne d'un projet scolaire basique,
+            CutBook a evolue en plateforme deployee et utilisable en prod. La migration Python &rarr; Next.js a
+            consolide nos competences fullstack.</p>
         </div>
       </section>
 
       <!-- 11 - LIVE DEMO -->
-      <section class="centered" data-background-color="#0F1410" data-background-gradient="radial-gradient(circle at 30% 50%, rgba(72,155,110,0.18), transparent 55%), radial-gradient(circle at 70% 50%, rgba(197,165,110,0.12), transparent 55%)">
+      <section class="centered" data-background-color="#0F1410"
+        data-background-gradient="radial-gradient(circle at 30% 50%, rgba(72,155,110,0.18), transparent 55%), radial-gradient(circle at 70% 50%, rgba(197,165,110,0.12), transparent 55%)">
         <p style="font-size: 0.65em; color: var(--green-400); font-weight: 600;">Et maintenant...</p>
         <h1 class="grad" style="font-size: 3em;">Live Demo</h1>
         <br>
@@ -738,7 +1335,8 @@
       </section>
 
       <!-- 12 - MERCI -->
-      <section class="centered" data-background-color="#0F1410" data-background-gradient="radial-gradient(circle at 50% 50%, rgba(197,165,110,0.14), transparent 60%)">
+      <section class="centered" data-background-color="#0F1410"
+        data-background-gradient="radial-gradient(circle at 50% 50%, rgba(197,165,110,0.14), transparent 60%)">
         <h1 class="grad">Merci !</h1>
         <br>
         <p style="font-size: 0.8em; color: var(--slate-400);">Des questions ?</p>
@@ -773,4 +1371,5 @@
     if (window.lucide) lucide.createIcons();
   </script>
 </body>
+
 </html>
