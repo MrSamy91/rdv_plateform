@@ -57,15 +57,13 @@ describe('public organization data', () => {
   it('liste tous les creneaux des membres de l organisation avec leur disponibilite', async () => {
     const slots = await listPublicOrganizationAvailableSlots(`@${seedOrganization.slug}`)
     const expectedSlots = buildSeedTimeSlots()
+      .filter((slot) => slot.isAvailable !== false)
       .map((slot) => slot.id)
       .sort()
 
-    expect(slots.map((slot) => slot.id).sort()).toEqual(expectedSlots)
+    expect(Array.from(new Set(slots.map((slot) => slot.id))).sort()).toEqual(expectedSlots)
     expect(
-      slots
-        .filter((slot) => slot.isAvailable)
-        .map((slot) => slot.id)
-        .sort(),
+      Array.from(new Set(slots.filter((slot) => slot.isAvailable).map((slot) => slot.id))).sort(),
     ).toEqual(
       buildSeedTimeSlots()
         .filter((slot) => slot.isAvailable !== false)
@@ -73,11 +71,8 @@ describe('public organization data', () => {
         .sort(),
     )
     expect(
-      slots
-        .filter((slot) => !slot.isAvailable)
-        .map((slot) => slot.id)
-        .sort(),
-    ).toEqual(['seed-slot-leo-1', 'seed-slot-mila-1'])
+      Array.from(new Set(slots.filter((slot) => !slot.isAvailable).map((slot) => slot.id))).sort(),
+    ).toEqual([])
     expect(slots.map((slot) => slot.member.organization.slug)).toEqual(
       expect.arrayContaining([seedOrganization.slug]),
     )

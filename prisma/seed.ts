@@ -8,12 +8,14 @@ import { hashPassword } from 'better-auth/crypto'
 export const defaultSeedPassword = 'CutBookDemo123!'
 
 export const seedUsers = {
+  // role = identite plateforme (CLIENT). Les casquettes orga sont des relations :
+  //   owner -> Organization.ownerId (cf. runSeed) ; member -> ligne Member (seedMembers).
   owner: {
     id: 'seed-user-owner',
     email: 'owner@cutbook.test',
     name: 'Nora Benali',
     phone: '+33102030405',
-    role: Role.OWNER,
+    role: Role.CLIENT,
     loyaltyPoints: 0,
   },
   memberOne: {
@@ -21,7 +23,7 @@ export const seedUsers = {
     email: 'mila@cutbook.test',
     name: 'Mila Laurent',
     phone: '+33102030406',
-    role: Role.MEMBER,
+    role: Role.CLIENT,
     loyaltyPoints: 0,
   },
   memberTwo: {
@@ -29,7 +31,7 @@ export const seedUsers = {
     email: 'leo@cutbook.test',
     name: 'Leo Martin',
     phone: '+33102030407',
-    role: Role.MEMBER,
+    role: Role.CLIENT,
     loyaltyPoints: 0,
   },
   clientOne: {

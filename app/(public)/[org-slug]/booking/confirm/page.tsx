@@ -105,6 +105,7 @@ export default async function PublicBookingConfirmPage({ params, searchParams }:
         serviceId={serviceId}
         memberId={memberId}
         slotId={slotId}
+        time={time || ''}
       />
     </main>
   )

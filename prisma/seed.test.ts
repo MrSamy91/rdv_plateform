@@ -15,11 +15,19 @@ import {
 describe('seed fixtures', () => {
   it('cree une organisation demo avec owner, members, clients et services coherents', () => {
     expect(seedOrganization.slug).toBe('atelier-nova')
-    expect(seedUsers.owner.role).toBe(Role.OWNER)
-    expect(seedUsers.memberOne.role).toBe(Role.MEMBER)
-    expect(seedUsers.memberTwo.role).toBe(Role.MEMBER)
-    expect(seedUsers.clientOne.role).toBe(Role.CLIENT)
-    expect(seedUsers.clientTwo.role).toBe(Role.CLIENT)
+
+    // role = identite plateforme : tous CLIENT (aucun admin dans le seed).
+    for (const user of Object.values(seedUsers)) {
+      expect(user.role).toBe(Role.CLIENT)
+    }
+
+    // owner / member sont des relations, pas des roles :
+    // - Mila et Leo sont les praticiens -> lignes Member
+    // - Nora est owner via Organization.ownerId -> pas de fiche Member
+    const memberUserIds = Object.values(seedMembers).map((member) => member.userId)
+    expect(memberUserIds).toContain(seedUsers.memberOne.id)
+    expect(memberUserIds).toContain(seedUsers.memberTwo.id)
+    expect(memberUserIds).not.toContain(seedUsers.owner.id)
 
     expect(seedMembers.mila.userId).toBe(seedUsers.memberOne.id)
     expect(seedMembers.leo.userId).toBe(seedUsers.memberTwo.id)

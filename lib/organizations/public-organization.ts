@@ -58,8 +58,20 @@ export async function listPublicOrganizationAvailableSlots(
 ) {
   const slug = normalizePublicOrgSlug(orgSlug)
 
-  return await db.timeSlot.findMany({
+  // 1. On récupère la durée du service si spécifiée, sinon on prend 30 mins par défaut
+  let serviceDuration = 30
+  if (filters.serviceId) {
+    const service = await db.service.findUnique({
+      where: { id: filters.serviceId },
+      select: { duration: true },
+    })
+    if (service) serviceDuration = service.duration
+  }
+
+  // 2. On récupère les créneaux disponibles (les grands blocs)
+  const availableSlots = await db.timeSlot.findMany({
     where: {
+      isAvailable: true,
       member: {
         ...(filters.memberId ? { id: filters.memberId } : {}),
         ...(filters.serviceId
@@ -71,32 +83,56 @@ export async function listPublicOrganizationAvailableSlots(
               },
             }
           : {}),
-        organization: {
-          slug,
-        },
+        organization: { slug },
       },
+      date: { gte: new Date(new Date().setHours(0, 0, 0, 0)) }, // Pas dans le passé
     },
     include: {
       member: {
         include: {
-          organization: {
-            select: {
-              id: true,
-              slug: true,
-              name: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          organization: { select: { id: true, slug: true, name: true } },
+          user: { select: { id: true, name: true } },
         },
       },
     },
     orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
   })
+
+  // 3. On génère dynamiquement des sous-créneaux (ex: toutes les 15 mins)
+  // si la durée du service tient dans l'espace restant du bloc.
+  const virtualSlots: ((typeof availableSlots)[0] & { originalSlotId?: string })[] = []
+
+  // Utilitaire interne très simple
+  const toMins = (t: string) => {
+    const [h, m] = t.split(':').map(Number)
+    return (h || 0) * 60 + (m || 0)
+  }
+  const toTime = (m: number) =>
+    `${Math.floor(m / 60)
+      .toString()
+      .padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}`
+
+  const INTERVAL = 15 // Les clients peuvent réserver toutes les 15 minutes
+
+  for (const slot of availableSlots) {
+    let currentStart = toMins(slot.startTime)
+    const blockEnd = toMins(slot.endTime)
+
+    // Tant qu'on a la place de caler le service dans ce bloc
+    while (currentStart + serviceDuration <= blockEnd) {
+      virtualSlots.push({
+        ...slot,
+        id: slot.id, // On garde l'ID du grand bloc parent
+        originalSlotId: slot.id, // On le garde de côté si besoin
+        startTime: toTime(currentStart),
+        endTime: toTime(currentStart + serviceDuration),
+      })
+
+      currentStart += INTERVAL
+    }
+  }
+
+  return virtualSlots
 }
 
 interface PublicBookingConfirmationInput {

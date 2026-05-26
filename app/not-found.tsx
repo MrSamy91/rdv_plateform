@@ -10,6 +10,12 @@ export const metadata: Metadata = {
 export default function NotFoundPage() {
   return (
     <div className="flex min-h-svh flex-col" style={{ background: '#f9f7f3' }}>
+      <style>{`
+        @keyframes cutbook-float {
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(-10px); }
+        }
+      `}</style>
       <main className="flex flex-1 items-center justify-center px-6 py-20">
         <div className="w-full max-w-md text-center">
           <div className="relative mb-10 flex justify-center">
