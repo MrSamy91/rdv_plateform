@@ -81,8 +81,11 @@
   --muted: var(--slate-100);
   --muted-foreground: var(--slate-500);
 
-  --accent: var(--gold-500);
-  --accent-foreground: var(--slate-900);
+  /* accent = fond de survol/focus subtil (dropdown, select...). Doit rester
+   * NEUTRE, pas dore : le gold sature passe par gold-* / --chart-* la ou un vrai
+   * highlight est voulu. Aligne sur --sidebar-accent pour des hovers coherents. */
+  --accent: var(--slate-100);
+  --accent-foreground: var(--slate-700);
 
   --destructive: var(--error);
 
@@ -134,8 +137,8 @@
   --muted: var(--slate-800);
   --muted-foreground: var(--slate-400);
 
-  --accent: var(--gold-400);
-  --accent-foreground: var(--slate-950);
+  --accent: var(--slate-800);
+  --accent-foreground: var(--slate-100);
 
   --destructive: var(--error);
 
@@ -293,5 +296,3 @@
     line-height: 1.4;
   }
 }
-
-

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { getSession } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { requireMember } from '@/lib/auth'
 import { getMemberDashboardSummary } from '@/lib/member/dashboard'
 import { getMemberBookingsPerDay } from '@/lib/member/chart-stats'
 import { MemberSectionCards } from '@/components/dashboard/member-section-cards'
@@ -13,14 +12,8 @@ export const metadata: Metadata = {
 }
 
 export default async function MemberDashboardPage() {
-  const session = await getSession()
-  if (!session) redirect('/login')
-
-  const member = await db.member.findUnique({
-    where: { userId: session.user.id },
-    select: { id: true },
-  })
-  if (!member) redirect('/client')
+  // requireMember() : garde + fiche Member, deja resolu par le layout (cache).
+  const { session, member } = await requireMember()
 
   const [summary, chartData] = await Promise.all([
     getMemberDashboardSummary(session.user.id),

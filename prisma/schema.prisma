@@ -45,10 +45,14 @@ model User {
   @@map("user")
 }
 
+// Role = identite PLATEFORME uniquement (global, 1 valeur par user).
+// Les "casquettes" orga (owner / member) sont des RELATIONS, pas des roles :
+//   - member d'une orga  -> une ligne Member (userId, orgId)
+//   - owner d'une orga    -> Organization.ownerId pointe sur le user
+// Un user peut donc cumuler : ADMIN/CLIENT (plateforme) + owner + member.
 enum Role {
+  ADMIN
   CLIENT
-  OWNER
-  MEMBER
 }
 
 // =============================================================
@@ -139,6 +143,7 @@ model Member {
   timeSlots    TimeSlot[]
   bookings     Booking[]
   reviews      Review[]
+  services     MemberService[]
 
   @@map("member")
 }
@@ -159,8 +164,21 @@ model Service {
 
   organization Organization @relation(fields: [orgId], references: [id])
   bookings     Booking[]
+  members      MemberService[]
 
   @@map("service")
+}
+
+model MemberService {
+  memberId  String
+  serviceId String
+  createdAt DateTime @default(now())
+
+  member  Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([memberId, serviceId])
+  @@map("member_service")
 }
 
 // =============================================================

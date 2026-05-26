@@ -8,12 +8,14 @@ import { hashPassword } from 'better-auth/crypto'
 export const defaultSeedPassword = 'CutBookDemo123!'
 
 export const seedUsers = {
+  // role = identite plateforme (CLIENT). Les casquettes orga sont des relations :
+  //   owner -> Organization.ownerId (cf. runSeed) ; member -> ligne Member (seedMembers).
   owner: {
     id: 'seed-user-owner',
     email: 'owner@cutbook.test',
     name: 'Nora Benali',
     phone: '+33102030405',
-    role: Role.OWNER,
+    role: Role.CLIENT,
     loyaltyPoints: 0,
   },
   memberOne: {
@@ -21,7 +23,7 @@ export const seedUsers = {
     email: 'mila@cutbook.test',
     name: 'Mila Laurent',
     phone: '+33102030406',
-    role: Role.MEMBER,
+    role: Role.CLIENT,
     loyaltyPoints: 0,
   },
   memberTwo: {
@@ -29,7 +31,7 @@ export const seedUsers = {
     email: 'leo@cutbook.test',
     name: 'Leo Martin',
     phone: '+33102030407',
-    role: Role.MEMBER,
+    role: Role.CLIENT,
     loyaltyPoints: 0,
   },
   clientOne: {
@@ -184,6 +186,23 @@ export function buildSeedBookings() {
   ]
 }
 
+export function buildSeedMemberServices() {
+  return [
+    {
+      memberId: seedMembers.mila.id,
+      serviceId: seedServices.cut.id,
+    },
+    {
+      memberId: seedMembers.mila.id,
+      serviceId: seedServices.color.id,
+    },
+    {
+      memberId: seedMembers.leo.id,
+      serviceId: seedServices.beard.id,
+    },
+  ]
+}
+
 export function buildSeedReviews() {
   return [
     {
@@ -255,6 +274,11 @@ async function clearSeedData(prisma: PrismaClient) {
     },
   })
   await prisma.reward.deleteMany({ where: { clientId: { in: userIds } } })
+  await prisma.memberService.deleteMany({
+    where: {
+      OR: [{ memberId: { in: memberIds } }, { serviceId: { in: serviceIds } }],
+    },
+  })
   await prisma.timeSlot.deleteMany({ where: { memberId: { in: memberIds } } })
   await prisma.service.deleteMany({ where: { id: { in: serviceIds } } })
   await prisma.member.deleteMany({ where: { id: { in: memberIds } } })
@@ -330,6 +354,7 @@ export async function runSeed() {
     })
 
     await prisma.timeSlot.createMany({ data: buildSeedTimeSlots() })
+    await prisma.memberService.createMany({ data: buildSeedMemberServices() })
     await prisma.booking.createMany({ data: buildSeedBookings() })
     await prisma.review.createMany({ data: buildSeedReviews() })
     await prisma.reward.createMany({ data: buildSeedRewards() })

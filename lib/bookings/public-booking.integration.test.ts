@@ -66,6 +66,25 @@ describe('confirmPublicBooking', () => {
     })
   })
 
+  it('refuse un service non propose par le professionnel choisi', async () => {
+    resetPublicBookingRateLimit()
+
+    await expect(
+      confirmPublicBooking({
+        orgSlug: seedOrganization.slug,
+        clientId: seedUsers.clientOne.id,
+        serviceId: seedServices.cut.id,
+        memberId: seedMembers.leo.id,
+        slotId: 'seed-slot-leo-2',
+        time: '09:30',
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      code: 'SLOT_UNAVAILABLE',
+      message: 'Ce creneau nest plus disponible.',
+    })
+  })
+
   it('rate limit les confirmations repetees par client', async () => {
     resetPublicBookingRateLimit()
 

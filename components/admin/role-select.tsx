@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { CheckIcon, ChevronDownIcon, LoaderCircleIcon } from 'lucide-react'
 import {
   DropdownMenu,
@@ -8,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { updateUserRole } from './actions'
+import { trpc } from '@/lib/trpc/client'
 import { Role } from '@/generated/prisma/enums'
 
 // ── Config des rôles ───────────────────────────────────────────────────────────
@@ -21,25 +22,18 @@ const roles: {
   hover: string
 }[] = [
   {
+    value: 'ADMIN',
+    label: 'Admin',
+    dot: 'bg-amber-400',
+    pill: 'bg-amber-50 text-amber-600 ring-amber-200',
+    hover: 'hover:bg-amber-50/60',
+  },
+  {
     value: 'CLIENT',
     label: 'Client',
     dot: 'bg-slate-400',
     pill: 'bg-slate-100 text-slate-600 ring-slate-200',
     hover: 'hover:bg-slate-50',
-  },
-  {
-    value: 'MEMBER',
-    label: 'Membre',
-    dot: 'bg-[#489B6E]',
-    pill: 'bg-[#489B6E]/10 text-[#489B6E] ring-[#489B6E]/25',
-    hover: 'hover:bg-[#489B6E]/5',
-  },
-  {
-    value: 'OWNER',
-    label: 'Owner',
-    dot: 'bg-rose-400',
-    pill: 'bg-rose-50 text-rose-500 ring-rose-200',
-    hover: 'hover:bg-rose-50/60',
   },
 ]
 
@@ -50,16 +44,19 @@ function getRoleConfig(role: Role) {
 // ── Composant ──────────────────────────────────────────────────────────────────
 
 export function RoleSelect({ userId, currentRole }: { userId: string; currentRole: Role }) {
+  const router = useRouter()
   const [role, setRole] = React.useState<Role>(currentRole)
-  const [pending, startTransition] = React.useTransition()
+  const updateRole = trpc.admin.updateUserRole.useMutation({
+    onSuccess: () => router.refresh(),
+    onError: () => setRole(currentRole), // rollback de l'optimistic update
+  })
+  const pending = updateRole.isPending
   const config = getRoleConfig(role)
 
   function handleSelect(next: Role) {
     if (next === role) return
     setRole(next) // optimistic update
-    startTransition(async () => {
-      await updateUserRole(userId, next)
-    })
+    updateRole.mutate({ userId, role: next })
   }
 
   return (

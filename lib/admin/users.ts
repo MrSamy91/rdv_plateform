@@ -1,6 +1,9 @@
 import { db } from '@/lib/db'
+import { requireAdmin } from '@/lib/auth'
 
 export async function getAdminUsers() {
+  await requireAdmin()
+
   return db.user.findMany({
     orderBy: { createdAt: 'desc' },
     select: {

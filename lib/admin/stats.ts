@@ -2,6 +2,7 @@
 // Utilisé directement dans les server components (pas de tRPC nécessaire).
 
 import { db } from '@/lib/db'
+import { requireAdmin } from '@/lib/auth'
 
 // ── Période helpers ────────────────────────────────────────────────────────────
 
@@ -24,6 +25,8 @@ function endOfLastMonth(date: Date) {
 // ── Stats pour les cartes ──────────────────────────────────────────────────────
 
 export async function getAdminStats() {
+  await requireAdmin()
+
   const now = new Date()
   const thisMonthStart = startOfMonth(now)
   const thisMonthEnd = endOfMonth(now)
@@ -104,6 +107,8 @@ export async function getAdminStats() {
 // futureDays : jours futurs à inclure (jusqu'à today + futureDays)
 
 export async function getBookingsPerDay(pastDays = 90, futureDays = 90) {
+  await requireAdmin()
+
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 

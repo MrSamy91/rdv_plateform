@@ -32,7 +32,7 @@ export async function PublicNavbar() {
           Trouver un pro
         </Link>
         <Link
-          href={session ? '/become-member' : '/login?callbackUrl=/become-member'}
+          href={session ? '/client/become-member' : '/login?callbackUrl=/client/become-member'}
           className="rounded-lg border px-3 py-1.5 text-sm font-semibold transition-opacity hover:opacity-80"
           style={{ borderColor: 'rgba(72,155,110,0.4)', color: '#489B6E' }}
         >

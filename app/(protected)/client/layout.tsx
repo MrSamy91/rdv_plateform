@@ -1,14 +1,23 @@
 import type { ReactNode } from 'react'
 import { Suspense } from 'react'
-import { getSession } from '@/lib/auth'
+import { requireSession } from '@/lib/auth'
+import { db } from '@/lib/db'
 import { DashboardBreadcrumb } from '@/components/dashboard/dashboard-breadcrumb'
 import { ClientSidebar } from '@/components/dashboard/client-sidebar'
 import { Search } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function ClientLayout({ children }: { children: ReactNode }) {
-  const session = await getSession()
-  const name = session!.user.name
+  const session = await requireSession('/client')
+
+  // "Devenir membre" ne se montre qu'aux users SANS fiche Member.
+  // On se base sur la relation, pas sur le role (un owner garde role CLIENT
+  // tout en ayant deja une fiche Member -> il ne doit pas voir le bouton).
+  const membership = await db.member.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true },
+  })
+  const name = session.user.name
   const firstName = name.split(' ')[0] ?? name
   const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
   const initials = name
@@ -30,7 +39,14 @@ export default async function ClientLayout({ children }: { children: ReactNode }
           />
         }
       >
-        <ClientSidebar />
+        <ClientSidebar
+          hasMembership={Boolean(membership)}
+          user={{
+            name: session.user.name,
+            email: session.user.email,
+            avatar: session.user.image ?? '',
+          }}
+        />
       </Suspense>
 
       {/* Zone contenu — prend tout l'espace restant */}
