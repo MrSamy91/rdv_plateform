@@ -219,6 +219,28 @@ export const serviceRouter = router({
       })
     }),
 
+  // Liste tous les professionnels du salon (pour l'UI d'assignation owner).
+  // Accessible aux membres du salon + owner (meme garde que listByOrganization).
+  listOrgMembers: protectedProcedure
+    .input(z.object({ orgId: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      await ensureOrgAccess(ctx, input.orgId)
+
+      return await ctx.db.member.findMany({
+        where: { orgId: input.orgId },
+        select: {
+          id: true,
+          user: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'asc' },
+      })
+    }),
+
   create: protectedProcedure.input(serviceInputSchema).mutation(async ({ ctx, input }) => {
     await ensureOrgOwner(ctx, input.orgId)
     await ensureMembersBelongToOrg(ctx, {
@@ -316,6 +338,45 @@ export const serviceRouter = router({
       return {
         memberId: member.id,
         serviceIds,
+      }
+    }),
+
+  // Assignation PAR SERVICE : fixe la liste des pros qui proposent un service.
+  // Miroir de setMemberServices, cote owner uniquement (getServiceForOwner garde).
+  setServiceMembers: protectedProcedure
+    .input(
+      z.object({
+        serviceId: z.string().min(1),
+        memberIds: z.array(z.string().min(1)),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const service = await getServiceForOwner(ctx, input.serviceId)
+      const memberIds = [...new Set(input.memberIds)]
+
+      await ensureMembersBelongToOrg(ctx, {
+        orgId: service.orgId,
+        memberIds,
+      })
+
+      await ctx.db.$transaction(async (tx) => {
+        await tx.memberService.deleteMany({
+          where: { serviceId: service.id },
+        })
+
+        if (memberIds.length > 0) {
+          await tx.memberService.createMany({
+            data: memberIds.map((memberId) => ({
+              memberId,
+              serviceId: service.id,
+            })),
+          })
+        }
+      })
+
+      return {
+        serviceId: service.id,
+        memberIds,
       }
     }),
 })

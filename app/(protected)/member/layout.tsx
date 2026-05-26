@@ -4,11 +4,19 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { MemberSidebar } from '@/components/dashboard/member-sidebar'
 import { SiteHeader } from '@/components/site-header'
 import { requireMember } from '@/lib/auth'
+import { db } from '@/lib/db'
 
 export default async function MemberLayout({ children }: { children: ReactNode }) {
   // Garde l'espace pro + recupere la fiche Member. Memoise (cache) : la page
   // appelle aussi requireMember() sans relancer la requete.
   const { session } = await requireMember()
+
+  // Un member peut aussi etre proprietaire d'un salon -> on affiche alors le
+  // lien "Espace gerant". Etre owner = posseder une Organization (ownerId).
+  const ownedOrg = await db.organization.findUnique({
+    where: { ownerId: session.user.id },
+    select: { id: true },
+  })
 
   return (
     <SidebarProvider
@@ -21,6 +29,7 @@ export default async function MemberLayout({ children }: { children: ReactNode }
     >
       <MemberSidebar
         variant="inset"
+        isOwner={Boolean(ownedOrg)}
         user={{
           name: session.user.name,
           email: session.user.email,

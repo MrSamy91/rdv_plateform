@@ -5,7 +5,7 @@ import { getSessionCookie } from 'better-auth/cookies'
 // Proxy = garde UX optimiste uniquement. Les vraies autorisations (rôles) restent
 // cote serveur : requireAdmin() / requireSession() dans les layouts protégés.
 // Ici on ne décide QUE "a un cookie de session -> laisse passer, sinon -> /login".
-const protectedRoutes = ['/admin', '/client', '/member']
+const protectedRoutes = ['/admin', '/client', '/member', '/owner']
 const authRoutes = ['/login', '/register']
 
 function isRoute(pathname: string, routes: string[]) {
@@ -52,6 +52,8 @@ export const config = {
     '/client/:path*',
     '/member',
     '/member/:path*',
+    '/owner',
+    '/owner/:path*',
     '/login',
     '/register',
   ],
