@@ -9,18 +9,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function formatPrice(price: number) {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
-}
-
-function formatDuration(minutes: number) {
-  if (minutes < 60) return `${minutes} min`
-  const h = Math.floor(minutes / 60)
-  const m = minutes % 60
-  return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`
-}
+import { formatPrice } from '@/lib/utils/format-price'
+import { formatDuration } from '@/lib/utils/format-duration'
 
 // ── Types (alignés sur les selects de serviceRouter) ─────────────────────────
 interface OrgMember {
