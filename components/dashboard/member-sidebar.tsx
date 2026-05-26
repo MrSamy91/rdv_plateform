@@ -1,7 +1,15 @@
 'use client'
 
 import * as React from 'react'
-import { LayoutDashboard, CalendarDays, Clock, User, Scissors, ArrowLeftRight } from 'lucide-react'
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Clock,
+  Tag,
+  User,
+  Scissors,
+  ArrowLeftRight,
+} from 'lucide-react'
 import Link from 'next/link'
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
@@ -21,6 +29,7 @@ const navMain = [
   { title: 'Tableau de bord', url: '/member', icon: <LayoutDashboard /> },
   { title: 'Mon calendrier', url: '/member/calendar', icon: <CalendarDays /> },
   { title: 'Mes créneaux', url: '/member/availability', icon: <Clock /> },
+  { title: 'Mes services', url: '/member/services', icon: <Tag /> },
   { title: 'Mon profil', url: '/member/profile', icon: <User /> },
 ]
 

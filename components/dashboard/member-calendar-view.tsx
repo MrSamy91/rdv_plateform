@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useMemo, useCallback } from 'react'
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -19,14 +19,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-// Utilitaire pour extraire "HH:mm" d'une date (heure locale)
 function formatTime(date: Date) {
   const h = date.getHours().toString().padStart(2, '0')
   const m = date.getMinutes().toString().padStart(2, '0')
   return `${h}:${m}`
 }
 
-// Utilitaire pour extraire "YYYY-MM-DD" d'une date (heure locale)
 function formatDate(date: Date) {
   const y = date.getFullYear()
   const m = (date.getMonth() + 1).toString().padStart(2, '0')
@@ -37,9 +35,24 @@ function formatDate(date: Date) {
 export function MemberCalendarView() {
   const utils = trpc.useUtils()
   const eventsQuery = trpc.memberPortal.calendarEvents.useQuery()
-
   const calendarRef = useRef<FullCalendar | null>(null)
 
+  // ── Responsive : vue Jour sur mobile, Semaine sur desktop ──────────────────
+  // Lazy init pour éviter un setState synchrone dans useEffect (ESLint react-hooks/set-state-in-effect)
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)')
+    const handler = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches)
+      calendarRef.current?.getApi().changeView(e.matches ? 'timeGridDay' : 'timeGridWeek')
+    }
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  // ── Mutations ──────────────────────────────────────────────────────────────
   const addAvailability = trpc.memberPortal.addAvailability.useMutation({
     onSuccess: () => {
       toast.success('Créneau ajouté avec succès')
@@ -64,7 +77,6 @@ export function MemberCalendarView() {
     },
   })
 
-  // Actions en masse
   const clearDay = trpc.memberPortal.clearDayAvailabilities.useMutation({
     onSuccess: () => {
       toast.success('Journée vidée')
@@ -97,13 +109,18 @@ export function MemberCalendarView() {
     onError: (e) => toast.error(e.message),
   })
 
-  // États pour le menu déroulant
+  // ── États UI ───────────────────────────────────────────────────────────────
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<
     ({ id: string } & Record<string, unknown>) | null
   >(null)
 
-  // Formatage des événements pour FullCalendar avec mise en cache
+  // Modal mobile d'ajout de créneau
+  const [mobileModal, setMobileModal] = useState<{ date: string } | null>(null)
+  const [mobileStart, setMobileStart] = useState('09:00')
+  const [mobileEnd, setMobileEnd] = useState('10:00')
+
+  // ── Formatage des événements ───────────────────────────────────────────────
   const calendarEvents = useMemo(() => {
     return (eventsQuery.data ?? []).map((slot) => {
       if (slot.isAvailable) {
@@ -134,18 +151,13 @@ export function MemberCalendarView() {
       const startTimeStr = formatTime(info.start)
       const endTimeStr = formatTime(info.end)
 
-      // Vérification de sécurité pour ne pas ajouter dans le passé (tolérance 15min)
       if (info.start.getTime() < Date.now() - 15 * 60 * 1000) {
         toast.error('Impossible de sélectionner un horaire dans le passé.')
         calendarRef.current?.getApi().unselect()
         return
       }
 
-      addAvailability.mutate({
-        date: dateStr,
-        startTime: startTimeStr,
-        endTime: endTimeStr,
-      })
+      addAvailability.mutate({ date: dateStr, startTime: startTimeStr, endTime: endTimeStr })
     },
     [addAvailability],
   )
@@ -153,19 +165,15 @@ export function MemberCalendarView() {
   const handleEventClick = useCallback((info: EventClickArg) => {
     const { type, slot } = info.event.extendedProps
 
-    // On ne permet le clic que sur les disponibilités (pas sur les réservations)
     if (type === 'availability') {
-      // Calculer la position pour le menu (utiliser la position de la souris)
-      setMenuPosition({
-        x: info.jsEvent.clientX,
-        y: info.jsEvent.clientY,
-      })
+      setMenuPosition({ x: info.jsEvent.clientX, y: info.jsEvent.clientY })
       setSelectedSlot(slot)
     } else {
       toast.info(`Réservation pour ${slot.booking.clientName}`)
     }
   }, [])
 
+  // ── Loading state ──────────────────────────────────────────────────────────
   if (eventsQuery.isLoading) {
     return (
       <div className="@container/main flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
@@ -175,20 +183,62 @@ export function MemberCalendarView() {
     )
   }
 
+  // ── CSS commun ─────────────────────────────────────────────────────────────
+  const fieldStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '0.625rem 0.875rem',
+    border: '1px solid rgba(37,49,34,0.18)',
+    borderRadius: '0.625rem',
+    fontSize: '1rem',
+    color: '#253122',
+    boxSizing: 'border-box',
+  }
+
   return (
     <div className="@container/main flex h-full flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
+      {/* En-tête */}
       <div className="px-4 lg:px-6">
         <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#253122' }}>
-          Agenda hebdomadaire
+          Agenda
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Sélectionnez des plages horaires (glissez-déposez) pour ouvrir vos disponibilités. Cliquez
-          sur un créneau vert pour le supprimer.
+          {isMobile
+            ? 'Appuyez sur un créneau vert pour le supprimer.'
+            : 'Sélectionnez des plages horaires (glissez-déposez) pour ouvrir vos disponibilités. Cliquez sur un créneau vert pour le supprimer.'}
         </p>
+
+        {/* Bouton mobile pour ajouter un créneau */}
+        {isMobile && (
+          <button
+            id="mobile-add-slot-btn"
+            onClick={() => {
+              setMobileModal({ date: formatDate(new Date()) })
+              setMobileStart('09:00')
+              setMobileEnd('10:00')
+            }}
+            style={{
+              marginTop: '0.75rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              background: '#489B6E',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '0.625rem',
+              padding: '0.6rem 1.25rem',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+            }}
+          >
+            + Ajouter un créneau
+          </button>
+        )}
       </div>
 
+      {/* Calendrier */}
       <div className="min-h-[600px] flex-1 px-4 lg:px-6">
-        <div className="h-full rounded-2xl border bg-white p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)]">
+        <div className="h-full rounded-2xl border bg-white p-3 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] sm:p-5">
           <style>{`
             .fc {
               --fc-border-color: rgba(37, 49, 34, 0.08);
@@ -203,7 +253,7 @@ export function MemberCalendarView() {
               font-family: inherit;
             }
             .fc .fc-toolbar-title {
-              font-size: 1.25rem;
+              font-size: clamp(0.9rem, 4vw, 1.25rem);
               font-weight: 800;
               color: #253122;
               text-transform: capitalize;
@@ -212,10 +262,13 @@ export function MemberCalendarView() {
               border-radius: 0.5rem;
               text-transform: capitalize;
               font-weight: 600;
-              font-size: 0.875rem;
-              padding: 0.4rem 1rem;
+              font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+              padding: 0.35rem 0.6rem;
               transition: all 0.2s;
               box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            }
+            @media (min-width: 640px) {
+              .fc .fc-button { padding: 0.4rem 1rem; }
             }
             .fc .fc-button-primary:not(:disabled).fc-button-active,
             .fc .fc-button-primary:not(:disabled):active {
@@ -239,51 +292,39 @@ export function MemberCalendarView() {
               border: 2px dashed #489B6E;
               border-radius: 6px;
             }
-            /* Reset native events */
             .fc-event {
               border: none !important;
               background: transparent !important;
               box-shadow: none !important;
               padding: 0 !important;
             }
-            .fc-event-main {
-              height: 100%;
-              width: 100%;
-              padding: 2px;
-            }
-            .fc-v-event {
-              background-color: transparent !important;
-              border: none !important;
-            }
+            .fc-event-main { height: 100%; width: 100%; padding: 2px; }
+            .fc-v-event { background-color: transparent !important; border: none !important; }
+            /* Empêche le scroll de la page lors du glisser dans le calendrier sur mobile */
+            .fc-timegrid-body { touch-action: none; }
           `}</style>
 
           <FullCalendar
             ref={calendarRef}
             plugins={[timeGridPlugin, interactionPlugin]}
-            initialView="timeGridWeek"
+            initialView={isMobile ? 'timeGridDay' : 'timeGridWeek'}
             customButtons={{
               saveBtn: {
                 text: 'Sauvegarder',
                 click: () => {
                   toast.success(
                     'Vos horaires sont déjà sauvegardés automatiquement à chaque modification !',
-                    {
-                      icon: '✅',
-                    },
+                    { icon: '✅' },
                   )
                 },
               },
             }}
             headerToolbar={{
-              left: 'saveBtn prev,next today',
+              left: isMobile ? 'prev,next today' : 'saveBtn prev,next today',
               center: 'title',
-              right: 'timeGridWeek,timeGridDay',
+              right: isMobile ? 'timeGridDay' : 'timeGridWeek,timeGridDay',
             }}
-            buttonText={{
-              today: "Aujourd'hui",
-              week: 'Semaine',
-              day: 'Jour',
-            }}
+            buttonText={{ today: "Aujourd'hui", week: 'Semaine', day: 'Jour' }}
             locale="fr"
             firstDay={1}
             navLinks={true}
@@ -291,9 +332,10 @@ export function MemberCalendarView() {
             slotMaxTime="20:00:00"
             allDaySlot={false}
             events={calendarEvents}
-            selectable={true}
-            selectMirror={true}
+            selectable={!isMobile}
+            selectMirror={!isMobile}
             selectOverlap={false}
+            longPressDelay={isMobile ? 500 : 0}
             select={handleSelect}
             eventClick={handleEventClick}
             height="100%"
@@ -309,9 +351,19 @@ export function MemberCalendarView() {
               const dateStr = formatDate(arg.date)
               const dayNamePlural = arg.date.toLocaleDateString('fr-FR', { weekday: 'long' }) + 's'
 
+              if (isMobile) {
+                return (
+                  <div className="flex w-full items-center justify-center px-1">
+                    <span className="text-xs font-bold" style={{ color: '#253122' }}>
+                      {arg.text}
+                    </span>
+                  </div>
+                )
+              }
+
               return (
                 <div className="flex w-full items-center justify-center gap-2 px-1">
-                  <span>{arg.text}</span>
+                  <span className="text-sm">{arg.text}</span>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="rounded-md p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
@@ -332,9 +384,7 @@ export function MemberCalendarView() {
                           const id = toast.loading('Application à la semaine...')
                           applyWeek.mutate(
                             { date: dateStr },
-                            {
-                              onSettled: () => toast.dismiss(id),
-                            },
+                            { onSettled: () => toast.dismiss(id) },
                           )
                         }}
                       >
@@ -346,9 +396,7 @@ export function MemberCalendarView() {
                           const id = toast.loading(`Application aux ${dayNamePlural}...`)
                           applyDayOfWeek.mutate(
                             { date: dateStr },
-                            {
-                              onSettled: () => toast.dismiss(id),
-                            },
+                            { onSettled: () => toast.dismiss(id) },
                           )
                         }}
                       >
@@ -360,9 +408,7 @@ export function MemberCalendarView() {
                           const id = toast.loading('Application au mois...')
                           applyMonth.mutate(
                             { date: dateStr },
-                            {
-                              onSettled: () => toast.dismiss(id),
-                            },
+                            { onSettled: () => toast.dismiss(id) },
                           )
                         }}
                       >
@@ -373,12 +419,7 @@ export function MemberCalendarView() {
                         className="cursor-pointer font-medium text-red-600 focus:bg-red-50 focus:text-red-700"
                         onClick={() => {
                           const id = toast.loading('Suppression...')
-                          clearDay.mutate(
-                            { date: dateStr },
-                            {
-                              onSettled: () => toast.dismiss(id),
-                            },
-                          )
+                          clearDay.mutate({ date: dateStr }, { onSettled: () => toast.dismiss(id) })
                         }}
                       >
                         Vider la journée
@@ -391,12 +432,8 @@ export function MemberCalendarView() {
             eventContent={(eventInfo) => {
               const { type, slot } = eventInfo.event.extendedProps
 
-              // Protection contre les événements de sélection temporaires de FullCalendar
               if (!slot) return null
 
-              // Déterminer si le créneau est passé
-              // slot.end est sous la forme "YYYY-MM-DDT12:00:00" (sans fuseau, donc local)
-              // new Date() est aussi local, la comparaison est donc correcte.
               const isPast = new Date(slot.end) < new Date()
 
               if (type === 'availability') {
@@ -404,7 +441,7 @@ export function MemberCalendarView() {
                   <div
                     className={`flex h-full w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 transition-colors ${
                       isPast
-                        ? 'border-slate-200 bg-slate-100 text-slate-400 opacity-60' // Grisé si passé
+                        ? 'border-slate-200 bg-slate-100 text-slate-400 opacity-60'
                         : 'border-green-500/30 bg-green-500/10 text-green-700 hover:border-green-500/50 hover:bg-green-500/20'
                     }`}
                   >
@@ -432,7 +469,7 @@ export function MemberCalendarView() {
                     <div className="mb-1 flex items-center gap-1.5">
                       <div
                         className={`h-2 w-2 rounded-full ${isPast ? 'bg-slate-400' : 'bg-green-400'}`}
-                      ></div>
+                      />
                       <span
                         className={`truncate text-xs font-bold ${isPast ? 'line-through' : ''}`}
                       >
@@ -457,7 +494,7 @@ export function MemberCalendarView() {
         </div>
       </div>
 
-      {/* Menu déroulant pour gérer les créneaux */}
+      {/* Menu contextuel (clic sur un créneau) */}
       {menuPosition && selectedSlot && (
         <DropdownMenu
           open={!!menuPosition}
@@ -512,6 +549,133 @@ export function MemberCalendarView() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      )}
+
+      {/* Modal mobile : ajouter un créneau (bottom sheet) */}
+      {mobileModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setMobileModal(null)
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: '1.25rem 1.25rem 0 0',
+              padding: '1.5rem',
+              width: '100%',
+              maxWidth: '480px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem',
+            }}
+          >
+            <h2 style={{ margin: 0, fontWeight: 800, fontSize: '1.125rem', color: '#253122' }}>
+              Ajouter un créneau
+            </h2>
+
+            <div style={{ display: 'grid', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#253122' }}>
+                Date
+              </label>
+              <input
+                id="mobile-slot-date"
+                type="date"
+                value={mobileModal.date}
+                onChange={(e) => setMobileModal({ date: e.target.value })}
+                style={fieldStyle}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#253122' }}>
+                  Début
+                </label>
+                <input
+                  id="mobile-slot-start"
+                  type="time"
+                  value={mobileStart}
+                  onChange={(e) => setMobileStart(e.target.value)}
+                  step={900}
+                  style={fieldStyle}
+                />
+              </div>
+              <div style={{ display: 'grid', gap: '0.5rem' }}>
+                <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#253122' }}>
+                  Fin
+                </label>
+                <input
+                  id="mobile-slot-end"
+                  type="time"
+                  value={mobileEnd}
+                  onChange={(e) => setMobileEnd(e.target.value)}
+                  step={900}
+                  style={fieldStyle}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={() => setMobileModal(null)}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  background: 'rgba(37,49,34,0.06)',
+                  border: 'none',
+                  borderRadius: '0.625rem',
+                  fontWeight: 700,
+                  fontSize: '0.9375rem',
+                  color: '#253122',
+                  cursor: 'pointer',
+                }}
+              >
+                Annuler
+              </button>
+              <button
+                id="mobile-slot-confirm"
+                onClick={() => {
+                  if (!mobileModal.date || !mobileStart || !mobileEnd) return
+                  if (mobileStart >= mobileEnd) {
+                    toast.error("L'heure de fin doit être après l'heure de début.")
+                    return
+                  }
+                  addAvailability.mutate({
+                    date: mobileModal.date,
+                    startTime: mobileStart,
+                    endTime: mobileEnd,
+                  })
+                  setMobileModal(null)
+                }}
+                disabled={addAvailability.isPending}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  background: '#489B6E',
+                  border: 'none',
+                  borderRadius: '0.625rem',
+                  fontWeight: 700,
+                  fontSize: '0.9375rem',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  opacity: addAvailability.isPending ? 0.6 : 1,
+                }}
+              >
+                Confirmer
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

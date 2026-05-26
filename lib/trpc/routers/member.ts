@@ -20,6 +20,7 @@ import {
   updateMemberProfile,
   updateMemberProfileSchema,
 } from '@/lib/member/profile'
+import { getMemberAssignedServices } from '@/lib/member/services'
 
 function ensureMemberResult<T>(result: T | null): T {
   if (!result) {
@@ -89,5 +90,11 @@ export const memberRouter = router({
 
   applyDayToMonth: protectedProcedure.input(bulkActionSchema).mutation(async ({ ctx, input }) => {
     return ensureMemberResult(await applyDayToMonth(ctx.user.id, input))
+  }),
+
+  // Services ASSIGNES au membre (lecture seule). Le owner gere le catalogue et
+  // l'assignation via serviceRouter ; le membre ne fait que consulter les siens.
+  services: protectedProcedure.query(async ({ ctx }) => {
+    return ensureMemberResult(await getMemberAssignedServices(ctx.user.id))
   }),
 })

@@ -31,8 +31,9 @@ export default async function ClientLayout({ children }: { children: ReactNode }
       {/* Suspense évite l'hydration mismatch de usePathname() dans ClientSidebar */}
       <Suspense
         fallback={
+          /* Skeleton sidebar — visible uniquement sur desktop pendant le chargement */
           <aside
-            className="flex w-60 shrink-0 flex-col"
+            className="hidden w-60 shrink-0 md:flex"
             style={{ background: '#253122' }}
             aria-hidden
           />
@@ -48,43 +49,40 @@ export default async function ClientLayout({ children }: { children: ReactNode }
         />
       </Suspense>
 
-      {/* Zone contenu — min-w-0 empêche le shrink, flex-1 prend tout l'espace restant */}
+      {/* Zone contenu — prend tout l'espace restant */}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <header
+          className="flex h-16 shrink-0 items-center justify-between border-b pr-5 pl-16 md:px-8"
           style={{
-            display: 'flex',
-            height: '4rem',
-            flexShrink: 0,
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(37,49,34,0.08)',
+            borderColor: 'rgba(37,49,34,0.08)',
             background: '#fff',
-            padding: '0 2rem',
           }}
         >
           <p style={{ fontWeight: 600, fontSize: '0.9375rem', color: '#253122' }}>
             Bonjour, {displayName} 👋
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Link
               id="client-header-search"
               href="/search"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.5rem',
+                gap: '0.4rem',
                 background: '#489B6E',
                 color: '#fff',
-                padding: '0.5rem 1rem',
+                padding: '0.45rem 0.875rem',
                 borderRadius: '0.5rem',
-                fontSize: '0.875rem',
+                fontSize: '0.8125rem',
                 fontWeight: 700,
                 textDecoration: 'none',
+                whiteSpace: 'nowrap',
               }}
             >
-              <Search size={14} />
-              Trouver un pro
+              <Search size={13} />
+              <span className="hidden sm:inline">Trouver un pro</span>
+              <span className="sm:hidden">Chercher</span>
             </Link>
             <div
               style={{
@@ -107,15 +105,15 @@ export default async function ClientLayout({ children }: { children: ReactNode }
           </div>
         </header>
 
-        {/* Main — prend tout l'espace vertical restant, scroll si besoin */}
+        {/* Main */}
         <main
           style={{
             flex: 1,
             overflow: 'auto',
-            padding: '2rem 2.5rem',
             width: '100%',
             boxSizing: 'border-box',
           }}
+          className="p-4 sm:p-6 md:p-8 lg:p-10"
         >
           <Suspense fallback={null}>
             <DashboardBreadcrumb base="client" />
