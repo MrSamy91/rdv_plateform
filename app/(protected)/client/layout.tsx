@@ -38,7 +38,14 @@ export default async function ClientLayout({ children }: { children: ReactNode }
           />
         }
       >
-        <ClientSidebar hasMembership={Boolean(membership)} />
+        <ClientSidebar
+          hasMembership={Boolean(membership)}
+          user={{
+            name: session.user.name,
+            email: session.user.email,
+            avatar: session.user.image ?? '',
+          }}
+        />
       </Suspense>
 
       {/* Zone contenu — min-w-0 empêche le shrink, flex-1 prend tout l'espace restant */}

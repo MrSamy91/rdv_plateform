@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         }}
       />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader title="Administration" />
         <div className="flex flex-1 flex-col">{children}</div>
       </SidebarInset>
     </SidebarProvider>

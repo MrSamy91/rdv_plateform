@@ -1,15 +1,16 @@
 'use client'
 
 import * as React from 'react'
-import { LayoutDashboard, CalendarDays, Clock, User, Settings2Icon, Scissors } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, Clock, User, Scissors, ArrowLeftRight } from 'lucide-react'
 import Link from 'next/link'
 import { NavMain } from '@/components/nav-main'
-import { NavSecondary } from '@/components/nav-secondary'
 import { NavUser } from '@/components/nav-user'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -22,8 +23,6 @@ const navMain = [
   { title: 'Mes créneaux', url: '/member/availability', icon: <Clock /> },
   { title: 'Mon profil', url: '/member/profile', icon: <User /> },
 ]
-
-const navSecondary = [{ title: 'Paramètres', url: '/member/profile', icon: <Settings2Icon /> }]
 
 interface MemberSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: { name: string; email: string; avatar: string }
@@ -54,11 +53,26 @@ export function MemberSidebar({ user, ...props }: MemberSidebarProps) {
 
       <SidebarContent>
         <NavMain items={navMain} />
-        <NavSecondary items={navSecondary} className="mt-auto" />
+
+        {/* Bascule vers la vue client (un member est aussi un client) */}
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Vue client">
+                  <Link href="/client">
+                    <ArrowLeftRight />
+                    <span>Espace client</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={user} profileHref="/member/profile" />
       </SidebarFooter>
     </Sidebar>
   )
