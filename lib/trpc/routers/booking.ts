@@ -5,8 +5,15 @@ import {
   confirmPublicBookingSelectionSchema,
 } from '@/lib/bookings/public-booking'
 import { BookingStatus } from '@/generated/prisma/enums'
-import { protectedProcedure, router } from '../init'
+import { getPublicBookingSlots } from '@/lib/organizations/public-organization'
+import { protectedProcedure, publicProcedure, router } from '../init'
 import { z } from 'zod'
+
+const publicSlotsInputSchema = z.object({
+  orgSlug: z.string().min(1),
+  serviceId: z.string().min(1).optional(),
+  memberId: z.string().min(1).optional(),
+})
 
 const confirmBookingProcedure = protectedProcedure
   .input(confirmPublicBookingSelectionSchema)
@@ -36,6 +43,15 @@ export const bookingRouter = router({
 
   // Alias temporaire pour garder le flow public actuel fonctionnel pendant la migration UI.
   confirmPublic: confirmBookingProcedure,
+
+  // Créneaux dispo d'une orga, exposés publiquement (page de réservation, sans login).
+  // Lit la même source que le SSR -> sert d'initialData côté client + permet le refetch.
+  publicSlots: publicProcedure.input(publicSlotsInputSchema).query(({ input }) =>
+    getPublicBookingSlots(input.orgSlug, {
+      memberId: input.memberId,
+      serviceId: input.serviceId,
+    }),
+  ),
 
   cancel: protectedProcedure
     .input(z.object({ bookingId: z.string().min(1) }))

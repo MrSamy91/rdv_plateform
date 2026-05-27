@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
-import { PublicSlotPicker } from '@/components/booking/public-slot-picker'
+import { PublicSlotPickerLive } from '@/components/booking/public-slot-picker-live'
 import { getPublicOrgBookingHref } from '@/lib/routes/organization-public-route'
-import {
-  listPublicOrganizationAvailableSlots,
-  listPublicSlotDates,
-} from '@/lib/organizations/public-organization'
+import { getPublicBookingSlots } from '@/lib/organizations/public-organization'
 
 interface Props {
   params: Promise<{ 'org-slug': string }>
@@ -20,19 +17,12 @@ export const metadata: Metadata = {
 export default async function PublicBookingSlotPage({ params, searchParams }: Props) {
   const { 'org-slug': orgSlug } = await params
   const { service, member } = await searchParams
-  const slots = await listPublicOrganizationAvailableSlots(orgSlug, {
+
+  // Fetch SSR : sert d'initialData au wrapper tRPC (rendu instantané + SEO).
+  const initialData = await getPublicBookingSlots(orgSlug, {
     memberId: member,
     serviceId: service,
   })
-  const slotDates = listPublicSlotDates(slots)
-  const publicSlots = slots.map((slot) => ({
-    id: slot.id,
-    dateKey: slot.date.toISOString().slice(0, 10),
-    startTime: slot.startTime,
-    endTime: slot.endTime,
-    isAvailable: slot.isAvailable,
-    memberName: slot.member.user.name,
-  }))
 
   return (
     <main className="mx-auto w-full max-w-3xl space-y-8 px-4 py-6">
@@ -50,12 +40,11 @@ export default async function PublicBookingSlotPage({ params, searchParams }: Pr
         </h1>
       </div>
 
-      <PublicSlotPicker
+      <PublicSlotPickerLive
         orgSlug={orgSlug}
         serviceId={service}
         memberId={member}
-        dates={slotDates}
-        slots={publicSlots}
+        initialData={initialData}
       />
     </main>
   )

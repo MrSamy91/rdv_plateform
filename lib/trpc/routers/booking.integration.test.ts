@@ -39,6 +39,49 @@ describe('bookingRouter', () => {
     })
   }
 
+  // Caller public (sans session) : la page de réservation est accessible sans login.
+  const publicCaller = appRouter.createCaller({ db, session: null, user: null })
+
+  const slotDurationMinutes = (slot: { startTime: string; endTime: string }) => {
+    const toMins = (t: string) => {
+      const [h, m] = t.split(':').map(Number)
+      return (h || 0) * 60 + (m || 0)
+    }
+    return toMins(slot.endTime) - toMins(slot.startTime)
+  }
+
+  it('expose les creneaux publics filtres par membre et service', async () => {
+    const result = await publicCaller.booking.publicSlots({
+      orgSlug: seedOrganization.slug,
+      memberId: seedMembers.mila.id,
+      serviceId: seedServices.cut.id,
+    })
+
+    expect(result.slots.length).toBeGreaterThan(0)
+    // Tous les creneaux renvoyes sont libres (le creneau deja reserve est exclu).
+    expect(result.slots.every((slot) => slot.isAvailable)).toBe(true)
+    expect(result.slots.every((slot) => slot.memberName === 'Mila Laurent')).toBe(true)
+    // Sous-creneaux generes a la duree du service (cut = 60 min).
+    expect(
+      result.slots.every((slot) => slotDurationMinutes(slot) === seedServices.cut.duration),
+    ).toBe(true)
+    // Les dates affichees correspondent exactement aux jours des creneaux.
+    const slotDateKeys = new Set(result.slots.map((slot) => slot.dateKey))
+    const dateKeys = new Set(result.dates.map((date) => date.key))
+    expect(dateKeys).toEqual(slotDateKeys)
+  })
+
+  it('ne renvoie aucun creneau pour un service que le membre ne propose pas', async () => {
+    // Mila ne fait pas "beard" (service de Leo) -> filtrage member-service cote serveur.
+    const result = await publicCaller.booking.publicSlots({
+      orgSlug: seedOrganization.slug,
+      memberId: seedMembers.mila.id,
+      serviceId: seedServices.beard.id,
+    })
+
+    expect(result.slots).toHaveLength(0)
+  })
+
   it('confirme un booking avec le client de la session tRPC', async () => {
     const caller = await createUserCaller(seedUsers.clientTwo.id)
 
