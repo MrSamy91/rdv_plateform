@@ -23,6 +23,7 @@ export function ConfirmBookingForm({
   const [isConfirmed, setIsConfirmed] = useState(false)
   const [optimisticConfirming, setOptimisticConfirming] = useState(false)
   const router = useRouter()
+  const utils = trpc.useUtils()
 
   useEffect(() => {
     if (!isConfirmed) {
@@ -41,6 +42,9 @@ export function ConfirmBookingForm({
       setOptimisticConfirming(false)
       setIsConfirmed(true)
       setMessage('Reservation confirmee.')
+      // Le créneau réservé n'est plus dispo : on invalide la liste pour CE client
+      // (utile s'il revient en arrière sur la page de sélection).
+      void utils.booking.publicSlots.invalidate()
     },
     onError(error) {
       setOptimisticConfirming(false)

@@ -1,6 +1,9 @@
 import { db } from '@/lib/db'
 import { normalizePublicOrgSlug } from '@/lib/routes/organization-public-route'
-export { listPublicSlotDates } from './public-slot-dates'
+import { listPublicSlotDates } from './public-slot-dates'
+import { toPublicBookingSlot } from './public-booking-slot'
+
+export { listPublicSlotDates }
 
 export async function listPublicOrganizations() {
   return await db.organization.findMany({
@@ -133,6 +136,20 @@ export async function listPublicOrganizationAvailableSlots(
   }
 
   return virtualSlots
+}
+
+// Forme prête pour l'UI publique (créneaux mappés + dates dérivées).
+// Source unique partagée par le SSR (initialData) et la procédure tRPC booking.publicSlots.
+export async function getPublicBookingSlots(
+  orgSlug: string,
+  filters: PublicOrganizationSlotFilters = {},
+) {
+  const slots = await listPublicOrganizationAvailableSlots(orgSlug, filters)
+
+  return {
+    slots: slots.map(toPublicBookingSlot),
+    dates: listPublicSlotDates(slots),
+  }
 }
 
 interface PublicBookingConfirmationInput {

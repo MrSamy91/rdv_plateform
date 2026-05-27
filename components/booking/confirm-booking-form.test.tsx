@@ -7,6 +7,13 @@ const { routerReplace } = vi.hoisted(() => ({
 
 vi.mock('@/lib/trpc/client', () => ({
   trpc: {
+    useUtils: () => ({
+      booking: {
+        publicSlots: {
+          invalidate: vi.fn(),
+        },
+      },
+    }),
     booking: {
       confirmPublic: {
         useMutation: (options: {
