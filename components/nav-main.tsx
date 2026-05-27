@@ -27,7 +27,8 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => {
             // Les URL racines ne sont actives que sur une correspondance exacte
-            const isDashboardRoot = item.url === '/admin' || item.url === '/member'
+            const isDashboardRoot =
+              item.url === '/admin' || item.url === '/member' || item.url === '/owner'
             const isActive = isDashboardRoot
               ? pathname === item.url
               : pathname === item.url || pathname.startsWith(item.url + '/')

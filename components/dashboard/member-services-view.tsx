@@ -2,6 +2,8 @@
 
 import { Scissors, Clock, Euro, Loader2 } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
+import { formatPrice } from '@/lib/utils/format-price'
+import { formatDuration } from '@/lib/utils/format-duration'
 
 // ── Palette (identique au reste du dashboard membre) ─────────────────────────
 const C = {
@@ -11,18 +13,6 @@ const C = {
   card: '#ffffff',
   green: '#489B6E',
   greenBg: 'rgba(72,155,110,0.10)',
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function formatPrice(price: number) {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
-}
-
-function formatDuration(minutes: number) {
-  if (minutes < 60) return `${minutes} min`
-  const h = Math.floor(minutes / 60)
-  const m = minutes % 60
-  return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`
 }
 
 // ── ServiceCard (lecture seule) ─────────────────────────────────────────────

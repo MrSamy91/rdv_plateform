@@ -1,16 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import {
-  LayoutDashboard,
-  CalendarDays,
-  Clock,
-  Tag,
-  Store,
-  User,
-  Scissors,
-  ArrowLeftRight,
-} from 'lucide-react'
+import { LayoutDashboard, Scissors, Tag, ArrowLeftRight, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
@@ -27,26 +18,22 @@ import {
 } from '@/components/ui/sidebar'
 
 const navMain = [
-  { title: 'Tableau de bord', url: '/member', icon: <LayoutDashboard /> },
-  { title: 'Mon calendrier', url: '/member/calendar', icon: <CalendarDays /> },
-  { title: 'Mes créneaux', url: '/member/availability', icon: <Clock /> },
-  { title: 'Mes services', url: '/member/services', icon: <Tag /> },
-  { title: 'Mon profil', url: '/member/profile', icon: <User /> },
+  { title: 'Tableau de bord', url: '/owner', icon: <LayoutDashboard /> },
+  { title: 'Services', url: '/owner/services', icon: <Tag /> },
 ]
 
-interface MemberSidebarProps extends React.ComponentProps<typeof Sidebar> {
+interface OwnerSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: { name: string; email: string; avatar: string }
-  isOwner?: boolean
 }
 
-export function MemberSidebar({ user, isOwner, ...props }: MemberSidebarProps) {
+export function OwnerSidebar({ user, ...props }: OwnerSidebarProps) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
-              <Link href="/member" className="flex items-center gap-2">
+              <Link href="/owner" className="flex items-center gap-2">
                 <span
                   className="flex size-6 items-center justify-center rounded-md"
                   style={{ background: '#489B6E' }}
@@ -54,7 +41,7 @@ export function MemberSidebar({ user, isOwner, ...props }: MemberSidebarProps) {
                   <Scissors size={13} className="rotate-90 text-white" />
                 </span>
                 <span className="text-base font-bold" style={{ color: '#253122' }}>
-                  CutBook <span className="text-xs font-normal opacity-50">Pro</span>
+                  CutBook <span className="text-xs font-normal opacity-50">Gérant</span>
                 </span>
               </Link>
             </SidebarMenuButton>
@@ -65,20 +52,18 @@ export function MemberSidebar({ user, isOwner, ...props }: MemberSidebarProps) {
       <SidebarContent>
         <NavMain items={navMain} />
 
-        {/* Bascule vers la vue client (un member est aussi un client) */}
+        {/* Bascule vers les autres espaces (un gérant est aussi pro et client) */}
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
-              {isOwner && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Espace gérant">
-                    <Link href="/owner">
-                      <Store />
-                      <span>Espace gérant</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Espace professionnel">
+                  <Link href="/member">
+                    <UserRound />
+                    <span>Espace pro</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Vue client">
                   <Link href="/client">
