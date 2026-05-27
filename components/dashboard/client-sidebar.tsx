@@ -117,13 +117,13 @@ export function ClientSidebar({
           </Link>
         ) : (
           <Link
-            id="client-sidebar-become-member"
-            href="/client/become-member"
+            id="client-sidebar-create-organization"
+            href="/client/create-organization"
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
             style={{ background: '#489B6E' }}
           >
             <UserRoundPlus size={16} />
-            Devenir membre
+            Devenir pro
           </Link>
         )}
       </div>

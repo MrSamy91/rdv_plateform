@@ -35,7 +35,7 @@ function toSlug(value: string) {
   return value
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 30)
@@ -126,11 +126,11 @@ function Field({
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-interface BecomeMemberFormProps {
+interface OrganizationCreatorProps {
   userName: string
 }
 
-export function BecomeMemberForm({ userName }: BecomeMemberFormProps) {
+export function OrganizationCreator({ userName }: OrganizationCreatorProps) {
   const router = useRouter()
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')

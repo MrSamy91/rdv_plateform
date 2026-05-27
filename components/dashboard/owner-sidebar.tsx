@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { LayoutDashboard, Scissors, Tag, ArrowLeftRight, UserRound } from 'lucide-react'
+import { LayoutDashboard, Scissors, Tag, Users, ArrowLeftRight, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
@@ -20,6 +20,7 @@ import {
 const navMain = [
   { title: 'Tableau de bord', url: '/owner', icon: <LayoutDashboard /> },
   { title: 'Services', url: '/owner/services', icon: <Tag /> },
+  { title: 'Équipe', url: '/owner/members', icon: <Users /> },
 ]
 
 interface OwnerSidebarProps extends React.ComponentProps<typeof Sidebar> {
