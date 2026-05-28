@@ -30,13 +30,17 @@ export function VerifyEmailTemplate({ name, verificationUrl }: VerifyEmailTempla
 
   return (
     <EmailShell
-      preview="Confirme ton adresse email pour activer ton espace CutBook."
-      eyebrow="Verification email"
-      title="Confirme ton adresse email"
+      preview="Bienvenue sur CutBook — confirme ton adresse pour activer ton compte."
+      eyebrow="Bienvenue"
+      title="Bienvenue sur CutBook"
     >
       <Text style={emailStyles.text}>{greeting}</Text>
       <Text style={emailStyles.text}>
-        Clique sur le bouton ci-dessous pour verifier ton adresse email et securiser ton compte.
+        Ravis de t&apos;accueillir sur CutBook. Reserve tes rendez-vous en ligne, suis tes RDV et
+        cumule des points de fidelite, le tout au meme endroit.
+      </Text>
+      <Text style={emailStyles.text}>
+        Derniere etape : confirme ton adresse email en cliquant ci-dessous pour activer ton compte.
       </Text>
 
       <Button href={verificationUrl} style={buttonStyle}>
