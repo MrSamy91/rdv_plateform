@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { getPublicOrgBookingPaymentHref } from '@/lib/routes/organization-public-route'
 import { trpc } from '@/lib/trpc/client'
 
 interface ConfirmBookingFormProps {
@@ -25,26 +26,15 @@ export function ConfirmBookingForm({
   const router = useRouter()
   const utils = trpc.useUtils()
 
-  useEffect(() => {
-    if (!isConfirmed) {
-      return undefined
-    }
-
-    const timeout = window.setTimeout(() => {
-      router.replace('/client/bookings')
-    }, 5000)
-
-    return () => window.clearTimeout(timeout)
-  }, [isConfirmed, router])
-
   const confirmBooking = trpc.booking.confirmPublic.useMutation({
-    onSuccess() {
-      setOptimisticConfirming(false)
+    onSuccess(data) {
       setIsConfirmed(true)
-      setMessage('Reservation confirmee.')
+      setMessage('Reservation confirmee. Redirection vers le paiement...')
       // Le créneau réservé n'est plus dispo : on invalide la liste pour CE client
       // (utile s'il revient en arrière sur la page de sélection).
       void utils.booking.publicSlots.invalidate()
+      // Paiement optionnel : on enchaine sur l'etape paiement (skippable la-bas).
+      router.replace(getPublicOrgBookingPaymentHref(orgSlug, { booking: data.bookingId }))
     },
     onError(error) {
       setOptimisticConfirming(false)

@@ -17,12 +17,12 @@ vi.mock('@/lib/trpc/client', () => ({
     booking: {
       confirmPublic: {
         useMutation: (options: {
-          onSuccess?: () => void
+          onSuccess?: (data: { bookingId: string }) => void
           onError?: (error: { data?: { code?: string }; message: string }) => void
         }) => {
           return {
             mutate: () => {
-              options?.onSuccess?.()
+              options?.onSuccess?.({ bookingId: 'b1' })
             },
             isPending: false,
           }
@@ -43,7 +43,6 @@ import { ConfirmBookingForm } from './confirm-booking-form'
 describe('ConfirmBookingForm', () => {
   beforeEach(() => {
     routerReplace.mockReset()
-    vi.useFakeTimers()
     window.history.pushState(
       {},
       '',
@@ -51,7 +50,7 @@ describe('ConfirmBookingForm', () => {
     )
   })
 
-  it('redirige vers les reservations client cinq secondes apres confirmation', async () => {
+  it('redirige vers la page de paiement apres confirmation', () => {
     render(
       <ConfirmBookingForm
         orgSlug="atelier-nova"
@@ -65,7 +64,7 @@ describe('ConfirmBookingForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirmer la reservation' }))
     expect(screen.getByRole('status')).toHaveTextContent('Reservation confirmee.')
 
-    await vi.advanceTimersByTimeAsync(5000)
-    expect(routerReplace).toHaveBeenCalledWith('/client/bookings')
+    // Paiement optionnel : on enchaine sur l'etape paiement avec le bookingId.
+    expect(routerReplace).toHaveBeenCalledWith('/atelier-nova/booking/payment?booking=b1')
   })
 })
