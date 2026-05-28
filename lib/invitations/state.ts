@@ -9,7 +9,13 @@ export function getInvitationExpiry(from: Date = new Date()): Date {
   return expiry
 }
 
-export type InvitationState = 'VALID' | 'EXPIRED' | 'REVOKED' | 'ACCEPTED' | 'WRONG_RECIPIENT'
+export type InvitationState =
+  | 'VALID'
+  | 'EXPIRED'
+  | 'REVOKED'
+  | 'DECLINED'
+  | 'ACCEPTED'
+  | 'WRONG_RECIPIENT'
 
 interface InvitationStateInput {
   status: InvitationStatus
@@ -20,7 +26,7 @@ interface InvitationStateInput {
 /**
  * Logique PURE (sans BDD) : décide l'état d'une invitation pour un user donné.
  * Réutilisée par `invitation.accept` (serveur) ET la page d'acceptation become-member.
- * Ordre de priorité : ACCEPTED > REVOKED > EXPIRED > WRONG_RECIPIENT > VALID.
+ * Ordre de priorité : ACCEPTED > REVOKED > DECLINED > EXPIRED > WRONG_RECIPIENT > VALID.
  */
 export function getInvitationState(
   invitation: InvitationStateInput,
@@ -29,6 +35,7 @@ export function getInvitationState(
 ): InvitationState {
   if (invitation.status === InvitationStatus.ACCEPTED) return 'ACCEPTED'
   if (invitation.status === InvitationStatus.REVOKED) return 'REVOKED'
+  if (invitation.status === InvitationStatus.DECLINED) return 'DECLINED'
   if (invitation.expiresAt.getTime() < now.getTime()) return 'EXPIRED'
   if (invitation.email.toLowerCase() !== userEmail.toLowerCase()) return 'WRONG_RECIPIENT'
   return 'VALID'

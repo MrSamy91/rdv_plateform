@@ -107,6 +107,28 @@ describe('invitationRouter + gestion equipe', () => {
     expect(updated?.status).toBe(InvitationStatus.REVOKED)
   })
 
+  it('le destinataire refuse une invitation', async () => {
+    const owner = await createUserCaller(seedUsers.owner.id)
+    const invite = await owner.invitation.create({ email: seedUsers.clientTwo.email })
+
+    const client = await createUserCaller(seedUsers.clientTwo.id)
+    const result = await client.invitation.decline({ token: invite.token })
+    expect(result.id).toBe(invite.id)
+
+    const updated = await db.memberInvitation.findUnique({ where: { id: invite.id } })
+    expect(updated?.status).toBe(InvitationStatus.DECLINED)
+  })
+
+  it('refuse d’accepter une invitation deja refusee', async () => {
+    const invitation = await db.memberInvitation.findFirstOrThrow({
+      where: { email: seedUsers.clientTwo.email.toLowerCase(), status: InvitationStatus.DECLINED },
+    })
+    const client = await createUserCaller(seedUsers.clientTwo.id)
+    await expect(client.invitation.accept({ token: invitation.token })).rejects.toMatchObject({
+      code: 'BAD_REQUEST' satisfies TRPCError['code'],
+    })
+  })
+
   it('liste l’equipe incluant le membre fraichement accepte', async () => {
     const owner = await createUserCaller(seedUsers.owner.id)
     const team = await owner.organization.teamMembers()

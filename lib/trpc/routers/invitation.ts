@@ -149,10 +149,11 @@ export const invitationRouter = router({
     }
 
     if (state !== 'VALID') {
-      // state est ici narrowé à ACCEPTED | REVOKED | EXPIRED (WRONG_RECIPIENT déjà géré).
+      // state narrowé à ACCEPTED | REVOKED | DECLINED | EXPIRED (WRONG_RECIPIENT déjà géré).
       const messages = {
         EXPIRED: 'Cette invitation a expire.',
         REVOKED: 'Cette invitation a ete revoquee.',
+        DECLINED: 'Vous avez refuse cette invitation.',
         ACCEPTED: 'Cette invitation a deja ete acceptee.',
       } as const
       throw new TRPCError({ code: 'BAD_REQUEST', message: messages[state] })
@@ -182,5 +183,37 @@ export const invitationRouter = router({
     })
 
     return { orgId: invitation.orgId }
+  }),
+
+  // Refus par le recrute connecte (email doit matcher) : passe l'invitation en DECLINED.
+  decline: protectedProcedure.input(invitationTokenSchema).mutation(async ({ ctx, input }) => {
+    const invitation = await ctx.db.memberInvitation.findUnique({
+      where: { token: input.token },
+      select: { id: true, email: true, status: true, expiresAt: true },
+    })
+
+    if (!invitation) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Invitation introuvable.' })
+    }
+
+    const state = getInvitationState(invitation, ctx.user.email, new Date())
+
+    if (state === 'WRONG_RECIPIENT') {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Cette invitation ne vous est pas destinee.',
+      })
+    }
+
+    if (state !== 'VALID') {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'Cette invitation est deja traitee.' })
+    }
+
+    await ctx.db.memberInvitation.update({
+      where: { id: invitation.id },
+      data: { status: InvitationStatus.DECLINED },
+    })
+
+    return { id: invitation.id }
   }),
 })

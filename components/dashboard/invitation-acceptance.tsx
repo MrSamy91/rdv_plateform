@@ -30,6 +30,7 @@ const ERROR_MESSAGES: Record<Exclude<InvitationState, 'VALID'> | 'INVALID', stri
   INVALID: 'Lien d’invitation invalide ou incomplet.',
   EXPIRED: 'Cette invitation a expiré.',
   REVOKED: 'Cette invitation a été révoquée.',
+  DECLINED: 'Vous avez refusé cette invitation.',
   ACCEPTED: 'Cette invitation a déjà été acceptée.',
   WRONG_RECIPIENT: 'Cette invitation ne correspond pas à votre compte.',
 }
@@ -49,6 +50,14 @@ export function InvitationAcceptance({
     },
   })
 
+  const decline = trpc.invitation.decline.useMutation({
+    onSuccess: () => {
+      router.push('/client')
+      router.refresh()
+    },
+  })
+
+  const busy = accept.isPending || accept.isSuccess || decline.isPending || decline.isSuccess
   const canAccept = state === 'VALID' && !alreadyMember && Boolean(token)
 
   return (
@@ -77,20 +86,20 @@ export function InvitationAcceptance({
               acceptant, vous accédez à votre espace membre (planning, prestations).
             </p>
 
-            {accept.isError && (
+            {(accept.isError || decline.isError) && (
               <div
                 className="mt-5 flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium"
                 style={{ background: C.redBg, color: C.red }}
               >
                 <AlertCircle size={15} />
-                {accept.error.message}
+                {(accept.error ?? decline.error)?.message}
               </div>
             )}
 
             <button
               type="button"
               onClick={() => token && accept.mutate({ token })}
-              disabled={accept.isPending || accept.isSuccess}
+              disabled={busy}
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
               style={{ background: C.green }}
             >
@@ -104,6 +113,16 @@ export function InvitationAcceptance({
               ) : (
                 'Accepter l’invitation'
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => token && decline.mutate({ token })}
+              disabled={busy}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-opacity hover:opacity-70 disabled:opacity-50"
+              style={{ color: C.muted }}
+            >
+              {decline.isPending ? 'Refus…' : 'Refuser l’invitation'}
             </button>
           </>
         ) : (

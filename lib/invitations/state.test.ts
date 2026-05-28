@@ -34,6 +34,16 @@ describe('getInvitationState', () => {
     ).toBe('REVOKED')
   })
 
+  it('DECLINED si refusée par le destinataire', () => {
+    expect(
+      getInvitationState(
+        { ...base, status: InvitationStatus.DECLINED },
+        'client@cutbook.test',
+        now,
+      ),
+    ).toBe('DECLINED')
+  })
+
   it('EXPIRED si expiresAt < now', () => {
     expect(
       getInvitationState(

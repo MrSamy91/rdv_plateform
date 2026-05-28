@@ -156,6 +156,7 @@ enum InvitationStatus {
   PENDING
   ACCEPTED
   REVOKED
+  DECLINED
 }
 
 model Member {

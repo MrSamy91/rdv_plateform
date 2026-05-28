@@ -92,9 +92,13 @@ export function OwnerMembersView() {
   const membersQuery = trpc.organization.teamMembers.useQuery()
   const invitationsQuery = trpc.invitation.listPending.useQuery()
 
+  // Confirmation inline du retrait d'un membre (pas de suppression directe au clic).
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
+
   const removeMember = trpc.organization.removeMember.useMutation({
     onSuccess() {
       toast.success('Professionnel retiré')
+      setConfirmingId(null)
       utils.organization.teamMembers.invalidate()
     },
     onError: (e) => toast.error(e.message),
@@ -144,18 +148,42 @@ export function OwnerMembersView() {
                 </p>
                 <p className="text-muted-foreground truncate text-sm">{member.email}</p>
               </div>
-              {!member.isOwner && (
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="text-destructive hover:text-destructive"
-                  aria-label="Retirer le professionnel"
-                  disabled={removeMember.isPending}
-                  onClick={() => removeMember.mutate({ memberId: member.id })}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              )}
+              {!member.isOwner &&
+                (confirmingId === member.id ? (
+                  <div className="flex shrink-0 items-center gap-1">
+                    <span className="text-muted-foreground hidden text-xs sm:inline">
+                      Retirer ?
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive"
+                      disabled={removeMember.isPending}
+                      onClick={() => removeMember.mutate({ memberId: member.id })}
+                    >
+                      {removeMember.isPending && <Loader2 className="size-3.5 animate-spin" />}
+                      Confirmer
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={removeMember.isPending}
+                      onClick={() => setConfirmingId(null)}
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive"
+                    aria-label="Retirer le professionnel"
+                    onClick={() => setConfirmingId(member.id)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                ))}
             </article>
           ))
         )}

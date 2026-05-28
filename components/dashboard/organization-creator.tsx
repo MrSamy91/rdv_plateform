@@ -134,7 +134,6 @@ export function OrganizationCreator({ userName }: OrganizationCreatorProps) {
   const router = useRouter()
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
-  const [slugEdited, setSlugEdited] = useState(false)
   const [address, setAddress] = useState('')
   const [phone, setPhone] = useState('')
   const [description, setDescription] = useState('')
@@ -147,16 +146,9 @@ export function OrganizationCreator({ userName }: OrganizationCreatorProps) {
     },
   })
 
-  // Auto-génération du slug depuis le nom
+  // Slug auto-généré depuis le nom (non éditable : une seule source de vérité = le nom).
   function handleNameChange(value: string) {
     setName(value)
-    if (!slugEdited) {
-      setSlug(toSlug(value))
-    }
-  }
-
-  function handleSlugChange(value: string) {
-    setSlugEdited(true)
     setSlug(toSlug(value))
   }
 
@@ -241,21 +233,21 @@ export function OrganizationCreator({ userName }: OrganizationCreatorProps) {
           />
         </FieldGroup>
 
-        {/* Slug */}
+        {/* Slug — généré automatiquement depuis le nom, non éditable */}
         <FieldGroup
           id="org-slug"
           label="Identifiant URL"
-          hint={`Votre page sera accessible sur /${slug || 'mon-salon'}`}
+          hint={`Généré automatiquement : cutbook.fr/${slug || 'mon-salon'}`}
           error={fieldErrors.slug ?? (isSlugConflict ? create.error?.message : undefined)}
         >
           <Field
             id="org-slug"
             value={slug}
-            onChange={handleSlugChange}
+            onChange={() => undefined}
             prefix="cutbook.fr/"
             placeholder="mon-salon"
             maxLength={30}
-            disabled={create.isPending || create.isSuccess}
+            disabled
           />
         </FieldGroup>
 
