@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, ChevronRight, Clock, Plus, X } from 'lucide-react'
+import { CalendarDays, ChevronRight, Clock, Plus, Receipt, X } from 'lucide-react'
 import Link from 'next/link'
 import type { BookingStatus } from '@/generated/prisma/enums'
 import { trpc } from '@/lib/trpc/client'
@@ -14,6 +14,8 @@ interface ClientBooking {
   time: string
   price: number
   status: BookingStatus
+  paidOnline: boolean
+  receiptUrl: string | null
 }
 
 const statusLabels: Record<BookingStatus, string> = {
@@ -136,6 +138,14 @@ function ClientBookingsContent({ bookings }: { bookings: ClientBooking[] }) {
                         >
                           {statusLabels[booking.status]}
                         </span>
+                        {booking.paidOnline && (
+                          <span
+                            className="rounded-md px-2 py-0.5 text-xs font-semibold"
+                            style={{ background: 'rgba(72,155,110,0.12)', color: '#489B6E' }}
+                          >
+                            Paye en ligne
+                          </span>
+                        )}
                       </div>
                       <p className="mt-0.5 text-sm" style={{ color: 'rgba(37,49,34,0.5)' }}>
                         {booking.service} - {booking.member}
@@ -155,6 +165,18 @@ function ClientBookingsContent({ bookings }: { bookings: ClientBooking[] }) {
                         <span className="font-semibold" style={{ color: '#253122' }}>
                           {booking.price} EUR
                         </span>
+                        {booking.receiptUrl && (
+                          <a
+                            href={booking.receiptUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 font-medium transition-opacity hover:opacity-70"
+                            style={{ color: '#489B6E' }}
+                          >
+                            <Receipt size={11} />
+                            Recu
+                          </a>
+                        )}
                       </div>
                     </div>
                     {booking.status !== 'CANCELLED' && (

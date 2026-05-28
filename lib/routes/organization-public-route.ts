@@ -36,3 +36,7 @@ export function getPublicOrgBookingSlotHref(orgSlug: string, search?: RouteSearc
 export function getPublicOrgBookingConfirmHref(orgSlug: string, search?: RouteSearch) {
   return `${getPublicOrgBookingHref(orgSlug)}/confirm${formatSearchSuffix(search)}`
 }
+
+export function getPublicOrgBookingPaymentHref(orgSlug: string, search?: RouteSearch) {
+  return `${getPublicOrgBookingHref(orgSlug)}/payment${formatSearchSuffix(search)}`
+}

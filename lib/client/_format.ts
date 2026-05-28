@@ -1,4 +1,4 @@
-import type { BookingStatus, RewardStatus } from '@/generated/prisma/enums'
+import type { BookingStatus, PaymentStatus, RewardStatus } from '@/generated/prisma/enums'
 
 export interface ClientBookingItem {
   id: string
@@ -9,6 +9,8 @@ export interface ClientBookingItem {
   time: string
   price: number
   status: BookingStatus
+  paidOnline: boolean
+  receiptUrl: string | null
 }
 
 export interface ClientRewardItem {
@@ -37,6 +39,12 @@ type BookingWithDetails = {
     date: Date
     startTime: string
   }
+  // Optionnel : seules les requetes qui incluent `payment` le fournissent
+  // (bookings + history). Les autres (dashboard, member) restent intactes.
+  payment?: {
+    status: PaymentStatus
+    receiptUrl: string | null
+  } | null
 }
 
 const dateFormatter = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' })
@@ -51,6 +59,8 @@ export function toClientBookingItem(booking: BookingWithDetails): ClientBookingI
     time: booking.timeSlot.startTime,
     price: booking.totalPrice,
     status: booking.status,
+    paidOnline: booking.payment?.status === 'SUCCEEDED',
+    receiptUrl: booking.payment?.receiptUrl ?? null,
   }
 }
 
