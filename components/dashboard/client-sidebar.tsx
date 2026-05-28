@@ -123,7 +123,7 @@ export function ClientSidebar({
             style={{ background: '#489B6E' }}
           >
             <UserRoundPlus size={16} />
-            Devenir pro
+            Ouvrir son salon
           </Link>
         )}
       </div>
