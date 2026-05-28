@@ -254,6 +254,7 @@ model Booking {
   member   Member   @relation(fields: [memberId], references: [id])
   service  Service  @relation(fields: [serviceId], references: [id])
   timeSlot TimeSlot @relation(fields: [timeSlotId], references: [id])
+  payment  Payment?
 
   @@map("booking")
 }
@@ -263,6 +264,38 @@ enum BookingStatus {
   CONFIRMED
   COMPLETED
   CANCELLED
+}
+
+// =============================================================
+// PAIEMENTS Stripe
+// Paiement en ligne OPTIONNEL : le booking est deja CONFIRMED a la
+// reservation, le Payment est une couche additive. 1 booking -> au plus
+// 1 paiement (bookingId @unique) ; on upsert sur les retries.
+// Source de verite du "paye" = le webhook Stripe (jamais le return_url).
+// =============================================================
+
+model Payment {
+  id                    String        @id @default(cuid())
+  bookingId             String        @unique
+  amount                Float
+  currency              String        @default("eur")
+  status                PaymentStatus @default(PENDING)
+  stripeSessionId       String?       @unique
+  stripePaymentIntentId String?       @unique
+  receiptUrl            String?
+  paidAt                DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("payment")
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
 }
 
 // =============================================================

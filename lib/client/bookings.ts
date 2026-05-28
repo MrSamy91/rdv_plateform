@@ -28,6 +28,12 @@ const bookingInclude = {
       startTime: true,
     },
   },
+  payment: {
+    select: {
+      status: true,
+      receiptUrl: true,
+    },
+  },
 } as const
 
 export async function getClientUpcomingBookings(clientId: string) {

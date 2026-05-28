@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, Clock } from 'lucide-react'
+import { CalendarDays, Clock, Receipt } from 'lucide-react'
 import type { BookingStatus } from '@/generated/prisma/enums'
 import { trpc } from '@/lib/trpc/client'
 
@@ -13,6 +13,8 @@ interface ClientHistoryItem {
   time: string
   price: number
   status: BookingStatus
+  paidOnline: boolean
+  receiptUrl: string | null
 }
 
 const statusStyles = {
@@ -107,6 +109,14 @@ function ClientHistoryContent({ history }: { history: ClientHistoryItem[] }) {
                           >
                             {style.label}
                           </span>
+                          {booking.paidOnline && (
+                            <span
+                              className="rounded-md px-2 py-0.5 text-xs font-semibold"
+                              style={{ background: 'rgba(72,155,110,0.12)', color: '#489B6E' }}
+                            >
+                              Paye en ligne
+                            </span>
+                          )}
                         </div>
                         <p className="mt-0.5 text-sm" style={{ color: 'rgba(37,49,34,0.5)' }}>
                           {booking.service} - {booking.member}
@@ -126,6 +136,18 @@ function ClientHistoryContent({ history }: { history: ClientHistoryItem[] }) {
                           <span className="font-semibold" style={{ color: '#253122' }}>
                             {booking.price} EUR
                           </span>
+                          {booking.receiptUrl && (
+                            <a
+                              href={booking.receiptUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 font-medium transition-opacity hover:opacity-70"
+                              style={{ color: '#489B6E' }}
+                            >
+                              <Receipt size={11} />
+                              Recu
+                            </a>
+                          )}
                         </div>
                       </div>
                     </div>

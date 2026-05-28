@@ -7,6 +7,7 @@ import { clientRouter } from './client'
 import { invitationRouter } from './invitation'
 import { memberRouter } from './member'
 import { organizationRouter } from './organization'
+import { paymentRouter } from './payment'
 import { serviceRouter } from './service'
 import { timeSlotRouter } from './time-slot'
 
@@ -14,6 +15,7 @@ export const appRouter = router({
   admin: adminRouter,
   organization: organizationRouter,
   booking: bookingRouter,
+  payment: paymentRouter,
   service: serviceRouter,
   timeSlot: timeSlotRouter,
   invitation: invitationRouter,
