@@ -1,8 +1,9 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { AlertCircle, Building2, CheckCircle2, Loader2 } from 'lucide-react'
+import { AlertCircle, Building2, CheckCircle2, Loader2, PartyPopper } from 'lucide-react'
 import { trpc } from '@/lib/trpc/client'
 import type { InvitationState } from '@/lib/invitations/state'
 
@@ -13,6 +14,7 @@ const C = {
   card: '#ffffff',
   bg: '#f9f7f3',
   green: '#489B6E',
+  greenBg: 'rgba(72,155,110,0.12)',
   greenDark: '#2d6b4a',
   red: '#dc2626',
   redBg: 'rgba(220,38,38,0.08)',
@@ -42,13 +44,24 @@ export function InvitationAcceptance({
   alreadyMember,
 }: InvitationAcceptanceProps) {
   const router = useRouter()
+  const [secondsLeft, setSecondsLeft] = useState(5)
 
-  const accept = trpc.invitation.accept.useMutation({
-    onSuccess: () => {
+  // Pas de redirection immédiate : on affiche une modal de félicitations + décompte.
+  const accept = trpc.invitation.accept.useMutation()
+
+  // Décompte de 5s après l'acceptation, puis redirection vers l'espace membre.
+  useEffect(() => {
+    if (!accept.isSuccess) return
+
+    if (secondsLeft <= 0) {
       router.push('/member')
       router.refresh()
-    },
-  })
+      return
+    }
+
+    const timer = window.setTimeout(() => setSecondsLeft((s) => s - 1), 1000)
+    return () => window.clearTimeout(timer)
+  }, [accept.isSuccess, secondsLeft, router])
 
   const decline = trpc.invitation.decline.useMutation({
     onSuccess: () => {
@@ -145,6 +158,34 @@ export function InvitationAcceptance({
           </>
         )}
       </div>
+
+      {/* Modal de félicitations + décompte avant redirection */}
+      {accept.isSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="w-full max-w-sm rounded-2xl p-8 text-center shadow-2xl"
+            style={{ background: C.card }}
+          >
+            <div
+              className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full"
+              style={{ background: C.greenBg }}
+            >
+              <PartyPopper size={30} style={{ color: C.green }} />
+            </div>
+            <h2 className="text-xl font-extrabold" style={{ color: C.text }}>
+              Félicitations !
+            </h2>
+            <p className="mx-auto mt-2 max-w-xs text-sm" style={{ color: C.muted }}>
+              Vous avez rejoint <strong>{orgName}</strong>. Bienvenue dans l’équipe !
+            </p>
+            <p className="mt-5 text-sm font-semibold" style={{ color: C.green }}>
+              Redirection vers votre espace dans {secondsLeft}s…
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
