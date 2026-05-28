@@ -5,9 +5,19 @@ import { listPublicOrganizations } from '@/lib/organizations/public-organization
 import { getPublicOrgHref } from '@/lib/routes/organization-public-route'
 
 export const metadata: Metadata = {
-  title: 'Trouver un professionnel - CutBook',
+  // Pas de suffixe manuel : le template `%s | CutBook` du layout racine
+  // ajoute déjà « | CutBook » → « Trouver un professionnel | CutBook ».
+  title: 'Trouver un professionnel',
   description:
-    'Recherchez et reservez chez votre coiffeur, barbier ou estheticien en quelques clics.',
+    'Recherchez et réservez chez votre coiffeur, barbier ou esthéticienne en quelques clics. Disponibilités en temps réel sur CutBook.',
+  alternates: { canonical: '/search' },
+  openGraph: {
+    type: 'website',
+    url: '/search',
+    title: 'Trouver un professionnel — CutBook',
+    description:
+      'Recherchez et réservez chez votre coiffeur, barbier ou esthéticienne en quelques clics.',
+  },
 }
 
 export default async function SearchPage() {

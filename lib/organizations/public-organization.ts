@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { db } from '@/lib/db'
 import { normalizePublicOrgSlug } from '@/lib/routes/organization-public-route'
 import { listPublicSlotDates } from './public-slot-dates'
@@ -23,7 +24,31 @@ export async function listPublicOrganizations() {
   })
 }
 
-export async function getPublicOrganizationBySlug(orgSlug: string) {
+// Query minimale pour le sitemap : on ne charge que ce que `<loc>`/`<lastmod>`
+// exigent. Inutile de remonter services + members comme la query catalogue.
+export async function listPublicOrganizationsForSitemap() {
+  return await db.organization.findMany({
+    select: { slug: true, updatedAt: true },
+    orderBy: { updatedAt: 'desc' },
+  })
+}
+
+// Query minimale pour les metadata SEO + l'image OG : nom, description et
+// updatedAt suffisent. Wrappée dans `cache()` pour que generateMetadata et la
+// route opengraph-image ne tapent pas deux fois la DB sur la même requête.
+export const getPublicOrganizationMetaBySlug = cache(async (orgSlug: string) => {
+  const slug = normalizePublicOrgSlug(orgSlug)
+
+  return await db.organization.findUnique({
+    where: { slug },
+    select: { name: true, description: true, updatedAt: true },
+  })
+})
+
+// `cache()` déduplique l'appel entre generateMetadata et le rendu de la page :
+// Next.js ne mémoize que `fetch()`, jamais Prisma. Sans ça, chaque page org
+// ferait deux fois cette query lourde (services + members) par requête.
+export const getPublicOrganizationBySlug = cache(async (orgSlug: string) => {
   const slug = normalizePublicOrgSlug(orgSlug)
 
   return await db.organization.findUnique({
@@ -48,7 +73,7 @@ export async function getPublicOrganizationBySlug(orgSlug: string) {
       },
     },
   })
-}
+})
 
 interface PublicOrganizationSlotFilters {
   memberId?: string
