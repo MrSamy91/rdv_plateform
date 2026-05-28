@@ -89,3 +89,4 @@ export async function sendEmail({ to, subject, react, text, tags }: SendEmailOpt
 }
 
 export { VerifyEmailTemplate } from './templates/verify-email-template'
+export { MemberInvitationTemplate } from './templates/member-invitation-template'

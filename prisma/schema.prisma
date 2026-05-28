@@ -32,11 +32,12 @@ model User {
   updatedAt     DateTime @updatedAt
 
   // Relations metier
-  bookings   Booking[]
-  reviews    Review[]
-  rewards    Reward[]
-  ownedOrg   Organization? @relation("OrgOwner")
-  membership Member?
+  bookings        Booking[]
+  reviews         Review[]
+  rewards         Reward[]
+  ownedOrg        Organization?      @relation("OrgOwner")
+  membership      Member?
+  invitationsSent MemberInvitation[] @relation("InvitationsSent")
 
   // Relations BetterAuth (a definir une fois BetterAuth setup)
   sessions Session[]
@@ -120,12 +121,42 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  ownerId  String    @unique
-  owner    User      @relation("OrgOwner", fields: [ownerId], references: [id])
-  members  Member[]
-  services Service[]
+  ownerId     String             @unique
+  owner       User               @relation("OrgOwner", fields: [ownerId], references: [id])
+  members     Member[]
+  services    Service[]
+  invitations MemberInvitation[]
 
   @@map("organization")
+}
+
+// Invitation d'un client a rejoindre une orga en tant que membre.
+// Token unique envoye par email ; expire apres INVITATION_TTL_DAYS (cf. lib/invitations/state.ts).
+// "Expiree" se derive de expiresAt (pas de statut stocke), seuls PENDING/ACCEPTED/REVOKED existent.
+model MemberInvitation {
+  id          String           @id @default(cuid())
+  token       String           @unique @default(cuid())
+  email       String
+  orgId       String
+  status      InvitationStatus @default(PENDING)
+  invitedById String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("InvitationsSent", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([orgId, status])
+  @@map("member_invitation")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  DECLINED
 }
 
 model Member {

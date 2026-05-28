@@ -256,9 +256,28 @@ function createPrismaClient() {
 
 async function clearSeedData(prisma: PrismaClient) {
   const userIds = Object.values(seedUsers).map((user) => user.id)
-  const memberIds = Object.values(seedMembers).map((member) => member.id)
   const serviceIds = Object.values(seedServices).map((service) => service.id)
 
+  // Membres rattachés au seed : ids fixes, OU rattachés à l'orga/aux users seed.
+  // Couvre les membres créés dynamiquement par les tests (ex: invitation acceptée).
+  const memberRows = await prisma.member.findMany({
+    where: {
+      OR: [
+        { id: { in: Object.values(seedMembers).map((member) => member.id) } },
+        { orgId: seedOrganization.id },
+        { userId: { in: userIds } },
+      ],
+    },
+    select: { id: true },
+  })
+  const memberIds = memberRows.map((member) => member.id)
+
+  // Invitations d'abord : elles referencent l'orga + le user (sinon FK au moment du delete).
+  await prisma.memberInvitation.deleteMany({
+    where: {
+      OR: [{ orgId: seedOrganization.id }, { invitedById: { in: userIds } }],
+    },
+  })
   await prisma.booking.deleteMany({
     where: {
       OR: [
