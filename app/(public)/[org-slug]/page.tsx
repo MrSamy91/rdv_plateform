@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { CalendarDays, ChevronLeft, MapPin, Scissors, User } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { getPublicOrganizationBySlug } from '@/lib/organizations/public-organization'
-import { getPublicOrgBookingHref } from '@/lib/routes/organization-public-route'
+import { getPublicOrgBookingHref, getPublicOrgHref } from '@/lib/routes/organization-public-route'
 
 interface Props {
   params: Promise<{ 'org-slug': string }>
@@ -11,15 +11,27 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { 'org-slug': orgSlug } = await params
+  // cache() partage cet appel avec le rendu de la page → une seule query DB.
   const org = await getPublicOrganizationBySlug(orgSlug)
 
   if (!org) {
-    return { title: 'Etablissement introuvable - CutBook' }
+    return { title: 'Établissement introuvable', robots: { index: false } }
   }
 
+  const canonicalPath = getPublicOrgHref(org.slug)
+  const description = org.description ?? `Réservez chez ${org.name} en ligne, en quelques clics.`
+
   return {
-    title: `${org.name} - CutBook`,
-    description: org.description ?? `Reservez chez ${org.name} en quelques clics.`,
+    // Le template racine ajoute « | CutBook » → « {nom} | CutBook ».
+    title: org.name,
+    description,
+    alternates: { canonical: canonicalPath },
+    openGraph: {
+      type: 'website',
+      url: canonicalPath,
+      title: `${org.name} — CutBook`,
+      description,
+    },
   }
 }
 

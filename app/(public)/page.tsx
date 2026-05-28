@@ -6,14 +6,18 @@ import { HeroSection } from '@/components/layout/hero-section'
 import { HowItWorksSection } from '@/components/layout/how-it-works-section'
 
 export const metadata: Metadata = {
-  title: 'CutBook - Réservation en ligne pour professionnels',
+  // `absolute` court-circuite le template `%s | CutBook` du layout racine :
+  // sur la home on ne veut pas d'un titre redondant « CutBook | CutBook ».
+  title: { absolute: 'CutBook — Réservation en ligne pour coiffeurs, coachs & pros' },
   description:
-    'Réservez en ligne chez votre coiffeur, coach ou esthéticienne. Paiement sécurisé, confirmations automatiques, programme de fidélité.',
+    'Réservez en ligne chez votre coiffeur, coach ou esthéticienne. Booking en temps réel, paiement sécurisé Stripe, confirmations automatiques et programme de fidélité.',
+  alternates: { canonical: '/' },
   openGraph: {
-    title: 'CutBook - Réservation en ligne pour professionnels',
-    description:
-      'Réservez en ligne chez votre coiffeur, coach ou esthéticienne. Paiement sécurisé, confirmations automatiques, programme de fidélité.',
     type: 'website',
+    url: '/',
+    title: 'CutBook — Réservation en ligne pour les pros',
+    description:
+      'Réservez en ligne chez votre coiffeur, coach ou esthéticienne. Paiement sécurisé, confirmations automatiques.',
   },
 }
 
