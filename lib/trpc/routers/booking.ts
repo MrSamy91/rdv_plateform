@@ -4,6 +4,7 @@ import {
   confirmPublicBooking,
   confirmPublicBookingSelectionSchema,
 } from '@/lib/bookings/public-booking'
+import { sendBookingConfirmationEmails } from '@/lib/bookings/email'
 import { BookingStatus } from '@/generated/prisma/enums'
 import { getPublicBookingSlots } from '@/lib/organizations/public-organization'
 import { protectedProcedure, publicProcedure, router } from '../init'
@@ -24,6 +25,9 @@ const confirmBookingProcedure = protectedProcedure
     })
 
     if (result.ok) {
+      // Best-effort : un echec d'envoi ne doit pas faire echouer la confirmation.
+      // await (et non fire-and-forget) pour rester safe en serverless (Vercel).
+      await sendBookingConfirmationEmails(result.bookingId)
       return { bookingId: result.bookingId }
     }
 

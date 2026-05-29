@@ -9,15 +9,28 @@ import { db } from '@/lib/db'
 // On mocke Stripe : pas d'appel reseau ni de cle requise. `sessions.create`
 // renvoie un faux clientSecret ; `sessions.retrieve` est utilise par le
 // fallback /return pour valider l'etat reel de la session paiement.
-const { sessionsCreate, sessionsRetrieve } = vi.hoisted(() => ({
+// On mocke aussi `@/lib/email` : markBookingPaid declenche un email recu,
+// on ne veut ni SMTP reel ni casser le test si Mailpit n'est pas up.
+const { sessionsCreate, sessionsRetrieve, sendEmailMock } = vi.hoisted(() => ({
   sessionsCreate: vi.fn(),
   sessionsRetrieve: vi.fn(),
+  sendEmailMock: vi.fn().mockResolvedValue({ id: 'mock-email' }),
 }))
 
 vi.mock('@/lib/stripe', () => ({
   getStripe: () => ({
     checkout: { sessions: { create: sessionsCreate, retrieve: sessionsRetrieve } },
   }),
+}))
+
+vi.mock('@/lib/email', () => ({
+  sendEmail: sendEmailMock,
+  // Stubs templates : on verifie les appels a sendEmail, pas le rendu JSX.
+  BookingConfirmationClientTemplate: (props: unknown) => props,
+  BookingNotificationMemberTemplate: (props: unknown) => props,
+  PaymentReceiptTemplate: (props: unknown) => props,
+  VerifyEmailTemplate: (props: unknown) => props,
+  MemberInvitationTemplate: (props: unknown) => props,
 }))
 
 import { createBookingCheckoutSession } from '@/lib/payments/checkout'
@@ -83,6 +96,8 @@ describe('payments', () => {
   })
 
   it('marque le paiement reussi et reporte le PaymentIntent sur le booking', async () => {
+    sendEmailMock.mockClear()
+
     await markBookingPaid({
       sessionId: 'cs_test_x',
       paymentIntentId: 'pi_test_1',
@@ -96,6 +111,17 @@ describe('payments', () => {
 
     const booking = await db.booking.findUnique({ where: { id: BOOKING_ID } })
     expect(booking?.stripePaymentId).toBe('pi_test_1')
+  })
+
+  it('envoie un email de recu Stripe apres markBookingPaid (declanche dans le test precedent)', () => {
+    // sendEmailMock vient d'etre appele par markBookingPaid -> sendPaymentReceiptEmail.
+    expect(sendEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: seedUsers.clientOne.email,
+        subject: expect.stringContaining('paiement'),
+        tags: [{ name: 'type', value: 'payment-receipt-client' }],
+      }),
+    )
   })
 
   it('refuse un second paiement si la reservation est deja payee', async () => {

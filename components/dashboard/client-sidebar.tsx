@@ -10,11 +10,11 @@ import {
   History,
   Home,
   LogOut,
-  Scissors,
   Settings,
   User,
   UserRoundPlus,
 } from 'lucide-react'
+import { Logo } from '@/components/brand/logo'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,18 +57,12 @@ export function ClientSidebar({
       style={{ background: '#253122' }}
       aria-label="Navigation client"
     >
-      {/* Brand */}
+      {/* Brand — fond sombre, texte blanc herite via text-white */}
       <div
-        className="flex h-16 items-center gap-2.5 border-b px-5"
+        className="flex h-16 items-center border-b px-5 text-white"
         style={{ borderColor: 'rgba(255,255,255,0.08)' }}
       >
-        <div
-          className="flex size-7 items-center justify-center rounded-lg"
-          style={{ background: '#489B6E' }}
-        >
-          <Scissors size={13} className="rotate-90 text-white" />
-        </div>
-        <span className="text-base font-bold tracking-tight text-white">CutBook</span>
+        <Logo variant="compose" size="sm" priority />
       </div>
 
       {/* Nav */}

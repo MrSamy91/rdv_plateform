@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import { Logo } from '@/components/brand/logo'
 
 const CURRENT_YEAR = new Date().getFullYear()
 
@@ -28,16 +28,10 @@ export function PublicFooter() {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
           {/* Colonne marque */}
           <div className="space-y-4">
-            <Link href="/" className="inline-flex transition-opacity hover:opacity-80">
-              <Image
-                src="/logo-vert.png"
-                alt="CutBook"
-                width={110}
-                height={32}
-                className="h-8 w-auto"
-                style={{ width: 'auto' }}
-                priority={false}
-              />
+            <Link href="/" className="inline-flex text-white transition-opacity hover:opacity-80">
+              {/* Compose pour heriter de text-white sur fond sombre ; le mark image
+                  reste lisible grace a ses tons or centraux. */}
+              <Logo variant="compose" size="md" />
             </Link>
             <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
               La plateforme de réservation en ligne pour les professionnels. Réservez en quelques
@@ -50,7 +44,10 @@ export function PublicFooter() {
 
           {/* Colonne navigation */}
           <div>
-            <p className="mb-4 text-xs font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <p
+              className="mb-4 text-xs font-semibold tracking-widest uppercase"
+              style={{ color: 'rgba(255,255,255,0.35)' }}
+            >
               Explorer
             </p>
             <ul className="space-y-2.5">
@@ -71,7 +68,10 @@ export function PublicFooter() {
 
           {/* Colonne légal */}
           <div>
-            <p className="mb-4 text-xs font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <p
+              className="mb-4 text-xs font-semibold tracking-widest uppercase"
+              style={{ color: 'rgba(255,255,255,0.35)' }}
+            >
               Informations
             </p>
             <ul className="space-y-2.5">

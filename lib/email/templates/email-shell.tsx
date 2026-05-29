@@ -1,11 +1,13 @@
 import {
   Body,
+  Column,
   Container,
   Head,
   Heading,
   Hr,
   Html,
   Preview,
+  Row,
   Section,
   Text,
 } from '@react-email/components'
@@ -107,6 +109,59 @@ export const emailStyles = {
     lineHeight: '1.5',
     textAlign: 'center' as const,
   },
+  // CTA partage par les templates (bouton vert + lien de secours).
+  button: {
+    display: 'inline-block',
+    borderRadius: '8px',
+    backgroundColor: colors.green500,
+    color: '#ffffff',
+    fontSize: '14px',
+    fontWeight: '700',
+    lineHeight: '1',
+    padding: '14px 22px',
+    textDecoration: 'none',
+  },
+  link: {
+    color: colors.green600,
+    fontWeight: '600',
+    textDecoration: 'underline',
+    textUnderlineOffset: '3px',
+  },
+  // Fiche recapitulative (RDV) : carte + lignes label/valeur, mutualisee
+  // entre l'email client et l'email du professionnel.
+  recapCard: {
+    margin: '8px 0 24px',
+    padding: '4px 18px',
+    backgroundColor: colors.slate50,
+    border: `1px solid ${colors.slate200}`,
+    borderRadius: '10px',
+  },
+  recapRow: {
+    borderBottom: `1px solid ${colors.slate100}`,
+  },
+  recapLabelCol: {
+    width: '42%',
+    verticalAlign: 'top' as const,
+    padding: '11px 0',
+  },
+  recapValueCol: {
+    verticalAlign: 'top' as const,
+    padding: '11px 0',
+    textAlign: 'right' as const,
+  },
+  recapLabel: {
+    margin: '0',
+    color: colors.slate500,
+    fontSize: '13px',
+    fontWeight: '600',
+  },
+  recapValue: {
+    margin: '0',
+    color: colors.slate800,
+    fontSize: '14px',
+    fontWeight: '600',
+    lineHeight: '1.4',
+  },
 }
 
 export function EmailShell({ preview, eyebrow, title, children }: EmailShellProps) {
@@ -135,5 +190,31 @@ export function EmailShell({ preview, eyebrow, title, children }: EmailShellProp
         </Container>
       </Body>
     </Html>
+  )
+}
+
+// Carte recapitulative reutilisable. On evite le borderBottom sur la derniere
+// ligne en laissant les templates composer leurs RecapRow a l'interieur.
+export function RecapCard({ children }: { children: ReactNode }) {
+  return <Section style={emailStyles.recapCard}>{children}</Section>
+}
+
+interface RecapRowProps {
+  label: string
+  value: ReactNode
+  // Derniere ligne d'une carte : pas de separateur sous la valeur.
+  isLast?: boolean
+}
+
+export function RecapRow({ label, value, isLast }: RecapRowProps) {
+  return (
+    <Row style={isLast ? undefined : emailStyles.recapRow}>
+      <Column style={emailStyles.recapLabelCol}>
+        <Text style={emailStyles.recapLabel}>{label}</Text>
+      </Column>
+      <Column style={emailStyles.recapValueCol}>
+        <Text style={emailStyles.recapValue}>{value}</Text>
+      </Column>
+    </Row>
   )
 }
