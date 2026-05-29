@@ -76,6 +76,18 @@ export const seedOrganization = {
 }
 
 export const seedMembers = {
+  // Nora cumule owner + member : invariant garanti par la procedure tRPC
+  // createOrganization (cf. lib/trpc/routers/organization.ts) qui cree
+  // toujours une ligne Member pour le createur de l'orga. Le seed doit
+  // refleter cet invariant sinon owner@cutbook.test apparait orphelin
+  // dans /atelier-nova et ne peut pas exploiter /member.
+  nora: {
+    id: 'seed-member-nora',
+    userId: seedUsers.owner.id,
+    specialties: 'Direction du salon, coupes signature, formations',
+    bio: "Fondatrice d'Atelier Nova, je supervise l'equipe et propose les coupes signature.",
+    experience: 12,
+  },
   mila: {
     id: 'seed-member-mila',
     userId: seedUsers.memberOne.id,
@@ -199,6 +211,10 @@ export function buildSeedBookings() {
 
 export function buildSeedMemberServices() {
   return [
+    // Nora (gerante) maitrise les 3 prestations du salon.
+    { memberId: seedMembers.nora.id, serviceId: seedServices.cut.id },
+    { memberId: seedMembers.nora.id, serviceId: seedServices.color.id },
+    { memberId: seedMembers.nora.id, serviceId: seedServices.beard.id },
     { memberId: seedMembers.mila.id, serviceId: seedServices.cut.id },
     { memberId: seedMembers.mila.id, serviceId: seedServices.color.id },
     { memberId: seedMembers.leo.id, serviceId: seedServices.beard.id },
@@ -1589,6 +1605,7 @@ export async function runSeed() {
 
     await prisma.member.createMany({
       data: [
+        { ...seedMembers.nora, orgId: seedOrganization.id },
         { ...seedMembers.mila, orgId: seedOrganization.id },
         { ...seedMembers.leo, orgId: seedOrganization.id },
       ],
