@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { CalendarCheck } from 'lucide-react'
 import { getSession } from '@/lib/auth'
+import { Logo } from '@/components/brand/logo'
 
 export async function PublicNavbar() {
   const session = await getSession()
@@ -11,16 +11,12 @@ export async function PublicNavbar() {
       style={{ borderColor: 'rgba(37,49,34,0.1)', background: '#f9f7f3' }}
       aria-label="Navigation principale"
     >
-      <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-        <span
-          className="flex size-7 items-center justify-center rounded-lg"
-          style={{ background: '#489B6E', color: '#fff' }}
-        >
-          <CalendarCheck size={15} />
-        </span>
-        <span className="text-sm font-bold tracking-tight" style={{ color: '#253122' }}>
-          CutBook
-        </span>
+      <Link
+        href="/"
+        className="flex items-center transition-opacity hover:opacity-80"
+        style={{ color: '#253122' }}
+      >
+        <Logo variant="compose" size="sm" priority />
       </Link>
 
       <div className="flex items-center gap-2">

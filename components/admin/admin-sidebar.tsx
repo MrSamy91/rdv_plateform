@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import {
-  CalendarCheck,
   LayoutDashboardIcon,
   UsersIcon,
   BuildingIcon,
@@ -14,6 +13,7 @@ import Link from 'next/link'
 import { NavMain } from '@/components/nav-main'
 import { NavSecondary } from '@/components/nav-secondary'
 import { NavUser } from '@/components/nav-user'
+import { Logo } from '@/components/brand/logo'
 import {
   Sidebar,
   SidebarContent,
@@ -47,16 +47,8 @@ export function AdminSidebar({ user, ...props }: AdminSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
-              <Link href="/admin" className="flex items-center gap-2">
-                <span
-                  className="flex size-6 items-center justify-center rounded-md"
-                  style={{ background: '#489B6E' }}
-                >
-                  <CalendarCheck size={14} className="text-white" />
-                </span>
-                <span className="text-base font-bold" style={{ color: '#253122' }}>
-                  CutBook <span className="text-xs font-normal opacity-50">Admin</span>
-                </span>
+              <Link href="/admin" className="flex items-center" style={{ color: '#253122' }}>
+                <Logo variant="compose" size="sm" subtitle="Admin" priority />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
