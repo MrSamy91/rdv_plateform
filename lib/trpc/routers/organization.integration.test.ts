@@ -31,15 +31,16 @@ describe('organizationRouter integration', () => {
 
     expect(organization.id).toBe(seedOrganization.id)
     expect(organization.name).toBe(seedOrganization.name)
-    expect(organization.services.map((service) => service.name).sort()).toEqual(
-      Object.values(seedServices)
-        .map((service) => service.name)
-        .sort(),
+    // Le seed rich ajoute d'autres services (Olaplex, Permanente, etc.) mais
+    // les 3 services historiques doivent toujours etre exposes par /atelier-nova.
+    expect(organization.services.map((service) => service.name)).toEqual(
+      expect.arrayContaining(Object.values(seedServices).map((service) => service.name)),
     )
-    expect(organization.members.map((member) => member.user.name).sort()).toEqual([
-      seedUsers.memberTwo.name,
-      seedUsers.memberOne.name,
-    ])
+    // Le seed rich peut ajouter d'autres membres (Nora owner+member, extras).
+    // On verifie au minimum la presence des deux membres historiques.
+    expect(organization.members.map((member) => member.user.name)).toEqual(
+      expect.arrayContaining([seedUsers.memberTwo.name, seedUsers.memberOne.name]),
+    )
   })
 
   it('retourne NOT_FOUND pour un slug inconnu', async () => {
