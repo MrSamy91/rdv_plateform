@@ -5,6 +5,7 @@
 // Regle security.md : pas de logique metier ici, juste marquer paye, idempotent.
 import type Stripe from 'stripe'
 import { PaymentStatus } from '@/generated/prisma/enums'
+import { sendPaymentReceiptEmail } from '@/lib/bookings/email'
 import { db } from '@/lib/db'
 import { getStripe } from '@/lib/stripe'
 
@@ -46,6 +47,14 @@ export async function markBookingPaid({
       data: { stripePaymentId: paymentIntentId },
     }),
   ])
+
+  // Envoie le recu au client APRES la transaction (best-effort).
+  // - Hors transaction : une lenteur SMTP/Resend ne doit pas rollback le marquage.
+  // - .catch swallows tout : un email KO ne doit jamais re-throw vers l'appelant
+  //   (webhook Stripe attend un 200, fallback /return continue le redirect).
+  await sendPaymentReceiptEmail(payment.bookingId).catch((error) => {
+    console.error('[payment] envoi recu echoue:', error)
+  })
 }
 
 // Dispatch d'un event Stripe deja verifie. On ne traite que la fin de paiement.

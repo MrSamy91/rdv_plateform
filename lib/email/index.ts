@@ -90,3 +90,6 @@ export async function sendEmail({ to, subject, react, text, tags }: SendEmailOpt
 
 export { VerifyEmailTemplate } from './templates/verify-email-template'
 export { MemberInvitationTemplate } from './templates/member-invitation-template'
+export { BookingConfirmationClientTemplate } from './templates/booking-confirmation-client-template'
+export { BookingNotificationMemberTemplate } from './templates/booking-notification-member-template'
+export { PaymentReceiptTemplate } from './templates/payment-receipt-template'
