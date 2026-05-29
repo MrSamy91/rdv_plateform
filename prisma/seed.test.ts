@@ -22,13 +22,16 @@ describe('seed fixtures', () => {
     }
 
     // owner / member sont des relations, pas des roles :
-    // - Mila et Leo sont les praticiens -> lignes Member
-    // - Nora est owner via Organization.ownerId -> pas de fiche Member
+    // - Mila et Leo sont les praticiens employes -> lignes Member
+    // - Nora cumule owner (Organization.ownerId) ET member (ligne Member) :
+    //   invariant garanti par la procedure tRPC createOrganization qui cree
+    //   toujours une fiche Member pour le createur de l'orga.
     const memberUserIds = Object.values(seedMembers).map((member) => member.userId)
+    expect(memberUserIds).toContain(seedUsers.owner.id)
     expect(memberUserIds).toContain(seedUsers.memberOne.id)
     expect(memberUserIds).toContain(seedUsers.memberTwo.id)
-    expect(memberUserIds).not.toContain(seedUsers.owner.id)
 
+    expect(seedMembers.nora.userId).toBe(seedUsers.owner.id)
     expect(seedMembers.mila.userId).toBe(seedUsers.memberOne.id)
     expect(seedMembers.leo.userId).toBe(seedUsers.memberTwo.id)
     expect(Object.values(seedServices)).toHaveLength(3)
