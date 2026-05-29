@@ -8,12 +8,12 @@ import {
   Tag,
   Store,
   User,
-  Scissors,
   ArrowLeftRight,
 } from 'lucide-react'
 import Link from 'next/link'
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
+import { Logo } from '@/components/brand/logo'
 import {
   Sidebar,
   SidebarContent,
@@ -46,16 +46,8 @@ export function MemberSidebar({ user, isOwner, ...props }: MemberSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
-              <Link href="/member" className="flex items-center gap-2">
-                <span
-                  className="flex size-6 items-center justify-center rounded-md"
-                  style={{ background: '#489B6E' }}
-                >
-                  <Scissors size={13} className="rotate-90 text-white" />
-                </span>
-                <span className="text-base font-bold" style={{ color: '#253122' }}>
-                  CutBook <span className="text-xs font-normal opacity-50">Pro</span>
-                </span>
+              <Link href="/member" className="flex items-center" style={{ color: '#253122' }}>
+                <Logo variant="compose" size="sm" subtitle="Pro" priority />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
