@@ -155,13 +155,12 @@ describe('public organization data', () => {
       }),
     ).resolves.toBeNull()
 
-    // Incoherence service / orga : on prend un service rattache a une autre
-    // organisation (Refuge) avec un slot Nova. Le seed rich attache toutes
-    // les prestations Nova a Leo, donc on ne peut plus utiliser un service
-    // Nova pour declencher la nullite ici.
+    // Incoherence service / membre intra-org : Leo est specialise barbe et ne
+    // propose pas cut, donc le recapitulatif doit retourner null meme si tout
+    // le reste (orga, slot, member) est coherent.
     await expect(
       getPublicBookingConfirmationSummary(seedOrganization.slug, {
-        serviceId: 'seed-service-barbershop-le-refuge-classic',
+        serviceId: seedServices.cut.id,
         memberId: seedMembers.leo.id,
         slotId: 'seed-slot-leo-2',
       }),
