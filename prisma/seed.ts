@@ -1259,21 +1259,36 @@ async function seedRichContent(prisma: PrismaClient, passwordHash: string) {
   }))
   await prisma.service.createMany({ data: novaExtraServices })
 
-  // MemberService : chaque membre fait tous les services de son orga (simplification demo)
+  // MemberService : chaque membre a son catalogue specialise (plus realiste
+  // qu'un salon ou tout le monde fait tout), et indispensable pour preserver
+  // l'invariant intra-org utilise par les tests d'integration
+  // ("service non propose par le membre") :
+  //   - Nora       : 3 prestations historiques (geante polyvalente, cumule owner+member)
+  //   - Mila       : cut + color uniquement (specialiste femme/couleur)
+  //   - Leo        : beard uniquement (specialiste homme/barbe)
+  //   - Hugo/Yasmine (extras) : portent les nouvelles prestations Nova (Olaplex, Permanente, etc.)
   type MemberCatalog = { id: string; orgId: string; serviceIds: string[] }
-  const novaServiceIds = [
-    seedServices.cut.id,
-    seedServices.color.id,
-    seedServices.beard.id,
-    ...novaExtraServices.map((s) => s.id),
-  ]
+  const novaExtraServiceIds = novaExtraServices.map((s) => s.id)
   const memberCatalogs: MemberCatalog[] = [
-    { id: seedMembers.mila.id, orgId: seedOrganization.id, serviceIds: novaServiceIds },
-    { id: seedMembers.leo.id, orgId: seedOrganization.id, serviceIds: novaServiceIds },
+    {
+      id: seedMembers.nora.id,
+      orgId: seedOrganization.id,
+      serviceIds: [seedServices.cut.id, seedServices.color.id, seedServices.beard.id],
+    },
+    {
+      id: seedMembers.mila.id,
+      orgId: seedOrganization.id,
+      serviceIds: [seedServices.cut.id, seedServices.color.id],
+    },
+    {
+      id: seedMembers.leo.id,
+      orgId: seedOrganization.id,
+      serviceIds: [seedServices.beard.id],
+    },
     ...novaExtraMembers.map((m) => ({
       id: m.id,
       orgId: seedOrganization.id,
-      serviceIds: novaServiceIds,
+      serviceIds: novaExtraServiceIds,
     })),
     ...extraPlans.flatMap((plan) =>
       plan.members.map((m) => ({

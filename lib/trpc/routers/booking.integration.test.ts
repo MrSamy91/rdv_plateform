@@ -72,13 +72,13 @@ describe('bookingRouter', () => {
   })
 
   it('ne renvoie aucun creneau pour un service que le membre ne propose pas', async () => {
-    // Le seed rich attache toutes les prestations Nova a Mila et Leo, donc on
-    // teste l'invariant avec un service d'une AUTRE orga : Mila ne fait pas
-    // les services Refuge -> le filtre member-service doit retourner 0.
+    // Intra-org : Mila est specialisee femme/couleur (cut + color), donc ne
+    // propose pas beard meme si c'est un service de son propre salon. Le filtre
+    // member-service doit retourner 0 creneaux.
     const result = await publicCaller.booking.publicSlots({
       orgSlug: seedOrganization.slug,
       memberId: seedMembers.mila.id,
-      serviceId: 'seed-service-barbershop-le-refuge-classic',
+      serviceId: seedServices.beard.id,
     })
 
     expect(result.slots).toHaveLength(0)
